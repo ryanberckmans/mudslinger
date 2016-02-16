@@ -1,7 +1,7 @@
 #!venv/bin/python2.7
 import time
 import threading
-from telnetlib import Telnet
+from telnetlib import Telnet, IAC, DO, WILL, SB, SE
 from flask import Flask, jsonify, render_template, request, redirect, url_for
 from flask.ext.socketio import SocketIO, emit
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -27,10 +27,12 @@ socketio=SocketIO(app)
 telnets={}
 
 class TelnetConn:
+    ttypes = [ 'ArcWeb', 'ANSI' ]
     def __init__(self, roomid):
         self.telnet=None
         self.roomid=roomid
         self.lock=threading.Lock()
+        self.ttype_index = 0
 
     def start(self):
         self.t=threading.Thread( target=self._listen )
@@ -45,17 +47,56 @@ class TelnetConn:
             with app.test_request_context('/telnet'):
                 socketio.emit('telnet_error', {},
                         room=self.roomid,
-                        namsepace='telnet' )
+                        namespace='telnet' )
         finally:
             self.lock.release()
+
+    # def _sock_write(self, cmd):
+    #     self.lock.acquire()
+    #     try:
+    #         self.telnet.get_socket.sendall(cmd)
+    #     except:
+    #         with app.test_request_context('/telnet'):
+    #             socketio.emit('telnet_error', {},
+    #                     room=self.roomid,
+    #                     namespace='telnet' )
+    #     finally:
+    #         self.lock.release()
 
     def write(self, cmd):
         t=threading.Thread( target= self._write, kwargs={'cmd': cmd})
         t.daemon=True
         t.start()
 
+    # def sock_write(self, cmd):
+    #     t=threading.Thread( target=self._sock_write, kwargs={'cmd': cmd})
+    #     t.daemon=True
+    #     t.start()
+
+    def _negotiate(self, socket, command, option):
+        print 'Got ',ord(command),ord(option)
+        if command == DO:
+            if option == TELNET_OPTIONS.TTYPE:
+                # self.write(IAC + WILL + TELNET_OPTIONS.TTYPE)
+                socket.sendall(IAC + WILL + TELNET_OPTIONS.TTYPE)
+            elif option == TELNET_OPTIONS.MXP:
+                socket.sendall(IAC + WILL + TELNET_OPTIONS.MXP)
+        elif command == SE:
+            d = self.telnet.read_sb_data()
+            print 'got',[ord(x) for x in d]
+            
+            if d == TELNET_OPTIONS.TTYPE + SUB_NEGOTIATION.SEND:
+                socket.sendall(IAC + SB + TELNET_OPTIONS.TTYPE + SUB_NEGOTIATION.IS + self.ttypes[self.ttype_index] + IAC + SE)
+                self.ttype_index += 1
+                if self.ttype_index > len(self.ttypes)-1:
+                    self.ttype_index = len(self.ttypes)-1
+                # self.sock_write(IAC+SB+TELNET_OPTIONS.TTYPE+SUB_NEGOTIATION.IS+"ANSI"+IAC+SE)
+            
+
     def _listen(self):
-        self.telnet=Telnet('aarchonmud.com', 7000)
+        self.ttype_index = 0
+        self.telnet=Telnet('rooflez.com', 7101)
+        self.telnet.set_option_negotiation_callback(self._negotiate)
 
         with app.test_request_context('/telnet'):
             socketio.emit('telnet_connect', {},
@@ -174,6 +215,16 @@ def register():
         login_user(user)
         return redirect(url_for('client'))
     return render_template("register.html", form=form)
+
+class TELNET_OPTIONS(object):
+    TTYPE = chr(24)
+    MXP = chr(91)
+
+class SUB_NEGOTIATION(object):
+    IS = chr(0)
+    SEND = chr(1)
+    ACCEPTED = chr(2)
+    REJECTED = chr(3)
 
 if __name__ == "__main__":
     app.debug=True

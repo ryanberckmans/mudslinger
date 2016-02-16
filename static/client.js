@@ -1,6 +1,7 @@
 var socket;
  
 var output_buffer='';
+var chat_buffer='';
 var rx;
 var mxp_open=false;
 var redirect_to_chat=false;
@@ -9,9 +10,12 @@ function handle_data(msg) {
     rx = rx || ''; // preserve partial data from previous call
     rx += msg.data;
 
+    //output_buffer += "[|";
+
     if (rx.length < 1) { return; }
 
     if (mxp_open == true) {
+
 
     }
     else {
@@ -44,7 +48,7 @@ function handle_data(msg) {
         rx = '';
     }
 
-
+    //output_buffer += "|]";
     var output_raw=output_buffer.replace(/\n\r/g, "<br>")
     var output_html=ansi_up.ansi_to_html(output_raw);
 
