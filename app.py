@@ -31,7 +31,7 @@ class TelnetConn:
     def __init__(self, roomid):
         self.telnet=None
         self.roomid=roomid
-        self.lock=threading.Lock()
+        self.write_lock=threading.Lock()
         self.ttype_index = 0
 
     def start(self):
@@ -40,7 +40,7 @@ class TelnetConn:
         self.t.start()
 
     def _write(self, cmd):
-        self.lock.acquire()
+        self.write_lock.acquire()
         try:
             self.telnet.write(str(cmd))
         except:
@@ -49,7 +49,7 @@ class TelnetConn:
                         room=self.roomid,
                         namespace='telnet' )
         finally:
-            self.lock.release()
+            self.write_lock.release()
 
     # def _sock_write(self, cmd):
     #     self.lock.acquire()
@@ -64,29 +64,41 @@ class TelnetConn:
     #         self.lock.release()
 
     def write(self, cmd):
-        t=threading.Thread( target= self._write, kwargs={'cmd': cmd})
-        t.daemon=True
-        t.start()
+        # t=threading.Thread( target= self._write, kwargs={'cmd': cmd})
+        # t.daemon=True
+        # t.start()
+        self._write(cmd)
 
-    # def sock_write(self, cmd):
-    #     t=threading.Thread( target=self._sock_write, kwargs={'cmd': cmd})
-    #     t.daemon=True
-    #     t.start()
+    def sock_write(self, cmd):
+        # t=threading.Thread( target=self._sock_write, kwargs={'cmd': cmd})
+        # t.daemon=True
+        # t.start()
+        self.write_lock.acquire()
+        self.telnet.get_socket().sendall(cmd)
+        self.write_lock.release()
 
     def _negotiate(self, socket, command, option):
         print 'Got ',ord(command),ord(option)
         if command == DO:
             if option == TELNET_OPTIONS.TTYPE:
-                # self.write(IAC + WILL + TELNET_OPTIONS.TTYPE)
-                socket.sendall(IAC + WILL + TELNET_OPTIONS.TTYPE)
+                #  self.write_lock.acquire()
+                #  socket.sendall(IAC + WILL + TELNET_OPTIONS.TTYPE)
+                #  self.write_lock.release()
+                self.sock_write(IAC + WILL + TELNET_OPTIONS.TTYPE)
             elif option == TELNET_OPTIONS.MXP:
-                socket.sendall(IAC + WILL + TELNET_OPTIONS.MXP)
+                # self.write_lock.acquire()
+                # socket.sendall(IAC + WILL + TELNET_OPTIONS.MXP)
+                # self.write_lock.release()
+                self.sock_write(IAC + WILL + TELNET_OPTIONS.MXP)
         elif command == SE:
             d = self.telnet.read_sb_data()
             print 'got',[ord(x) for x in d]
             
             if d == TELNET_OPTIONS.TTYPE + SUB_NEGOTIATION.SEND:
-                socket.sendall(IAC + SB + TELNET_OPTIONS.TTYPE + SUB_NEGOTIATION.IS + self.ttypes[self.ttype_index] + IAC + SE)
+                # self.write_lock.acquire()
+                # socket.sendall(IAC + SB + TELNET_OPTIONS.TTYPE + SUB_NEGOTIATION.IS + self.ttypes[self.ttype_index] + IAC + SE)
+                # self.write_lock.release()
+                self.sock_write(IAC + SB + TELNET_OPTIONS.TTYPE + SUB_NEGOTIATION.IS + self.ttypes[self.ttype_index] + IAC + SE)
                 self.ttype_index += 1
                 if self.ttype_index > len(self.ttypes)-1:
                     self.ttype_index = len(self.ttypes)-1
@@ -105,9 +117,9 @@ class TelnetConn:
 
         while True:
 
-            self.lock.acquire()
+            # self.lock.acquire()
             d=self.telnet.read_very_eager()
-            self.lock.release()
+            # self.lock.release()
             if d != '':
                 with app.test_request_context('/telnet'):
                     socketio.emit('telnet_data', {'data':d},
