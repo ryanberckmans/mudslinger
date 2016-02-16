@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Aarchon WebClient</title>
+  <link rel="stylesheet" 
+    href="{{url_for('static', filename='jqwidgets/styles/jqx.base.css')}}"
+  />
+  <style>
+    #win_output {
+        font-family:monospace;
+        color:white;
+        background-color:black;
+        word-wrap:break-word;
+        overflow-y:scroll;
+        width:'100%';
+        height:'100%';
+    }
+    #output_gauge_split {
+        width:'100%';
+        height:'100%';
+    }
+    #main_vert_split {
+        width:90vw;
+        height:90vh;
+    }
+
+  </style>
+  <script src="//code.jquery.com/jquery-1.11.1.js"></script>
+  <script src="{{url_for('static', filename='jqwidgets/jqxcore.js')}}"></script>
+  <script src="{{url_for('static', filename='jqwidgets/jqxsplitter.js')}}"></script>
+  <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+  <script type=text/javascript src="{{
+  url_for('static', filename='ansi_up.js') }}"></script>
+  <script type=text/javascript src="{{
+  url_for('static', filename='client.js') }}"></script>
+<script type="text/javascript">
+</script>
+</head>
+<body>
+<!--
+<div id="jqxWidget">
+-->
+<div id="main_vert_split">
+
+    <div>
+    <div id="output_gauge_split" >
+        <pre id="win_output" >
+        </pre>
+        <div id="win_gauge" >
+            Gauges and stuff go here
+        </div>
+    </div>
+    </div>
+
+    <div class='splitter-panel'>
+    <div id="map_chat_split" >
+        <div id="win_map" >
+            <span>Map goes here</span>
+        </div>
+        <div id="win_chat" >
+            <span>Chat window goes here</span>
+        </div>
+    </div>
+    </div>
+
+</div>
+
+
+<!--
+</div>
+-->
+
+<br>
+<form id=send1 method="POST" action="#">
+<input type="text" 
+    id="send_command" 
+    size=80
+    autocomplete="off"></input>
+<input type="submit" resize=both value="Send"></input>
+</form>
+<br>
+<a id=open_telnet href=#>OPEN TELNET</a><br>
+<span id=dbg>
+</span>
+</body>
+</html>
