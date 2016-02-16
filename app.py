@@ -34,10 +34,18 @@ class TelnetConn:
         self.write_lock=threading.Lock()
         self.ttype_index = 0
 
+        self.abort = False
+
     def start(self):
         self.t=threading.Thread( target=self._listen )
         self.t.daemon=True
         self.t.start()
+
+
+    def stop(self):
+        self.abort = True
+        self.telnet.close()
+        
 
     def _write(self, cmd):
         self.write_lock.acquire()
@@ -116,7 +124,8 @@ class TelnetConn:
                     namespace='/telnet')
 
         while True:
-
+            if self.abort:
+                return
             # self.lock.acquire()
             d=self.telnet.read_very_eager()
             # self.lock.release()
@@ -137,6 +146,10 @@ def ws_connect():
 @socketio.on('disconnect', namespace='/telnet')
 def ws_disconnect():
     print('disconnect running')
+    if request.sid in telnets:
+        tn = telnets[request.sid]
+        tn.stop()
+        del telnets[request.sid]
     emit('ws_disconnect', {}, namespace="/telnet")
 
 @socketio.on('open_telnet', namespace='/telnet')
@@ -203,8 +216,7 @@ def login():
         if form.validate_on_submit():
             user = User.query.filter_by(name=request.form['username']).first()
             if user is not None and bcrypt.check_password_hash(
-                user.password, request.form['password']
-            ):
+                user.password, request.form['password']):
                 login_user(user)
                 flash('You were logged in. Go Crazy.')
                 return redirect(url_for('home.home'))
