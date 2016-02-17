@@ -47,19 +47,55 @@ function handle_data(msg) {
     }
     rx = '';
 */
-    if (rx.match(/\x1b\[1z/)) {
-        console.log("matched MXP");
-        var m = rx.match(/\x1b\[1z<DEST Comm>\x1b\[7z([^<]*)/);
-        console.log( 'm: ' + m );
-        if ( m ) {
-            console.log("matched dest");
+    //if (rx.match(/\x1b\[1z/)) {
+        //console.log("matched MXP");
+
+        /* fix non escaped brackets */
+        var new_rx='';
+        for (var i=0; i<rx.length; i++)
+        {
+            if ( rx[i] == '<' )
+            {
+                if ( i >= 4 ) {
+                    if ( rx.slice(i-4,i) == "\x1b\[1z" ) {
+                        new_rx += rx[i];
+                        continue;
+                    }
+                }
+                new_rx += '&lt';
+            }
+            else if ( rx[i] == '>' )
+            {
+                if ( (i+4) < rx.length ) {
+                    if ( rx.slice(i+1,i+5) == "\x1b\[7z" ) {
+                        new_rx += rx[i];
+                        continue;
+                    }
+                }
+                new_rx += '&gt';
+            }
+            else
+            {
+                new_rx += rx[i];
+            }
+        }
+        rx = new_rx 
+        
+        /* DEST tag */
+        var commRe = /\x1b\[1z<DEST Comm>\x1b\[7z([^<]*)\x1b\[1z<\/DEST>/g;
+        var m;
+        while ((m = commRe.exec(rx)) !== null) {
             chat_buffer += m[1];
             var chat_buffer_raw = chat_buffer.replace(/\n\r/g, "<br>");
             var chat_html = ansi_up.ansi_to_html(chat_buffer_raw);
             $('#win_chat').html(chat_html);
             $('#win_chat').scrollTop($('#win_chat').prop("scrollHeight"));
         }
-    }
+        rx = rx.replace(commRe, '');
+        
+        /* kill unsupported tags */
+        //rx = rx.replace(/\x1b\[[17]z<\/[^>]*>/g
+    //}
 
     //output_buffer += "|]";
     output_buffer += rx;
@@ -110,9 +146,6 @@ $(document).ready(function() {
     socket = io.connect('http://' + document.domain + ':' + location.port + '/telnet');
     socket.on('ws_connect', function(msg) {
         $('#dbg').append("WebSocket connected.<br>");
-    });
-    socket.on('ws_disconnect', function(msg) {
-        $('#dbg').append("WebSocket disconnected.<br>");
     });
     socket.on('telnet_error', function(msg) {
         $('#dbg').append("Telnet error.<br>");

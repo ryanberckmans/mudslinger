@@ -145,12 +145,12 @@ def ws_connect():
 
 @socketio.on('disconnect', namespace='/telnet')
 def ws_disconnect():
-    print('disconnect running')
+    print('disconnect running ' + request.sid)
     if request.sid in telnets:
         tn = telnets[request.sid]
         tn.stop()
         del telnets[request.sid]
-    emit('ws_disconnect', {}, namespace="/telnet")
+    # emit('ws_disconnect', {}, namespace="/telnet")
 
 @socketio.on('open_telnet', namespace='/telnet')
 def ws_open_telnet(message):
