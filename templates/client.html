@@ -25,10 +25,12 @@
         height:90vh;
     }
 
+
   </style>
   <script src="//code.jquery.com/jquery-1.11.1.js"></script>
   <script src="{{url_for('static', filename='jqwidgets/jqxcore.js')}}"></script>
   <script src="{{url_for('static', filename='jqwidgets/jqxsplitter.js')}}"></script>
+  <script src="{{url_for('static', filename='jqwidgets/jqxprogressbar.js')}}"></script>
   <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
   <script type=text/javascript src="{{
   url_for('static', filename='ansi_up.js') }}"></script>
@@ -48,7 +50,15 @@
         <pre id="win_output" >
         </pre>
         <div id="win_gauge" >
-            Gauges and stuff go here
+            <div id='hp_bar'>
+            
+            </div>
+            <div id='mana_bar'>
+
+            </div>
+            <div id='move_bar'>
+
+            </div>
         </div>
     </div>
     </div>

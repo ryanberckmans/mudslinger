@@ -1,5 +1,12 @@
 var socket;
- 
+
+var health=0;
+var health_max=0;
+var mana=0;
+var mana_max=0;
+var move=0;
+var move_max=0;
+
 var output_buffer='';
 var chat_buffer='';
 var rx;
@@ -112,7 +119,18 @@ function handle_data(msg) {
 function handle_mxp_escape(esc) {
     
 }
-    
+
+function update_hp_bar() {
+    $('#hp_bar').jqxProgressBar({ value: 100*health/health_max });
+}
+
+function update_mana_bar() {
+    $('#mana_bar').jqxProgressBar({ value: 100*mana/mana_max });
+}
+
+function update_move_bar() {
+    $('#move_bar').jqxProgressBar({ value: 100*move/move_max });
+}
 
 $(document).ready(function() {
     $('a#open_telnet').bind('click', function() {
@@ -139,9 +157,43 @@ $(document).ready(function() {
         orientation: 'horizontal'
     });
 
+    $('#hp_bar').jqxProgressBar({ 
+        width: '100%', 
+        height: 30, 
+        value: 50,
+        showText: true,
+        renderText: function(text) {
+            return health + " / " + health_max;
+        }
+    });
 
+    $('#hp_bar .jqx-progressbar-value').css(
+            "background-color", "red");
         
 
+    $('#mana_bar').jqxProgressBar({
+        width: '100%',
+        height: 30,
+        value: 50,
+        showText: true,
+        renderText: function(text) {
+            return mana + " / " + mana_max;
+        }
+    });
+    $('#mana_bar .jqx-progressbar-value').css(
+            "background-color", "blue");
+
+    $('#move_bar').jqxProgressBar({
+        width: '100%',
+        height: 30,
+        value: 50,
+        showText: true,
+        renderText: function(text) {
+            return move + " / " + move_max;
+        }
+    });
+    $('#move_bar .jqx-progressbar-value').css(
+            "background-color", "cyan");
 
     socket = io.connect('http://' + document.domain + ':' + location.port + '/telnet');
     socket.on('ws_connect', function(msg) {
@@ -152,6 +204,40 @@ $(document).ready(function() {
     });
     socket.on('telnet_connect', function(msg) {
         $('#dbg').append("Telnet connect.<br>");
+    })
+    socket.on('msdp_var', function(msg) {
+        $('#dbg').append("MSDP var: "+msg.var+" val: "+msg.val+"<br>");
+        if (msg.var == "HEALTH")
+        {
+            health = msg.val;
+            update_hp_bar();
+        }
+        else if (msg.var == "HEALTH_MAX")
+        {
+            health_max = msg.val;
+            update_hp_bar();
+        }
+        else if (msg.var == "MANA")
+        {
+            mana = msg.val;
+            update_mana_bar();
+        }
+        else if (msg.var == "MANA_MAX")
+        {
+            mana_max = msg.val;
+            update_mana_bar();
+        }
+        else if (msg.var == "MOVEMENT")
+        {
+            move = msg.val;
+            update_move_bar();
+        }
+        else if (msg.var == "MOVEMENT_MAX")
+        {
+            move_max = msg.val;
+            update_move_bar();
+        }
+            
     });
     socket.on('telnet_data', handle_data);
 

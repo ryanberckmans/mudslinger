@@ -10,6 +10,8 @@ from flask.ext.login import LoginManager,login_user
 from flask_wtf import Form
 from wtforms import TextField, PasswordField
 from wtforms.validators import DataRequired, Length, Email, EqualTo
+import re
+
 
 app = Flask(__name__)
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
@@ -84,33 +86,57 @@ class TelnetConn:
         self.write_lock.acquire()
         self.telnet.get_socket().sendall(cmd)
         self.write_lock.release()
+    
+    def handle_msdp(self, msdp):
+        if msdp[0] == MSDP.VAR:
+            ind = 1
+            while msdp[ind] != MSDP.VAL:
+                ind += 1
+
+            var = msdp[1:ind]
+            val = msdp[ind+1:]
+            with app.test_request_context('/telnet'):
+                socketio.emit('msdp_var', { 'var': var, 'val': val},
+                        room=self.roomid,
+                        namespace='/telnet')
+
+    def write_msdp_var(self, var, val):
+        seq = IAC + SB + TELNET_OPTIONS.MSDP + MSDP.VAR + var + MSDP.VAL + val + IAC + SE
+        self.sock_write(seq)
+        
 
     def _negotiate(self, socket, command, option):
         print 'Got ',ord(command),ord(option)
+        if command == WILL:
+            if option == TELNET_OPTIONS.MSDP:
+                self.sock_write(IAC + DO + TELNET_OPTIONS.MSDP)
+                
+                self.write_msdp_var('CLIENT_ID', "ArcWeb");
+                self.write_msdp_var('REPORT', 'HEALTH');
+                self.write_msdp_var('REPORT', 'HEALTH_MAX');
+                self.write_msdp_var('REPORT', 'MANA');
+                self.write_msdp_var('REPORT', 'MANA_MAX');
+                self.write_msdp_var('REPORT', 'MOVEMENT');
+                self.write_msdp_var('REPORT', 'MOVEMENT_MAX');
+
+            
         if command == DO:
             if option == TELNET_OPTIONS.TTYPE:
-                #  self.write_lock.acquire()
-                #  socket.sendall(IAC + WILL + TELNET_OPTIONS.TTYPE)
-                #  self.write_lock.release()
                 self.sock_write(IAC + WILL + TELNET_OPTIONS.TTYPE)
             elif option == TELNET_OPTIONS.MXP:
-                # self.write_lock.acquire()
-                # socket.sendall(IAC + WILL + TELNET_OPTIONS.MXP)
-                # self.write_lock.release()
                 self.sock_write(IAC + WILL + TELNET_OPTIONS.MXP)
         elif command == SE:
             d = self.telnet.read_sb_data()
             print 'got',[ord(x) for x in d]
             
             if d == TELNET_OPTIONS.TTYPE + SUB_NEGOTIATION.SEND:
-                # self.write_lock.acquire()
-                # socket.sendall(IAC + SB + TELNET_OPTIONS.TTYPE + SUB_NEGOTIATION.IS + self.ttypes[self.ttype_index] + IAC + SE)
-                # self.write_lock.release()
                 self.sock_write(IAC + SB + TELNET_OPTIONS.TTYPE + SUB_NEGOTIATION.IS + self.ttypes[self.ttype_index] + IAC + SE)
                 self.ttype_index += 1
                 if self.ttype_index > len(self.ttypes)-1:
                     self.ttype_index = len(self.ttypes)-1
-                # self.sock_write(IAC+SB+TELNET_OPTIONS.TTYPE+SUB_NEGOTIATION.IS+"ANSI"+IAC+SE)
+            elif d[0] == TELNET_OPTIONS.MSDP:
+                print 'get the msdp'
+                self.handle_msdp(d[1:])
             
 
     def _listen(self):
@@ -242,6 +268,7 @@ def register():
 
 class TELNET_OPTIONS(object):
     TTYPE = chr(24)
+    MSDP = chr(69)
     MXP = chr(91)
 
 class SUB_NEGOTIATION(object):
@@ -249,6 +276,14 @@ class SUB_NEGOTIATION(object):
     SEND = chr(1)
     ACCEPTED = chr(2)
     REJECTED = chr(3)
+
+class MSDP(object):
+    VAR = chr(1)
+    VAL = chr(2)
+    TABLE_OPEN = chr(3)
+    TABLE_CLOSE = chr(4)
+    ARRAY_OPEN = chr(5)
+    ARRAY_CLOSE = chr(6)
 
 if __name__ == "__main__":
     app.debug=True
