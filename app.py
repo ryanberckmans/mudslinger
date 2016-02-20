@@ -2,11 +2,12 @@
 import time
 import threading
 from telnetlib import Telnet, IAC, DO, WILL, SB, SE
-from flask import Flask, jsonify, render_template, request, redirect, url_for
+from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, g
 from flask.ext.socketio import SocketIO, emit
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.bcrypt import Bcrypt
-from flask.ext.login import LoginManager,login_user
+from flask.ext.login import LoginManager, login_user, logout_user, \
+        current_user, login_required
 from flask_wtf import Form
 from wtforms import TextField, PasswordField
 from wtforms.validators import DataRequired, Length, Email, EqualTo
@@ -22,6 +23,7 @@ from models import *
 #app.config['SERVER_NAME'] = 'vps.rooflez.com'
 login_manager = LoginManager()
 login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 
 socketio=SocketIO(app)
@@ -197,6 +199,7 @@ def client():
     return render_template('client.html')
 
 @app.route("/resize")
+@login_required
 def resize():
     print "resize"
     return render_template('resize.html')
@@ -206,7 +209,8 @@ def resize():
 
 @login_manager.user_loader
 def load_user(user_id):
-    User.query.filter(User.id == int(user_id)).first()
+    #User.query.filter(User.id == int(user_id)).first()
+    return User.query.get(user_id)
 
 
 class LoginForm(Form):
@@ -223,7 +227,7 @@ class RegisterForm(Form):
         'email',
         validators=[DataRequired(), Email(message=None), Length(min=6, max=40)]
     )
-    password = TextField(
+    password = PasswordField(
         'password',
         validators=[DataRequired(), Length(min=6, max=25)]
     )
@@ -236,6 +240,9 @@ class RegisterForm(Form):
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
+    if g.user is not None and g.user.is_authenticated:
+        return redirect(url_for('client'))
+
     error = None
     form = LoginForm(request.form)
     if request.method == 'POST':
@@ -244,12 +251,20 @@ def login():
             if user is not None and bcrypt.check_password_hash(
                 user.password, request.form['password']):
                 login_user(user)
-                flash('You were logged in. Go Crazy.')
-                return redirect(url_for('home.home'))
+                # flash('You were logged in. Go Crazy.')
+                print user
+                return redirect(url_for('client'))
 
             else:
                 error = 'Invalid username or password.'
     return render_template('login.html', form=form, error=error)
+
+@app.route("/logout", methods=['GET'])
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('client'))
+
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -265,6 +280,10 @@ def register():
         login_user(user)
         return redirect(url_for('client'))
     return render_template("register.html", form=form)
+
+@app.before_request
+def before_request():
+    g.user = current_user
 
 class TELNET_OPTIONS(object):
     TTYPE = chr(24)
@@ -288,6 +307,6 @@ class MSDP(object):
 if __name__ == "__main__":
     app.debug=True
     # app.run('0.0.0.0')
-    socketio.run(app, '0.0.0.0'  )
-    # db.create_all()
+    db.create_all()
+    socketio.run(app, '0.0.0.0', debug=True )
     # db.session.commit()

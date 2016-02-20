@@ -159,7 +159,8 @@ $(document).ready(function() {
 
     $('#hp_bar').jqxProgressBar({ 
         width: '100%', 
-        height: 30, 
+        //float: 'left',
+        height: 20, 
         value: 50,
         showText: true,
         renderText: function(text) {
@@ -173,7 +174,7 @@ $(document).ready(function() {
 
     $('#mana_bar').jqxProgressBar({
         width: '100%',
-        height: 30,
+        height: 20,
         value: 50,
         showText: true,
         renderText: function(text) {
@@ -185,7 +186,7 @@ $(document).ready(function() {
 
     $('#move_bar').jqxProgressBar({
         width: '100%',
-        height: 30,
+        height: 20,
         value: 50,
         showText: true,
         renderText: function(text) {
