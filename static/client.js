@@ -1,18 +1,35 @@
 var socket;
 
-var health=0;
-var health_max=0;
-var mana=0;
-var mana_max=0;
-var move=0;
-var move_max=0;
+var msdp_vals={};
+var msdp_callbacks={};
+function on_msdp(val, func) {
+    msdp_callbacks[val] = msdp_callbacks[val] || [];
+    msdp_callbacks[val].push(func)    
+}
 
-var enemy_name = '';
-var enemy_health = 0;
-var enemy_health_max = 0;
+function strip_color_tags(text) {
+    var rtn='';
+    for (var i=0; i<text.length; i++) {
+        if (text[i] == '{')
+        {
+            if (i == text.length-1) {
+                break;
+            }
+            else if (text[i+1] == '{') {
+                rtn += '{';
+                i++;
+            }
+            else {
+                i++;
+            }
+        }
+        else {
+            rtn += text[i];
+        }
+    }
 
-var experience_max=0;
-var experience_tnl=0;
+    return rtn;
+}
 
 var output_buffer='';
 var chat_buffer='';
@@ -127,25 +144,124 @@ function handle_mxp_escape(esc) {
     
 }
 
+
+
 function update_hp_bar() {
-    $('#hp_bar').jqxProgressBar({ value: 100*health/health_max });
+    var val = msdp_vals.HEALTH || 0;
+    var max = msdp_vals.HEALTH_MAX || 0; 
+    if ( !max || max == 0) { return; }
+    $('#hp_bar').jqxProgressBar({ value: 100*val/max });
 }
+on_msdp("HEALTH", update_hp_bar);
+on_msdp("HEALTH_MAX", update_hp_bar);
+
 
 function update_mana_bar() {
-    $('#mana_bar').jqxProgressBar({ value: 100*mana/mana_max });
+    var val = msdp_vals.MANA || 0;
+    var max = msdp_vals.MANA_MAX || 0;
+    if ( !max || max == 0) { return; }
+    $('#mana_bar').jqxProgressBar({ value: 100*val/max });
 }
+on_msdp("MANA", update_mana_bar);
+on_msdp("MANA_MAX", update_mana_bar);
 
 function update_move_bar() {
-    $('#move_bar').jqxProgressBar({ value: 100*move/move_max });
+    var val = msdp_vals.MOVEMENT || 0;
+    var max = msdp_vals.MOVEMENT_MAX || 0;
+    if ( !max || max == 0) { return; }
+    $('#move_bar').jqxProgressBar({ value: 100*val/max });
 }
+on_msdp("MOVEMENT", update_move_bar);
+on_msdp("MOVEMENT_MAX", update_move_bar);
 
 function update_enemy_bar() {
-    $('#enemy_bar').jqxProgressBar({ value: 100*enemy_health/enemy_health_max });
+    var val = msdp_vals.OPPONENT_HEALTH || 0;
+    var max = msdp_vals.OPPONENT_HEALTH_MAX || 0;
+    if ( !max || max == 0) { return; }
+    $('#enemy_bar').jqxProgressBar({ value: 100*val/max });
 }
+on_msdp("OPPONENT_HEALTH", update_enemy_bar);
+on_msdp("OPPONENT_HEALTH_MAX", update_enemy_bar);
+on_msdp("OPPONENT_NAME", update_enemy_bar);
 
 function update_tnl_bar() {
-    $('#tnl_bar').jqxProgressBar({ value: 100*(experience_max - experience_tnl)/experience_max });
+    var val = msdp_vals.EXPERIENCE_TNL || 0;
+    var max = msdp_vals.EXPERIENCE_MAX || 0;
+    if ( !max || max == 0) { return; }
+    $('#tnl_bar').jqxProgressBar({ value: 100*(max - val)/max });
 }
+on_msdp("EXPERIENCE_TNL", update_tnl_bar);
+on_msdp("EXPERIENCE_MAX", update_tnl_bar);
+
+function update_stat_window() {
+    var output='';
+    output += '<h1><center>STATS</center></h1>';
+
+    var left = false;
+
+    function print_stat( label, val, perm) {
+        var color;
+        left = !left;
+        if (left) {
+            color = "red";
+        } else {
+            color = "cyan";
+        }
+
+        output += '<span style="color: '+color+';">';
+
+        output += label + ": ";
+        output += ("   " + (msdp_vals[perm] || '???')).slice(-3);
+        output += "("+(("   " + (msdp_vals[val] || '???')).slice(-3))+")";
+
+        output += "</span>"
+    }
+
+    output += '<center>';
+
+    print_stat( "Str", "STR", "STR_PERM");
+    output += '   ';
+    print_stat( "Int", "INT", "INT_PERM");
+    output += "<br>";
+    
+    print_stat( "Con", "CON", "CON_PERM");
+    output += '   ';
+    print_stat( "Wis", "WIS", "WIS_PERM");
+    output += "<br>";
+
+    print_stat( "Vit", "VIT", "VIT_PERM");
+    output += '   ';
+    print_stat( "Dis", "DIS", "DIS_PERM");
+    output += "<br>";
+
+    print_stat( "Agi", "AGI", "AGI_PERM");
+    output += '   ';
+    print_stat( "Cha", "CHA", "CHA_PERM");
+    output += "<br>";
+
+    print_stat( "Dex", "DEX", "DEX_PERM");
+    output += '   ';
+    print_stat( "Luc", "LUC", "LUC_PERM");
+    output += "<br>";
+
+    output += '</center>';
+
+    $('#win_stat').html("<pre>"+output+"</pre>");
+}
+
+var stats = ['STR', 'CON', 'VIT', 'AGI', 'DEX',
+             'INT', 'WIS', 'DIS', 'CHA', 'LUC'];
+
+for (var i=0; i < stats.length; i++) {
+    on_msdp(stats[i], update_stat_window);
+    on_msdp(stats[i]+"_PERM", update_stat_window);
+}
+
+on_msdp("STR", update_stat_window);
+on_msdp("STR_PERM", update_stat_window);
+
+on_msdp("INT", update_stat_window);
+on_msdp("INT_PERM", update_stat_window);
 
 $(document).ready(function() {
     $('a#open_telnet').bind('click', function() {
@@ -179,7 +295,7 @@ $(document).ready(function() {
         showText: true,
         animationDuration: 0,
         renderText: function(text) {
-            return health + " / " + health_max;
+            return (msdp_vals.HEALTH || 0) + " / " + (msdp_vals.HEALTH_MAX || 0);
         }
     });
 
@@ -194,7 +310,7 @@ $(document).ready(function() {
         showText: true,
         animationDuration: 0,
         renderText: function(text) {
-            return mana + " / " + mana_max;
+            return (msdp_vals.MANA || 0) + " / " + (msdp_vals.MANA_MAX || 0);
         }
     });
     $('#mana_bar .jqx-progressbar-value').css(
@@ -207,7 +323,7 @@ $(document).ready(function() {
         showText: true,
         animationDuration: 0,
         renderText: function(text) {
-            return move + " / " + move_max;
+            return (msdp_vals.MOVEMENT || 0) + " / " + (msdp_vals.MOVEMENT_MAX || 0);
         }
     });
     $('#move_bar .jqx-progressbar-value').css(
@@ -220,7 +336,7 @@ $(document).ready(function() {
         showText: true,
         animationDuration: 0,
         renderText: function(text) {
-            return enemy_name;
+            return strip_color_tags(msdp_vals.OPPONENT_NAME || '');
         }
     });
     $('#enemy_bar .jqx-progressbar-value').css(
@@ -233,7 +349,9 @@ $(document).ready(function() {
         showText: true,
         animationDuration: 0,
         renderText: function(text) {
-            return experience_max-experience_tnl + " / " + experience_max;
+            var tnl=msdp_vals.EXPERIENCE_TNL || 0;
+            var max=msdp_vals.EXPERIENCE_MAX || 0;
+            return (max-tnl) + " / " + max;
         }
     });
     $('#tnl_bar .jqx-progressbar-value').css(
@@ -251,64 +369,14 @@ $(document).ready(function() {
     })
     socket.on('msdp_var', function(msg) {
         $('#dbg').append("MSDP var: "+msg.var+" val: "+msg.val+"<br>");
-        if (msg.var == "HEALTH")
-        {
-            health = msg.val;
-            update_hp_bar();
-        }
-        else if (msg.var == "HEALTH_MAX")
-        {
-            health_max = msg.val;
-            update_hp_bar();
-        }
-        else if (msg.var == "MANA")
-        {
-            mana = msg.val;
-            update_mana_bar();
-        }
-        else if (msg.var == "MANA_MAX")
-        {
-            mana_max = msg.val;
-            update_mana_bar();
-        }
-        else if (msg.var == "MOVEMENT")
-        {
-            move = msg.val;
-            update_move_bar();
-        }
-        else if (msg.var == "MOVEMENT_MAX")
-        {
-            move_max = msg.val;
-            update_move_bar();
-        }
-        else if (msg.var == "OPPONENT_HEALTH")
-        {
-            enemy_health = msg.val;
-            update_enemy_bar();
-        }
-        else if (msg.var == "OPPONENT_HEALTH_MAX")
-        {
-            enemy_health_max = msg.val;
-            update_enemy_bar();
-        }
-        else if (msg.var == "OPPONENT_NAME")
-        {
-            enemy_name = msg.val;
-            update_enemy_bar();
-        }
-        else if (msg.var == "EXPERIENCE_MAX")
-        {
-            experience_max = msg.val;
-            update_tnl_bar();
-        }
-        else if (msg.var == "EXPERIENCE_TNL")
-        {
-            experience_tnl = msg.val;
-            update_tnl_bar();
-        }
-        else if (msg.var == "CHARCTER_NAME")
-        {
-            document.title = msg.val;
+
+        msdp_vals[msg.var] = msg.val;
+
+        var funcs = msdp_callbacks[msg.var];
+        if (funcs) {
+            for (var i=0; i < funcs.length; i++) {
+                funcs[i](msg.var, msg.val);
+            }
         }
             
     });
