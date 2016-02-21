@@ -120,6 +120,11 @@ class TelnetConn:
                 self.write_msdp_var('REPORT', 'MANA_MAX');
                 self.write_msdp_var('REPORT', 'MOVEMENT');
                 self.write_msdp_var('REPORT', 'MOVEMENT_MAX');
+                self.write_msdp_var('REPORT', 'EXPERIENCE_MAX');
+                self.write_msdp_var('REPORT', 'EXPERIENCE_TNL');
+                self.write_msdp_var('REPORT', 'OPPONENT_HEALTH');
+                self.write_msdp_var('REPORT', 'OPPONENT_HEALTH_MAX');
+                self.write_msdp_var('REPORT', 'OPPONENT_NAME');
 
             
         if command == DO:

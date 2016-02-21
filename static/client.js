@@ -7,6 +7,13 @@ var mana_max=0;
 var move=0;
 var move_max=0;
 
+var enemy_name = '';
+var enemy_health = 0;
+var enemy_health_max = 0;
+
+var experience_max=0;
+var experience_tnl=0;
+
 var output_buffer='';
 var chat_buffer='';
 var rx;
@@ -132,6 +139,14 @@ function update_move_bar() {
     $('#move_bar').jqxProgressBar({ value: 100*move/move_max });
 }
 
+function update_enemy_bar() {
+    $('#enemy_bar').jqxProgressBar({ value: 100*enemy_health/enemy_health_max });
+}
+
+function update_tnl_bar() {
+    $('#tnl_bar').jqxProgressBar({ value: 100*(experience_max - experience_tnl)/experience_max });
+}
+
 $(document).ready(function() {
     $('a#open_telnet').bind('click', function() {
         socket.emit('open_telnet', {} ); 
@@ -159,10 +174,10 @@ $(document).ready(function() {
 
     $('#hp_bar').jqxProgressBar({ 
         width: '100%', 
-        //float: 'left',
         height: 20, 
         value: 50,
         showText: true,
+        animationDuration: 0,
         renderText: function(text) {
             return health + " / " + health_max;
         }
@@ -177,6 +192,7 @@ $(document).ready(function() {
         height: 20,
         value: 50,
         showText: true,
+        animationDuration: 0,
         renderText: function(text) {
             return mana + " / " + mana_max;
         }
@@ -189,12 +205,39 @@ $(document).ready(function() {
         height: 20,
         value: 50,
         showText: true,
+        animationDuration: 0,
         renderText: function(text) {
             return move + " / " + move_max;
         }
     });
     $('#move_bar .jqx-progressbar-value').css(
             "background-color", "cyan");
+
+    $('#enemy_bar').jqxProgressBar({
+        width: '100%',
+        height: 20,
+        value: 50,
+        showText: true,
+        animationDuration: 0,
+        renderText: function(text) {
+            return enemy_name;
+        }
+    });
+    $('#enemy_bar .jqx-progressbar-value').css(
+            "background-color", "purple");
+
+    $('#tnl_bar').jqxProgressBar({
+        width: '100%',
+        height: 20,
+        value: 50,
+        showText: true,
+        animationDuration: 0,
+        renderText: function(text) {
+            return experience_max-experience_tnl + " / " + experience_max;
+        }
+    });
+    $('#tnl_bar .jqx-progressbar-value').css(
+            "background-color", "yellow");
 
     socket = io.connect('http://' + document.domain + ':' + location.port + '/telnet');
     socket.on('ws_connect', function(msg) {
@@ -237,6 +280,31 @@ $(document).ready(function() {
         {
             move_max = msg.val;
             update_move_bar();
+        }
+        else if (msg.var == "OPPONENT_HEALTH")
+        {
+            enemy_health = msg.val;
+            update_enemy_bar();
+        }
+        else if (msg.var == "OPPONENT_HEALTH_MAX")
+        {
+            enemy_health_max = msg.val;
+            update_enemy_bar();
+        }
+        else if (msg.var == "OPPONENT_NAME")
+        {
+            enemy_name = msg.val;
+            update_enemy_bar();
+        }
+        else if (msg.var == "EXPERIENCE_MAX")
+        {
+            experience_max = msg.val;
+            update_tnl_bar();
+        }
+        else if (msg.var == "EXPERIENCE_TNL")
+        {
+            experience_tnl = msg.val;
+            update_tnl_bar();
         }
             
     });
