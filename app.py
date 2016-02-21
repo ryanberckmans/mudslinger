@@ -32,6 +32,25 @@ telnets={}
 
 class TelnetConn:
     ttypes = [ 'ArcWeb', 'ANSI' ]
+    MSDP_VARS = [
+        'CHARACTER_NAME',
+        'HEALTH', 'HEALTH_MAX',
+        'MANA', 'MANA_MAX',
+        'MOVEMENT', 'MOVEMENT_MAX',
+        'EXPERIENCE_TNL', 'EXPERIENCE_MAX',
+        'OPPONENT_HEALTH', 'OPPONENT_HEALTH_MAX',
+        'OPPONENT_NAME',
+        'STR', 'STR_PERM',
+        'CON', 'CON_PERM',
+        'VIT', 'VIT_PERM',
+        'AGI', 'AGI_PERM',
+        'DEX', 'DEX_PERM',
+        'INT', 'INT_PERM',
+        'WIS', 'WIS_PERM',
+        'DIS', 'DIS_PERM',
+        'CHA', 'CHA_PERM',
+        'LUC', 'LUC_PERM']
+
     def __init__(self, roomid):
         self.telnet=None
         self.roomid=roomid
@@ -114,18 +133,8 @@ class TelnetConn:
                 self.sock_write(IAC + DO + TELNET_OPTIONS.MSDP)
                 
                 self.write_msdp_var('CLIENT_ID', "ArcWeb");
-                self.write_msdp_var('REPORT', 'HEALTH');
-                self.write_msdp_var('REPORT', 'HEALTH_MAX');
-                self.write_msdp_var('REPORT', 'MANA');
-                self.write_msdp_var('REPORT', 'MANA_MAX');
-                self.write_msdp_var('REPORT', 'MOVEMENT');
-                self.write_msdp_var('REPORT', 'MOVEMENT_MAX');
-                self.write_msdp_var('REPORT', 'EXPERIENCE_MAX');
-                self.write_msdp_var('REPORT', 'EXPERIENCE_TNL');
-                self.write_msdp_var('REPORT', 'OPPONENT_HEALTH');
-                self.write_msdp_var('REPORT', 'OPPONENT_HEALTH_MAX');
-                self.write_msdp_var('REPORT', 'OPPONENT_NAME');
-
+                for var_name in self.MSDP_VARS:
+                    self.write_msdp_var("REPORT", var_name)
             
         if command == DO:
             if option == TELNET_OPTIONS.TTYPE:
@@ -148,7 +157,9 @@ class TelnetConn:
 
     def _listen(self):
         self.ttype_index = 0
+        #self.telnet=Telnet('aarchonmud.com', 7000)
         self.telnet=Telnet('rooflez.com', 7101)
+
         self.telnet.set_option_negotiation_callback(self._negotiate)
 
         with app.test_request_context('/telnet'):

@@ -166,7 +166,7 @@ $(document).ready(function() {
     });
     $("#output_gauge_split").jqxSplitter({
         orientation: 'horizontal',
-        panels: [{size:'85%'},{size:'15%'}]
+        panels: [{size:'90%'},{size:'60px'}]
     });
     $('#map_chat_split').jqxSplitter({
         orientation: 'horizontal'
@@ -184,7 +184,7 @@ $(document).ready(function() {
     });
 
     $('#hp_bar .jqx-progressbar-value').css(
-            "background-color", "red");
+            "background-color", "#DF0101");
         
 
     $('#mana_bar').jqxProgressBar({
@@ -198,7 +198,7 @@ $(document).ready(function() {
         }
     });
     $('#mana_bar .jqx-progressbar-value').css(
-            "background-color", "blue");
+            "background-color", "#2E64FE");
 
     $('#move_bar').jqxProgressBar({
         width: '100%',
@@ -211,7 +211,7 @@ $(document).ready(function() {
         }
     });
     $('#move_bar .jqx-progressbar-value').css(
-            "background-color", "cyan");
+            "background-color", "#04B4AE");
 
     $('#enemy_bar').jqxProgressBar({
         width: '100%',
@@ -237,7 +237,7 @@ $(document).ready(function() {
         }
     });
     $('#tnl_bar .jqx-progressbar-value').css(
-            "background-color", "yellow");
+            "background-color", "#04B404");
 
     socket = io.connect('http://' + document.domain + ':' + location.port + '/telnet');
     socket.on('ws_connect', function(msg) {
@@ -305,6 +305,10 @@ $(document).ready(function() {
         {
             experience_tnl = msg.val;
             update_tnl_bar();
+        }
+        else if (msg.var == "CHARCTER_NAME")
+        {
+            document.title = msg.val;
         }
             
     });

@@ -25,6 +25,9 @@
         height:90vh;
     }
 
+    #win_gauge {
+        background-color:black;
+    }
     #hmv_cont {
         width: 50%;
         float: left;
@@ -32,6 +35,15 @@
     #alt_gauge_cont {
         width: 50%;
         float: right;
+    }
+    .gauge_bar {
+        background-color:grey;
+    }
+
+    .gauge_bar .jqx-progressbar-text {
+        color: yellow;
+        text-shadow: 0px 0px 2px black;
+        font-size: 150%;
     }
 
 
@@ -60,13 +72,13 @@
         </pre>
         <div id="win_gauge" >
             <div id="hmv_cont">
-                <div id='hp_bar'></div>
-                <div id='mana_bar'></div>
-                <div id='move_bar'></div>
+                <div id='hp_bar' class='gauge_bar'></div>
+                <div id='mana_bar' class='gauge_bar'></div>
+                <div id='move_bar' class='gauge_bar'></div>
             </div>
             <div id="alt_gauge_cont">
-                <div id='enemy_bar'></div>
-                <div id='tnl_bar'></div>
+                <div id='enemy_bar' class='gauge_bar'></div>
+                <div id='tnl_bar' class='gauge_bar'></div>
             </div>
         </div>
     </div>
