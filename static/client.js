@@ -193,6 +193,19 @@ function update_tnl_bar() {
 on_msdp("EXPERIENCE_TNL", update_tnl_bar);
 on_msdp("EXPERIENCE_MAX", update_tnl_bar);
 
+function update_affects_win() {
+    var affects = msdp_vals.AFFECTS || {};
+
+    var output = "<h2>AFFECTS</h2>";
+
+    for (var key in affects) {
+        output += ("   "+affects[key]).slice(-3) + ' : ' + key + "<br>";
+    }
+
+    $('#win_aff').html(output);
+}
+on_msdp("AFFECTS", update_affects_win);
+
 function update_stat_window() {
     var output='';
     output += '<h1><center>STATS</center></h1>';
@@ -280,6 +293,11 @@ $(document).ready(function() {
         orientation: 'vertical',
         panels: [{size:'75%'},{size:'25%'}]
     });
+    $('#output_aff_split').jqxSplitter({
+        orientation: 'vertical',
+        panels: [{size:'10%'},{size:'90%'}]
+    });
+
     $("#output_gauge_split").jqxSplitter({
         orientation: 'horizontal',
         panels: [{size:'90%'},{size:'60px'}]

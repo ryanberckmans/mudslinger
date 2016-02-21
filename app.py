@@ -49,7 +49,9 @@ class TelnetConn:
         'WIS', 'WIS_PERM',
         'DIS', 'DIS_PERM',
         'CHA', 'CHA_PERM',
-        'LUC', 'LUC_PERM']
+        'LUC', 'LUC_PERM',
+        'ROOM_NAME', 'ROOM_EXITS',
+        'AFFECTS']
 
     def __init__(self, roomid):
         self.telnet=None
@@ -82,44 +84,66 @@ class TelnetConn:
         finally:
             self.write_lock.release()
 
-    # def _sock_write(self, cmd):
-    #     self.lock.acquire()
-    #     try:
-    #         self.telnet.get_socket.sendall(cmd)
-    #     except:
-    #         with app.test_request_context('/telnet'):
-    #             socketio.emit('telnet_error', {},
-    #                     room=self.roomid,
-    #                     namespace='telnet' )
-    #     finally:
-    #         self.lock.release()
 
     def write(self, cmd):
-        # t=threading.Thread( target= self._write, kwargs={'cmd': cmd})
-        # t.daemon=True
-        # t.start()
         self._write(cmd)
 
     def sock_write(self, cmd):
-        # t=threading.Thread( target=self._sock_write, kwargs={'cmd': cmd})
-        # t.daemon=True
-        # t.start()
         self.write_lock.acquire()
         self.telnet.get_socket().sendall(cmd)
         self.write_lock.release()
     
     def handle_msdp(self, msdp):
-        if msdp[0] == MSDP.VAR:
-            ind = 1
-            while msdp[ind] != MSDP.VAL:
-                ind += 1
+        env={'ind': 1}
 
-            var = msdp[1:ind]
-            val = msdp[ind+1:]
-            with app.test_request_context('/telnet'):
-                socketio.emit('msdp_var', { 'var': var, 'val': val},
-                        room=self.roomid,
-                        namespace='/telnet')
+        def get_msdp_table():
+            rtn = {}
+            while msdp[env['ind']] != MSDP.TABLE_CLOSE:
+                kv = get_msdp_var()
+                rtn[kv[0]] = kv[1]
+            
+            return rtn 
+
+        def get_msdp_array():
+            rtn = []
+            while msdp[env['ind']] != MSDP.ARRAY_CLOSE:
+                v = get_msdp_val()
+                rtn.append(v)
+
+            return rtn
+
+        def get_msdp_val():
+            env['ind'] += 1
+
+            if env['ind'] >= len(msdp):
+                return ''
+
+            if msdp[env['ind']] == MSDP.ARRAY_OPEN:
+                return get_msdp_array()
+            elif msdp[env['ind']] == MSDP.TABLE_OPEN:
+                return get_msdp_table()
+                
+            # normal var
+            start_ind = env['ind'] 
+            while env['ind'] < len(msdp) and msdp[env['ind']] not in (MSDP.VAR, MSDP.VAL, MSDP.ARRAY_CLOSE, MSDP.TABLE_CLOSE):
+                env['ind'] += 1 
+            
+            return msdp[start_ind:env['ind']]
+
+        def get_msdp_var():
+            start_ind = env['ind']
+
+            while msdp[env['ind']] != MSDP.VAL:
+                env['ind'] += 1 
+
+            return ( msdp[start_ind:env['ind']], get_msdp_val() )
+        
+
+        result = get_msdp_var()
+        with app.test_request_context('/telnet'):
+            socketio.emit('msdp_var', { 'var': result[0], 'val': result[1]},
+                    room=self.roomid,
+                    namespace='/telnet')
 
     def write_msdp_var(self, var, val):
         seq = IAC + SB + TELNET_OPTIONS.MSDP + MSDP.VAR + var + MSDP.VAL + val + IAC + SE

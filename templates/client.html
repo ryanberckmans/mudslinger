@@ -24,6 +24,22 @@
         width:100%;
         height:100%;
     }
+    #win_aff {
+        font-family: monospace;
+        color:purple;
+        background-color:black;
+        width:100%;
+        height:100%;
+        overflow-x:scroll;
+        white-space: nowrap;
+    }
+    #win_aff h2 {
+        text-align:center;
+        color:white;
+    }
+
+    #output_aff_split {
+    }
 
     #output_gauge_split {
         width:100%;
@@ -77,35 +93,58 @@
 <div id="jqxWidget">
 -->
 <div id="main_vert_split">
+    <div>
+        <div id="output_aff_split">
+            <div id="win_aff"></div>
+
+            <div>
+            <div id="output_gauge_split" >
+                <pre id="win_output"></pre>
+                <div id="win_gauge" >
+                    <div id="hmv_cont">
+                        <div id='hp_bar' class='gauge_bar'></div>
+                        <div id='mana_bar' class='gauge_bar'></div>
+                        <div id='move_bar' class='gauge_bar'></div>
+                    </div>
+                    <div id="alt_gauge_cont">
+                        <div id='enemy_bar' class='gauge_bar'></div>
+                        <div id='tnl_bar' class='gauge_bar'></div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
 
     <div>
-    <div id="output_gauge_split" >
-        <pre id="win_output" >
-        </pre>
-        <div id="win_gauge" >
-            <div id="hmv_cont">
-                <div id='hp_bar' class='gauge_bar'></div>
-                <div id='mana_bar' class='gauge_bar'></div>
-                <div id='move_bar' class='gauge_bar'></div>
+        <div id="map_chat_split" >
+            <div id="win_stat" ></div>
+        <!--
+        <div id="win_map" >
+            <div style='width:100px;margin: 0 auto;'>
+            <div style="display:flex;flex-direction:column">
+                <div id=map_row_1 style='display: flex;'>
+                    <img id="exit_nw" src="static/images/diag_nw.png">
+                    <img id="exit_n" src="static/images/north.png">
+                    <img id="exit_ne" src="static/images/diag_ne.png">
+                </div>
+                <div id=map_row_2 style='display: flex;'>
+                    <img id="exit_w" src="static/images/east.png">
+                    <img id="map_room" src="static/images/square.png">
+                    <img id="exit_e" src="static/images/east.png">
+                </div>
+                <div id=map_row_3 style='display: flex;'>
+                    <img id="exit_sw" src="static/images/diag_ne.png">
+                    <img id="exit_s" src="static/images/north.png">
+                    <img id="exit_se" src="static/images/diag_nw.png">
+                </div>
             </div>
-            <div id="alt_gauge_cont">
-                <div id='enemy_bar' class='gauge_bar'></div>
-                <div id='tnl_bar' class='gauge_bar'></div>
             </div>
         </div>
-    </div>
-    </div>
-
-    <div class='splitter-panel'>
-    <div id="map_chat_split" >
-        <div id="win_stat" >
-            <span>Stats goes here</span>
-        </div>
-        <div id="win_chat" >
+        -->
+            <div id="win_chat" ></div>
         </div>
     </div>
-    </div>
-
 </div>
 
 
