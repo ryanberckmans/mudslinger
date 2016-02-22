@@ -26,7 +26,7 @@
     }
     #win_aff {
         font-family: monospace;
-        color:purple;
+        color:yellow;
         background-color:black;
         width:100%;
         height:100%;
@@ -48,6 +48,10 @@
     #main_vert_split {
         width:90vw;
         height:90vh;
+    }
+
+    #win_map {
+        background-color:grey;
     }
 
     #win_gauge {
@@ -73,6 +77,14 @@
 
     #enemy_bar .jqx-progressbar-text {
         font-size: 75%;
+    }
+
+    #room_name {
+        min-height: 25px;
+        border-style: solid;
+        border-color: black;
+        background-color: green;
+        font-weight: bold;
     }
 
   </style>
@@ -118,7 +130,15 @@
 
     <div>
         <div id="map_chat_split" >
-            <div id="win_stat" ></div>
+            <div>
+                <div id="win_map" >
+                    <center><div id=room_name></div>
+                    <svg id="svg_map" width=125 height=100></svg>
+                    </center>
+                </div>
+                <div id="win_stat" ></div>
+            </div>
+            
         <!--
         <div id="win_map" >
             <div style='width:100px;margin: 0 auto;'>
@@ -142,7 +162,10 @@
             </div>
         </div>
         -->
+            <div>
+                <center><span>CHAT</span></center>
             <div id="win_chat" ></div>
+            </div>
         </div>
     </div>
 </div>
@@ -161,8 +184,8 @@
 <input type="submit" resize=both value="Send"></input>
 </form>
 <br>
+<!--
 <a id=open_telnet href=#>OPEN TELNET</a><br>
-<span id=dbg>
-</span>
+-->
 </body>
 </html>

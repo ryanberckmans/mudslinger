@@ -206,6 +206,67 @@ function update_affects_win() {
 }
 on_msdp("AFFECTS", update_affects_win);
 
+function update_room_exits() {
+    var output='';
+
+    var exits = {
+        northwest: '<line x1="0" y1="0" x2="25" y2="25" style="stroke:rgb(255,0,0);stroke-width:4" />', 
+        north: '<line x1="50" y1="0" x2="50" y2="25" style="stroke:rgb(255,0,0);stroke-width:4" />',
+        northeast: '<line x1="100" y1="0" x2="75" y2="25" style="stroke:rgb(255,0,0);stroke-width:4" />',
+        east: '<line x1="75" y1="50" x2="100" y2="50" style="stroke:rgb(255,0,0);stroke-width:4" />',
+        southeast: '<line x1="100" y1="100" x2="75" y2="75" style="stroke:rgb(255,0,0);stroke-width:4" />',
+        south: '<line x1="50" y1="100" x2="50" y2="75" style="stroke:rgb(255,0,0);stroke-width:4" />',
+        southwest: '<line x1="0" y1="100" x2="25" y2="75" style="stroke:rgb(255,0,0);stroke-width:4" />',
+        west: '<line x1="0" y1="50" x2="25" y2="50" style="stroke:rgb(255,0,0);stroke-width:4" />',
+        up: '<line x1="112" y1="45" x2="112" y2="20" style="stroke:rgb(255,0,0);stroke-width:4" />'
+           +'<line x1="104" y1="28" x2="112" y2="20" style="stroke:rgb(255,0,0);stroke-width:4" />'
+           +'<line x1="120" y1="28" x2="112" y2="20" style="stroke:rgb(255,0,0);stroke-width:4" />',
+        down: '<line x1="112" y1="55" x2="112" y2="80" style="stroke:rgb(255,0,0);stroke-width:4" />'
+             +'<line x1="104" y1="72" x2="112" y2="80" style="stroke:rgb(255,0,0);stroke-width:4" />'
+             +'<line x1="120" y1="72" x2="112" y2="80" style="stroke:rgb(255,0,0);stroke-width:4" />'
+    };
+
+    var doors = {
+        northwest: '<line x1="8" y1="17" x2="17" y2="8" style="stroke:rgb(0,0,0);stroke-width:3" />',
+        north: '<line x1="43" y1="12" x2="57" y2="12" style="stroke:rgb(0,0,0);stroke-width:3" />',
+        northeast: '<line x1="92" y1="17" x2="83" y2="8" style="stroke:rgb(0,0,0);stroke-width:3" />',
+        east: '<line x1="88" y1="43" x2="88" y2="57" style="stroke:rgb(0,0,0);stroke-width:3" />',
+        southeast: '<line x1="92" y1="83" x2="83" y2="92" style="stroke:rgb(0,0,0);stroke-width:3" />',
+        south: '<line x1="43" y1="88" x2="57" y2="88" style="stroke:rgb(0,0,0);stroke-width:3" />',
+        southwest: '<line x1="8" y1="83" x2="17" y2="92" style="stroke:rgb(0,0,0);stroke-width:3" />',
+        west: '<line x1="12" y1="43" x2="12" y2="57" style="stroke:rgb(0,0,0);stroke-width:3" />',
+        up: '<line x1="105" y1="35" x2="119" y2="35" style="stroke:rgb(0,0,0);stroke-width:3" />',
+        down: '<line x1="105" y1="65" x2="119" y2="65" style="stroke:rgb(0,0,0);stroke-width:3" />'
+    };
+
+    console.log(exits);
+    var room_ex = msdp_vals.ROOM_EXITS || {};
+
+    for (var key in room_ex) {
+
+        for (var i=0; i < key.length; i++) {
+            console.log(key.charCodeAt(i));
+        }
+        output += exits[key];
+
+        if (room_ex[key] == 'C') {
+            output += doors[key];
+        }
+    }
+    output += '<rect x="25" y="25" width="50" height="50" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)">';
+
+    console.log(output);
+    $('#svg_map').html(output);
+
+}
+on_msdp("ROOM_EXITS", update_room_exits);
+
+function update_room_name() {
+    var name = msdp_vals.ROOM_NAME || '';
+    $('#room_name').html(strip_color_tags(name));
+};
+on_msdp("ROOM_NAME", update_room_name);
+
 function update_stat_window() {
     var output='';
     output += '<h1><center>STATS</center></h1>';
@@ -277,12 +338,18 @@ on_msdp("INT", update_stat_window);
 on_msdp("INT_PERM", update_stat_window);
 
 $(document).ready(function() {
+    /*
     $('a#open_telnet').bind('click', function() {
         socket.emit('open_telnet', {} ); 
         return false;
     });
+    */
     $('form#send1').submit(function(event) {
         socket.emit('send_command', {data: $('#send_command').val()});
+        // have to send ansi colors here
+        output_buffer += "\x1b[1;33m";
+        output_buffer += $('#send_command').val(); 
+        output_buffer += "\x1b[0m\n\r";
         $('#send_command').select();
         return false;
     });
@@ -295,7 +362,7 @@ $(document).ready(function() {
     });
     $('#output_aff_split').jqxSplitter({
         orientation: 'vertical',
-        panels: [{size:'10%'},{size:'90%'}]
+        panels: [{size:'20%'},{size:'80%'}]
     });
 
     $("#output_gauge_split").jqxSplitter({
@@ -313,7 +380,7 @@ $(document).ready(function() {
         showText: true,
         animationDuration: 0,
         renderText: function(text) {
-            return (msdp_vals.HEALTH || 0) + " / " + (msdp_vals.HEALTH_MAX || 0);
+            return (msdp_vals.HEALTH || 0) + " / " + (msdp_vals.HEALTH_MAX || 0) + " hp";
         }
     });
 
@@ -328,7 +395,7 @@ $(document).ready(function() {
         showText: true,
         animationDuration: 0,
         renderText: function(text) {
-            return (msdp_vals.MANA || 0) + " / " + (msdp_vals.MANA_MAX || 0);
+            return (msdp_vals.MANA || 0) + " / " + (msdp_vals.MANA_MAX || 0) + " mn";
         }
     });
     $('#mana_bar .jqx-progressbar-value').css(
@@ -341,7 +408,7 @@ $(document).ready(function() {
         showText: true,
         animationDuration: 0,
         renderText: function(text) {
-            return (msdp_vals.MOVEMENT || 0) + " / " + (msdp_vals.MOVEMENT_MAX || 0);
+            return (msdp_vals.MOVEMENT || 0) + " / " + (msdp_vals.MOVEMENT_MAX || 0) + " mv";
         }
     });
     $('#move_bar .jqx-progressbar-value').css(
@@ -369,7 +436,7 @@ $(document).ready(function() {
         renderText: function(text) {
             var tnl=msdp_vals.EXPERIENCE_TNL || 0;
             var max=msdp_vals.EXPERIENCE_MAX || 0;
-            return (max-tnl) + " / " + max;
+            return (max-tnl) + " / " + max + " tnl";
         }
     });
     $('#tnl_bar .jqx-progressbar-value').css(
@@ -377,16 +444,16 @@ $(document).ready(function() {
 
     socket = io.connect('http://' + document.domain + ':' + location.port + '/telnet');
     socket.on('ws_connect', function(msg) {
-        $('#dbg').append("WebSocket connected.<br>");
+        //$('#dbg').append("WebSocket connected.<br>");
     });
     socket.on('telnet_error', function(msg) {
-        $('#dbg').append("Telnet error.<br>");
+        //$('#dbg').append("Telnet error.<br>");
     });
     socket.on('telnet_connect', function(msg) {
-        $('#dbg').append("Telnet connect.<br>");
+        //$('#dbg').append("Telnet connect.<br>");
     })
     socket.on('msdp_var', function(msg) {
-        $('#dbg').append("MSDP var: "+msg.var+" val: "+msg.val+"<br>");
+        //$('#dbg').append("MSDP var: "+msg.var+" val: "+msg.val+"<br>");
 
         msdp_vals[msg.var] = msg.val;
 
@@ -404,5 +471,7 @@ $(document).ready(function() {
         console.log('WebSocket Error: ' + error);
     };
 
+    /* autoconnect telnet on page load */
+    socket.emit('open_telnet', {} ); 
 });
 

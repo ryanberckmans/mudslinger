@@ -94,9 +94,10 @@ class TelnetConn:
         self.write_lock.release()
     
     def handle_msdp(self, msdp):
-        env={'ind': 1}
+        env={'ind': 0}
 
         def get_msdp_table():
+            env['ind'] += 1
             rtn = {}
             while msdp[env['ind']] != MSDP.TABLE_CLOSE:
                 kv = get_msdp_var()
@@ -105,6 +106,7 @@ class TelnetConn:
             return rtn 
 
         def get_msdp_array():
+            env['ind'] += 1
             rtn = []
             while msdp[env['ind']] != MSDP.ARRAY_CLOSE:
                 v = get_msdp_val()
@@ -131,6 +133,7 @@ class TelnetConn:
             return msdp[start_ind:env['ind']]
 
         def get_msdp_var():
+            env['ind'] += 1
             start_ind = env['ind']
 
             while msdp[env['ind']] != MSDP.VAL:
