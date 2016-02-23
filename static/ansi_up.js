@@ -25,13 +25,13 @@
             { color: "255,255,255",    'class': "ansi-white"   }
           ],
           [
-            { color: "85, 85, 85",     'class': "ansi-bright-black"   },
-            { color: "255, 85, 85",    'class': "ansi-bright-red"     },
+            { color: "120, 120, 120",     'class': "ansi-bright-black"   },
+            { color: "255, 0, 0",    'class': "ansi-bright-red"     },
             { color: "0, 255, 0",      'class': "ansi-bright-green"   },
-            { color: "255, 255, 85",   'class': "ansi-bright-yellow"  },
-            { color: "85, 85, 255",    'class': "ansi-bright-blue"    },
-            { color: "255, 85, 255",   'class': "ansi-bright-magenta" },
-            { color: "85, 255, 255",   'class': "ansi-bright-cyan"    },
+            { color: "255, 255, 0",   'class': "ansi-bright-yellow"  },
+            { color: "0, 0, 255",    'class': "ansi-bright-blue"    },
+            { color: "255, 0, 255",   'class': "ansi-bright-magenta" },
+            { color: "0, 255, 255",   'class': "ansi-bright-cyan"    },
             { color: "255, 255, 255",  'class': "ansi-bright-white"   }
           ]
         ],

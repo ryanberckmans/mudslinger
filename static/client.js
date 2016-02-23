@@ -448,9 +448,15 @@ $(document).ready(function() {
     });
     socket.on('telnet_error', function(msg) {
         //$('#dbg').append("Telnet error.<br>");
+        output_buffer += "\x1b[1;36m";
+        output_buffer += "[[Telnet error]]"; 
+        output_buffer += "\x1b[0m\n\r";
     });
     socket.on('telnet_connect', function(msg) {
         //$('#dbg').append("Telnet connect.<br>");
+        output_buffer += "\x1b[1;36m";
+        output_buffer += "[[Telnet connected]]"; 
+        output_buffer += "\x1b[0m\n\r";
     })
     socket.on('msdp_var', function(msg) {
         //$('#dbg').append("MSDP var: "+msg.var+" val: "+msg.val+"<br>");
