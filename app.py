@@ -198,9 +198,25 @@ class TelnetConn:
             if self.abort:
                 return
             # self.lock.acquire()
-            d=self.telnet.read_very_eager()
+            d = None
+            try:
+                d=self.telnet.read_very_eager()
+            except EOFError:
+                with app.test_request_context('/telnet'):
+                    socketio.emit('telnet_disconnect', {},
+                            room=self.roomid,
+                            namespace='/telnet' )
+                return
+
+            except Exception as ex:
+                with app.text_request_context('/telnet'):
+                    socketio.emit('telnet_error', {'message': ex.message},
+                            room=self.roomid,
+                            namespace='/telnet')
+                return
+
             # self.lock.release()
-            if d != '':
+            if d is not None and d != '':
                 with app.test_request_context('/telnet'):
                     socketio.emit('telnet_data', {'data':d},
                             room=self.roomid,

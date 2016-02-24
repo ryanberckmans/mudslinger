@@ -347,9 +347,9 @@ $(document).ready(function() {
     $('form#send1').submit(function(event) {
         socket.emit('send_command', {data: $('#send_command').val()});
         // have to send ansi colors here
-        output_buffer += "\x1b[1;33m";
-        output_buffer += $('#send_command').val(); 
-        output_buffer += "\x1b[0m\n\r";
+        handle_data({data: "\x1b[1;33m"
+            + $('#send_command').val() 
+            + "\x1b[0m\n\r"});
         $('#send_command').select();
         return false;
     });
@@ -448,16 +448,22 @@ $(document).ready(function() {
     });
     socket.on('telnet_error', function(msg) {
         //$('#dbg').append("Telnet error.<br>");
-        output_buffer += "\x1b[1;36m";
-        output_buffer += "[[Telnet error]]"; 
-        output_buffer += "\x1b[0m\n\r";
+        var out = "\x1b[1;36m" 
+                + "[[Telnet error: " + msg.message + "]]"; 
+                + "\x1b[0m\n\r";
+        handle_data({data: out});
     });
     socket.on('telnet_connect', function(msg) {
         //$('#dbg').append("Telnet connect.<br>");
-        output_buffer += "\x1b[1;36m";
-        output_buffer += "[[Telnet connected]]"; 
-        output_buffer += "\x1b[0m\n\r";
-    })
+        handle_data({data: "\x1b[1;36m"
+            + "[[Telnet connected]]"
+            + "\x1b[0m\n\r"});
+    });
+    socket.on('telnet_disconnect', function(msg) {
+        handle_data({data: "\x1b[1;36m"
+            + "[[Telnet disconnected]]"
+            + "\x1b[0m\n\r"});
+    });
     socket.on('msdp_var', function(msg) {
         //$('#dbg').append("MSDP var: "+msg.var+" val: "+msg.val+"<br>");
 
