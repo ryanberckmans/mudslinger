@@ -8,7 +8,7 @@
   />
   <style>
     #win_output, #win_chat {
-        font-family:"Courier New";
+        font-family:Courier;
         font-size: 11;
         color:white;
         background-color:black;
@@ -19,14 +19,19 @@
     }
 
     #win_stat {
-        font-family:monospace;
+        font-family:Courier;
         color:white;
         background-color:black;
         width:100%;
         height:100%;
     }
+    #win_stat h2 {
+        text-align:center;
+        color:white;
+        font-family:Courier;
+    }
     #win_aff {
-        font-family: monospace;
+        font-family:Courier;
         color:yellow;
         background-color:black;
         width:100%;
@@ -37,6 +42,7 @@
     #win_aff h2 {
         text-align:center;
         color:white;
+        font-family:Courier;
     }
 
     #output_aff_split {
@@ -70,10 +76,11 @@
         background-color:grey;
     }
 
-    .gauge_bar .jqx-progressbar-text {
+    .gauge_bar .jqx-progressbar-text, .gauge_text {
         color: yellow;
         text-shadow: 0px 0px 2px black;
-        font-size: 150%;
+        font-size: 24px;
+        font-family:Courier;
     }
 
     #enemy_bar .jqx-progressbar-text {

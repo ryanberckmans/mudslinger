@@ -219,11 +219,9 @@ function update_room_exits() {
         southwest: '<line x1="0" y1="100" x2="25" y2="75" style="stroke:rgb(255,0,0);stroke-width:4" />',
         west: '<line x1="0" y1="50" x2="25" y2="50" style="stroke:rgb(255,0,0);stroke-width:4" />',
         up: '<line x1="112" y1="45" x2="112" y2="20" style="stroke:rgb(255,0,0);stroke-width:4" />'
-           +'<line x1="104" y1="28" x2="112" y2="20" style="stroke:rgb(255,0,0);stroke-width:4" />'
-           +'<line x1="120" y1="28" x2="112" y2="20" style="stroke:rgb(255,0,0);stroke-width:4" />',
+            + '<polyline points="104,28 112,20 120,28" style="fill:none;stroke:rgb(255,0,0);stroke-width:4"></polyline>',
         down: '<line x1="112" y1="55" x2="112" y2="80" style="stroke:rgb(255,0,0);stroke-width:4" />'
-             +'<line x1="104" y1="72" x2="112" y2="80" style="stroke:rgb(255,0,0);stroke-width:4" />'
-             +'<line x1="120" y1="72" x2="112" y2="80" style="stroke:rgb(255,0,0);stroke-width:4" />'
+            + '<polyline points="104,72, 112,80 120,72" style="fill:none;stroke:rgb(255,0,0);stroke-width:4"></polyline>'
     };
 
     var doors = {
@@ -269,7 +267,7 @@ on_msdp("ROOM_NAME", update_room_name);
 
 function update_stat_window() {
     var output='';
-    output += '<h1><center>STATS</center></h1>';
+    output += '<h2>STATS</h2>';
 
     var left = false;
 
@@ -373,6 +371,11 @@ $(document).ready(function() {
         orientation: 'horizontal'
     });
 
+    function render_gauge_text(curr, max, tag) {
+        
+        var rtn = "<pre class='gauge_text'>"+("     " + curr).slice(-5) + " / " + ("     " + max).slice(-5) + " " + tag+"</pre>";
+        return rtn;
+    }
     $('#hp_bar').jqxProgressBar({ 
         width: '100%', 
         height: 20, 
@@ -380,7 +383,8 @@ $(document).ready(function() {
         showText: true,
         animationDuration: 0,
         renderText: function(text) {
-            return (msdp_vals.HEALTH || 0) + " / " + (msdp_vals.HEALTH_MAX || 0) + " hp";
+            //return "     " + (msdp_vals.HEALTH || 0) + " / " + (msdp_vals.HEALTH_MAX || 0) + " hp";
+            return render_gauge_text( msdp_vals.HEALTH || 0, msdp_vals.HEALTH_MAX || 0, "hp");
         }
     });
 
@@ -395,7 +399,8 @@ $(document).ready(function() {
         showText: true,
         animationDuration: 0,
         renderText: function(text) {
-            return (msdp_vals.MANA || 0) + " / " + (msdp_vals.MANA_MAX || 0) + " mn";
+            //return (msdp_vals.MANA || 0) + " / " + (msdp_vals.MANA_MAX || 0) + " mn";
+            return render_gauge_text( msdp_vals.MANA || 0, msdp_vals.MANA_MAX || 0, "mn");
         }
     });
     $('#mana_bar .jqx-progressbar-value').css(
@@ -408,7 +413,8 @@ $(document).ready(function() {
         showText: true,
         animationDuration: 0,
         renderText: function(text) {
-            return (msdp_vals.MOVEMENT || 0) + " / " + (msdp_vals.MOVEMENT_MAX || 0) + " mv";
+            //return (msdp_vals.MOVEMENT || 0) + " / " + (msdp_vals.MOVEMENT_MAX || 0) + " mv";
+            return render_gauge_text( msdp_vals.MOVEMENT || 0, msdp_vals.MOVEMENT_MAX || 0, "mv");
         }
     });
     $('#move_bar .jqx-progressbar-value').css(
@@ -436,7 +442,8 @@ $(document).ready(function() {
         renderText: function(text) {
             var tnl=msdp_vals.EXPERIENCE_TNL || 0;
             var max=msdp_vals.EXPERIENCE_MAX || 0;
-            return (max-tnl) + " / " + max + " tnl";
+            //return (max-tnl) + " / " + max + " etl";
+            return render_gauge_text( max-tnl, max, "etl");
         }
     });
     $('#tnl_bar .jqx-progressbar-value').css(
