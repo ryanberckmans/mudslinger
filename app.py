@@ -77,8 +77,8 @@ class TelnetConn:
         try:
             self.telnet.write(str(cmd))
         except:
-            with app.test_request_context('/telnet'):
-                socketio.emit('telnet_error', {},
+            #with app.test_request_context('/telnet'):
+            socketio.emit('telnet_error', {},
                         room=self.roomid,
                         namespace='telnet' )
         finally:
@@ -143,8 +143,8 @@ class TelnetConn:
         
 
         result = get_msdp_var()
-        with app.test_request_context('/telnet'):
-            socketio.emit('msdp_var', { 'var': result[0], 'val': result[1]},
+        #with app.test_request_context('/telnet'):
+        socketio.emit('msdp_var', { 'var': result[0], 'val': result[1]},
                     room=self.roomid,
                     namespace='/telnet')
 
@@ -189,8 +189,8 @@ class TelnetConn:
 
         self.telnet.set_option_negotiation_callback(self._negotiate)
 
-        with app.test_request_context('/telnet'):
-            socketio.emit('telnet_connect', {},
+        #with app.test_request_context('/telnet'):
+        socketio.emit('telnet_connect', {},
                     room=self.roomid,
                     namespace='/telnet')
 
@@ -202,8 +202,8 @@ class TelnetConn:
             try:
                 d=self.telnet.read_very_eager()
             except EOFError:
-                with app.test_request_context('/telnet'):
-                    socketio.emit('telnet_disconnect', {},
+                #with app.test_request_context('/telnet'):
+                socketio.emit('telnet_disconnect', {},
                             room=self.roomid,
                             namespace='/telnet' )
                 return
@@ -217,8 +217,8 @@ class TelnetConn:
 
             # self.lock.release()
             if d is not None and d != '':
-                with app.test_request_context('/telnet'):
-                    socketio.emit('telnet_data', {'data':d},
+                # with app.test_request_context('/telnet'):
+                socketio.emit('telnet_data', {'data':d},
                             room=self.roomid,
                             namespace='/telnet' )
             time.sleep(0.020)
