@@ -1,4 +1,5 @@
 #!venv/bin/python2.7
+from Queue import Queue
 import time
 import threading
 from telnetlib import Telnet, IAC, DO, WILL, SB, SE
@@ -58,6 +59,7 @@ class TelnetConn:
         self.roomid=roomid
         self.write_lock=threading.Lock()
         self.ttype_index = 0
+        self.write_queue = Queue()
 
         self.abort = False
 
@@ -66,27 +68,33 @@ class TelnetConn:
         self.t.daemon=True
         self.t.start()
 
+        self.wt = threading.Thread(target=self._write)
+        self.wt.daemon=True
+        self.wt.start()
 
     def stop(self):
         self.abort = True
         self.telnet.close()
         
-
     def _write(self, cmd):
-        self.write_lock.acquire()
-        try:
-            self.telnet.write(str(cmd))
-        except:
-            #with app.test_request_context('/telnet'):
-            socketio.emit('telnet_error', {},
+        while True:
+            if self.abort:
+                return
+
+            cmd = self.write_queue.get(True, None)
+            self.write_lock.acquire()
+            try:
+                self.telnet.write(str(cmd))
+            except:
+                socketio.emit('telnet_error', {},
                         room=self.roomid,
                         namespace='telnet' )
-        finally:
-            self.write_lock.release()
-
+            finally:
+                self.write_lock.release()
 
     def write(self, cmd):
-        self._write(cmd)
+        self.write_queue.put(cmd)
+        #self._write(cmd)
 
     def sock_write(self, cmd):
         self.write_lock.acquire()
@@ -154,7 +162,7 @@ class TelnetConn:
         
 
     def _negotiate(self, socket, command, option):
-        print 'Got ',ord(command),ord(option)
+        # print 'Got ',ord(command),ord(option)
         if command == WILL:
             if option == TELNET_OPTIONS.MSDP:
                 self.sock_write(IAC + DO + TELNET_OPTIONS.MSDP)
@@ -170,7 +178,7 @@ class TelnetConn:
                 self.sock_write(IAC + WILL + TELNET_OPTIONS.MXP)
         elif command == SE:
             d = self.telnet.read_sb_data()
-            print 'got',[ord(x) for x in d]
+            # print 'got',[ord(x) for x in d]
             
             if d == TELNET_OPTIONS.TTYPE + SUB_NEGOTIATION.SEND:
                 self.sock_write(IAC + SB + TELNET_OPTIONS.TTYPE + SUB_NEGOTIATION.IS + self.ttypes[self.ttype_index] + IAC + SE)
@@ -178,18 +186,16 @@ class TelnetConn:
                 if self.ttype_index > len(self.ttypes)-1:
                     self.ttype_index = len(self.ttypes)-1
             elif d[0] == TELNET_OPTIONS.MSDP:
-                print 'get the msdp'
+                # print 'get the msdp'
                 self.handle_msdp(d[1:])
             
 
     def _listen(self):
         self.ttype_index = 0
-        #self.telnet=Telnet('aarchonmud.com', 7000)
         self.telnet=Telnet('aarchonmud.com', 7000)
 
         self.telnet.set_option_negotiation_callback(self._negotiate)
 
-        #with app.test_request_context('/telnet'):
         socketio.emit('telnet_connect', {},
                     room=self.roomid,
                     namespace='/telnet')
@@ -197,12 +203,10 @@ class TelnetConn:
         while True:
             if self.abort:
                 return
-            # self.lock.acquire()
             d = None
             try:
-                d=self.telnet.read_very_eager()
+                d = self.telnet.read_very_eager()
             except EOFError:
-                #with app.test_request_context('/telnet'):
                 socketio.emit('telnet_disconnect', {},
                             room=self.roomid,
                             namespace='/telnet' )
@@ -215,13 +219,11 @@ class TelnetConn:
                             namespace='/telnet')
                 return
 
-            # self.lock.release()
             if d is not None and d != '':
-                # with app.test_request_context('/telnet'):
                 socketio.emit('telnet_data', {'data':d},
                             room=self.roomid,
                             namespace='/telnet' )
-            time.sleep(0.020)
+            time.sleep(0.050)
 
 
 
@@ -367,5 +369,5 @@ if __name__ == "__main__":
     # app.debug=True
     # app.run('0.0.0.0')
     db.create_all()
-    socketio.run(app, '0.0.0.0', port=5555 )
+    socketio.run(app, '0.0.0.0', port=5000 )
     # db.session.commit()

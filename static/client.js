@@ -36,6 +36,7 @@ var chat_buffer='';
 var rx;
 var get_mxp_tag=false;
 var redirect_to_chat=false;
+var outlen=0;
 function handle_data(msg) {
     //output_buffer+=msg.data
     rx = rx || ''; // preserve partial data from previous call
@@ -129,15 +130,43 @@ function handle_data(msg) {
     //}
 
     //output_buffer += "|]";
+    
+    rx = rx.replace(/\n\r/g, "<br>");
+    rx = ansi_up.ansi_to_html(rx);
+    rx = "<span>" + rx + "</span>";
+    $("#win_output").append(rx);
     output_buffer += rx;
+    outlen += rx.length;
+    /*
+    if (outlen >= 1000000) {
+        outlen /= 2;
+        output_buffer = output_buffer.slice(-outlen);
+        $("#win_output").html(output_buffer);
+        console.log("TRIMMED OUTPUT");
+    }
+    */
+    if (outlen >= 1000000) {
+        //$("#win_output").children(":lt(1000)").remove();
+        console.log("outlen: " + outlen);
+        $("#win_output *").slice(0, 10000).remove();
+        outlen = $("#win_output").html().length;
+        console.log("trimmmed");
+        console.log("new outlen: " + outlen);
+    }
+    //console.log($("#win_output").html());
+    $("#win_output").scrollTop($("#win_output").prop("scrollHeight"));
     rx = '';
-    var output_raw=output_buffer.replace(/\n\r/g, "<br>");
-    var output_html=ansi_up.ansi_to_html(output_raw);
+    
+    //output_buffer += rx;
+    //output_buffer = output_buffer.slice(-500000);
+    //rx = '';
+    //var output_raw=output_buffer.replace(/\n\r/g, "<br>");
+    //var output_html=ansi_up.ansi_to_html(output_raw);
 
-    var win_output=$('#win_output');
+    //var win_output=$('#win_output');
 
-    win_output.html(output_html);
-    win_output.scrollTop(win_output.prop("scrollHeight"));
+    //win_output.html(output_html);
+    //win_output.scrollTop(win_output.prop("scrollHeight"));
 }
 
 function handle_mxp_escape(esc) {
