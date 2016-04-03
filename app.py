@@ -76,7 +76,7 @@ class TelnetConn:
         self.abort = True
         self.telnet.close()
         
-    def _write(self, cmd):
+    def _write(self):
         while True:
             if self.abort:
                 return

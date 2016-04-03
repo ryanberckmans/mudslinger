@@ -371,6 +371,7 @@ $(document).ready(function() {
         return false;
     });
     */
+    /*
     $('form#send1').submit(function(event) {
         socket.emit('send_command', {data: $('#send_command').val()});
         // have to send ansi colors here
@@ -379,6 +380,58 @@ $(document).ready(function() {
             + "\x1b[0m\n\r"});
         $('#send_command').select();
         return false;
+    });
+    */
+    var cmd_history = [];
+    var cmd_index = -1;
+    var send_func = function() {
+        var cmd = $("#cmd_input").val();
+        socket.emit('send_command', {data: cmd});
+        // have to send ansi colors here
+        handle_data({data: "\x1b[1;33m"
+            + cmd 
+            + "\x1b[0m\n\r"});
+        $('#cmd_input').select();
+
+        if (cmd.trim() == '') {
+            return;
+        }
+        if (cmd_history.length > 0 && cmd == cmd_history[cmd_history.length-1]) {
+            return;
+        }
+
+        cmd_history.push(cmd);
+        cmd_index = -1;
+    };
+
+    $('#cmd_input').keydown(function(event) {
+        switch (event.which) {
+            case 13: // enter
+                send_func();
+                return false;
+            case 38: // up
+                if (cmd_index == -1) {
+                    cmd_index = cmd_history.length-1;
+                } else {
+                    cmd_index -= 1;
+                    cmd_index = Math.max(cmd_index, 0);
+                }
+                $('#cmd_input').val(cmd_history[cmd_index]);
+                $('#cmd_input').select();
+                return false;
+            case 40: //down
+                if (cmd_index == -1) {
+                    break;
+                }
+                cmd_index += 1;
+                cmd_index = Math.min(cmd_index, cmd_history.length-1);
+                $('#cmd_input').val(cmd_history[cmd_index]);
+                $('#cmd_input').select();
+                return false;
+            default:
+                cmd_index = -1;
+                return true;
+        }
     });
 
     $('#main_vert_split').jqxSplitter({
