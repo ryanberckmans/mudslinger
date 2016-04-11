@@ -1,4 +1,5 @@
 #!venv/bin/python2.7
+import traceback
 from Queue import Queue
 import time
 import threading
@@ -52,7 +53,8 @@ class TelnetConn:
         'CHA', 'CHA_PERM',
         'LUC', 'LUC_PERM',
         'ROOM_NAME', 'ROOM_EXITS',
-        'AFFECTS']
+        'AFFECTS',
+        'LUA_EDIT']
 
     def __init__(self, roomid):
         self.telnet=None
@@ -83,6 +85,7 @@ class TelnetConn:
 
             cmd = self.write_queue.get(True, None)
             self.write_lock.acquire()
+            print("locked")
             try:
                 self.telnet.write(str(cmd))
             except:
@@ -91,20 +94,25 @@ class TelnetConn:
                         namespace='telnet' )
             finally:
                 self.write_lock.release()
+                print("unlocked")
 
     def write(self, cmd):
         self.write_queue.put(cmd)
         #self._write(cmd)
 
     def sock_write(self, cmd):
+        print("sock_write")
         self.write_lock.acquire()
+        print("slocked")
         self.telnet.get_socket().sendall(cmd)
         self.write_lock.release()
+        print("sunlocked")
     
     def handle_msdp(self, msdp):
         env={'ind': 0}
 
         def get_msdp_table():
+            print "TBL"
             env['ind'] += 1
             rtn = {}
             while msdp[env['ind']] != MSDP.TABLE_CLOSE:
@@ -114,6 +122,7 @@ class TelnetConn:
             return rtn 
 
         def get_msdp_array():
+            print ("ARRY")
             env['ind'] += 1
             rtn = []
             while msdp[env['ind']] != MSDP.ARRAY_CLOSE:
@@ -152,12 +161,15 @@ class TelnetConn:
 
         result = get_msdp_var()
         #with app.test_request_context('/telnet'):
+        print result
         socketio.emit('msdp_var', { 'var': result[0], 'val': result[1]},
                     room=self.roomid,
                     namespace='/telnet')
 
     def write_msdp_var(self, var, val):
-        seq = IAC + SB + TELNET_OPTIONS.MSDP + MSDP.VAR + var + MSDP.VAL + val + IAC + SE
+        print("write_msdp_var")
+        seq = IAC + SB + TELNET_OPTIONS.MSDP + MSDP.VAR + str(var) + MSDP.VAL + str(val) + IAC + SE
+        print("Seq:",seq)
         self.sock_write(seq)
         
 
@@ -192,7 +204,8 @@ class TelnetConn:
 
     def _listen(self):
         self.ttype_index = 0
-        self.telnet=Telnet('aarchonmud.com', 7000)
+        # self.telnet=Telnet('aarchonmud.com', 7000)
+        self.telnet=Telnet('rooflez.com', 7101)
 
         self.telnet.set_option_negotiation_callback(self._negotiate)
 
@@ -225,7 +238,32 @@ class TelnetConn:
                             namespace='/telnet' )
             time.sleep(0.050)
 
+@socketio.on('ack_rx', namespace='/telnet')
+def ws_ack_rx(message):
+    print("ack_rx running")
+    tn = telnets.get(request.sid, None)
+    if tn is None:
+        print("OMG")
+        return
 
+    print "Message ",  message
+    try:
+        tn.write_msdp_var("ACK_RX", message)
+    except Exception as e:
+        print "help"
+        print e.message
+        print traceback.print_exc()
+
+    print "FINISSIMO"
+
+@socketio.on('save_lua', namespace='/telnet')
+def ws_save_lua(message):
+    print("save_lua running")
+    tn = telnets.get(request.sid, None)
+    if tn is None:
+        return
+
+    tn.write_msdp_var("LUA_EDIT", message['data']) 
 
 @socketio.on('connect', namespace='/telnet')
 def ws_connect():

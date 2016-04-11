@@ -3,9 +3,11 @@
 <head>
   <meta charset="utf-8">
   <title>Aarchon WebClient</title>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
   <link rel="stylesheet" 
     href="{{url_for('static', filename='jqwidgets/styles/jqx.base.css')}}"
   />
+  <link rel="stylesheet" href="{{url_for('static', filename='lib/codemirror.css')}}">
   <style>
     #win_output, #win_chat {
         font-family:Courier;
@@ -99,12 +101,28 @@
         width: 90vw;
     }
 
+    #trigger_win {
+        display: none;
+        width: 150px;
+        height: 150px;
+        padding: 0.5em;
+        background-color:black;
+        color:red;
+        border-color: white;
+        border-style: solid;
+        border-width: 2px;
+    }
+
   </style>
   <script src="//code.jquery.com/jquery-2.1.3.js"></script>
+  <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
   <script src="{{url_for('static', filename='jqwidgets/jqxcore.js')}}"></script>
+  <script src="{{url_for('static', filename='jqwidgets/jqxwindow.js')}}"></script>
   <script src="{{url_for('static', filename='jqwidgets/jqxsplitter.js')}}"></script>
   <script src="{{url_for('static', filename='jqwidgets/jqxprogressbar.js')}}"></script>
   <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+  <script src="{{url_for('static', filename='lib/codemirror.js')}}"></script>
+  <script src="{{url_for('static', filename='mode/lua/lua.js')}}"></script>
   <script type=text/javascript src="{{
   url_for('static', filename='ansi_up.js') }}"></script>
   <script type=text/javascript src="{{
@@ -113,9 +131,7 @@
 </script>
 </head>
 <body>
-<!--
-<div id="jqxWidget">
--->
+<input type="button" value="Triggers" id="trig_button" />
 <div id="main_vert_split">
     <div>
         <div id="output_aff_split">
@@ -151,29 +167,6 @@
                 <div id="win_stat" ></div>
             </div>
             
-        <!--
-        <div id="win_map" >
-            <div style='width:100px;margin: 0 auto;'>
-            <div style="display:flex;flex-direction:column">
-                <div id=map_row_1 style='display: flex;'>
-                    <img id="exit_nw" src="static/images/diag_nw.png">
-                    <img id="exit_n" src="static/images/north.png">
-                    <img id="exit_ne" src="static/images/diag_ne.png">
-                </div>
-                <div id=map_row_2 style='display: flex;'>
-                    <img id="exit_w" src="static/images/east.png">
-                    <img id="map_room" src="static/images/square.png">
-                    <img id="exit_e" src="static/images/east.png">
-                </div>
-                <div id=map_row_3 style='display: flex;'>
-                    <img id="exit_sw" src="static/images/diag_ne.png">
-                    <img id="exit_s" src="static/images/north.png">
-                    <img id="exit_se" src="static/images/diag_nw.png">
-                </div>
-            </div>
-            </div>
-        </div>
-        -->
             <div>
                 <center><span>CHAT</span></center>
             <div id="win_chat" ></div>
@@ -181,15 +174,27 @@
         </div>
     </div>
 </div>
-
-
-<!--
+<br>
+<input type="text" id="cmd_input"> </input>
+<br>
+<div id="trig_win">
+    <div>
+        <span style="float: left">Triggers </span>
+    </div>
+    <div style="overflow: hidden">
+        <span>LOS TRIGGEROS</span>
+    </div>
 </div>
--->
 
-<br>
-<input type="text" id="cmd_input" </input>
-</form>
-<br>
+<div id="lua_win">
+    <div>
+        <span style="floag: left">LUA </span>
+    </div>
+    <div style="overflow: hidden">
+        <textarea id="lua_code">
+        </textarea>
+        <input type="button" id="save_lua_button" value="SAVE AND CLOSE" />
+    </div>
+</div>
 </body>
 </html>

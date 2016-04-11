@@ -1,4 +1,7 @@
 var socket;
+var lua_code_mirror;
+
+var triggers={'You chirp like a little birdie.': 'dance'};
 
 var msdp_vals={};
 var msdp_callbacks={};
@@ -31,148 +34,85 @@ function strip_color_tags(text) {
     return rtn;
 }
 
-var output_buffer='';
 var chat_buffer='';
 var rx;
-var get_mxp_tag=false;
-var redirect_to_chat=false;
 var outlen=0;
 function handle_data(msg) {
-    //output_buffer+=msg.data
     rx = rx || ''; // preserve partial data from previous call
     rx += msg.data;
 
-    //output_buffer += "[|";
 
     if (rx.length < 1) { return; }
 
-    /*
-    if ( get_mxp_tag ) {
-        
-    }
 
-    for ( i=0 ; i<rx.length ; i++ ) {
-        if (rx[i] == '\033') {
-            // Check if MXP escape (\0331z)
-            // if not long enough to chec, wait til it is
-            var seq = rx.slice(i);
-            if (seq.length < 4) { 
-                rx = seq; 
-                return; 
-            }
-
-            if (seq.slice(0,3) == '\033[1z') {
-                mxp_open = true;
-                rx = seq.slice(4);
-                handle_data({data: ''});
-                return;
-            }
-        }
-            
-        if (rx[i] == '<') {
-            output_buffer += '&lt;';
-        } else if (rx[i] == '>') {
-            output_buffer += '&gt;';
-        } else {
-            output_buffer += rx[i];
-        }
-    }
-    rx = '';
-*/
-    //if (rx.match(/\x1b\[1z/)) {
-        //console.log("matched MXP");
-
-        /* fix non escaped brackets */
-        var new_rx='';
-        for (var i=0; i<rx.length; i++)
+    /* fix non escaped brackets */
+    var new_rx='';
+    for (var i=0; i<rx.length; i++)
+    {
+        if ( rx[i] == '<' )
         {
-            if ( rx[i] == '<' )
-            {
-                if ( i >= 4 ) {
-                    if ( rx.slice(i-4,i) == "\x1b\[1z" ) {
-                        new_rx += rx[i];
-                        continue;
-                    }
+            if ( i >= 4 ) {
+                if ( rx.slice(i-4,i) == "\x1b\[1z" ) {
+                    new_rx += rx[i];
+                    continue;
                 }
-                new_rx += '&lt';
             }
-            else if ( rx[i] == '>' )
-            {
-                if ( (i+4) < rx.length ) {
-                    if ( rx.slice(i+1,i+5) == "\x1b\[7z" ) {
-                        new_rx += rx[i];
-                        continue;
-                    }
+            new_rx += '&lt';
+        }
+        else if ( rx[i] == '>' )
+        {
+            if ( (i+4) < rx.length ) {
+                if ( rx.slice(i+1,i+5) == "\x1b\[7z" ) {
+                    new_rx += rx[i];
+                    continue;
                 }
-                new_rx += '&gt';
             }
-            else
-            {
-                new_rx += rx[i];
-            }
+            new_rx += '&gt';
         }
-        rx = new_rx 
-        
-        /* DEST tag */
-        var commRe = /\x1b\[1z<DEST Comm>\x1b\[7z([^<]*)\x1b\[1z<\/DEST>/g;
-        var m;
-        while ((m = commRe.exec(rx)) !== null) {
-            chat_buffer += m[1];
-            var chat_buffer_raw = chat_buffer.replace(/\n\r/g, "<br>");
-            var chat_html = ansi_up.ansi_to_html(chat_buffer_raw);
-            $('#win_chat').html(chat_html);
-            $('#win_chat').scrollTop($('#win_chat').prop("scrollHeight"));
+        else
+        {
+            new_rx += rx[i];
         }
-        rx = rx.replace(commRe, '');
+    }
+    rx = new_rx 
+    
+    /* DEST tag */
+    var commRe = /\x1b\[1z<DEST Comm>\x1b\[7z([^<]*)\x1b\[1z<\/DEST>/g;
+    var m;
+    while ((m = commRe.exec(rx)) !== null) {
+        chat_buffer += m[1];
+        var chat_buffer_raw = chat_buffer.replace(/\n\r/g, "<br>");
+        var chat_html = ansi_up.ansi_to_html(chat_buffer_raw);
+        $('#win_chat').html(chat_html);
+        $('#win_chat').scrollTop($('#win_chat').prop("scrollHeight"));
+    }
+    rx = rx.replace(commRe, '');
         
-        /* kill unsupported tags */
-        //rx = rx.replace(/\x1b\[[17]z<\/[^>]*>/g
-    //}
-
-    //output_buffer += "|]";
+    for (var key in triggers) {
+        if (rx.includes(key)) {
+            socket.emit('send_command', {data: triggers[key]});
+        }
+    }
     
     rx = rx.replace(/\n\r/g, "<br>");
     rx = ansi_up.ansi_to_html(rx);
     rx = "<span>" + rx + "</span>";
     $("#win_output").append(rx);
-    output_buffer += rx;
     outlen += rx.length;
-    /*
-    if (outlen >= 1000000) {
-        outlen /= 2;
-        output_buffer = output_buffer.slice(-outlen);
-        $("#win_output").html(output_buffer);
-        console.log("TRIMMED OUTPUT");
-    }
-    */
+    
     if (outlen >= 1000000) {
         //$("#win_output").children(":lt(1000)").remove();
-        console.log("outlen: " + outlen);
+        //console.log("outlen: " + outlen);
         $("#win_output *").slice(0, 10000).remove();
         outlen = $("#win_output").html().length;
-        console.log("trimmmed");
-        console.log("new outlen: " + outlen);
+        //console.log("trimmmed");
+        //console.log("new outlen: " + outlen);
     }
-    //console.log($("#win_output").html());
+
     $("#win_output").scrollTop($("#win_output").prop("scrollHeight"));
     rx = '';
     
-    //output_buffer += rx;
-    //output_buffer = output_buffer.slice(-500000);
-    //rx = '';
-    //var output_raw=output_buffer.replace(/\n\r/g, "<br>");
-    //var output_html=ansi_up.ansi_to_html(output_raw);
-
-    //var win_output=$('#win_output');
-
-    //win_output.html(output_html);
-    //win_output.scrollTop(win_output.prop("scrollHeight"));
 }
-
-function handle_mxp_escape(esc) {
-    
-}
-
 
 
 function update_hp_bar() {
@@ -364,24 +304,58 @@ on_msdp("STR_PERM", update_stat_window);
 on_msdp("INT", update_stat_window);
 on_msdp("INT_PERM", update_stat_window);
 
+var lua_edit_code;
+on_msdp("LUA_EDIT", function() {
+    if (lua_edit_code == null ) {
+        lua_edit_code = '';
+    }
+    
+    var val = msdp_vals['LUA_EDIT'];
+    console.log(val)
+    lua_edit_code += val[0];
+    if (val[1] == 'true') { // continue
+        socket.emit("ack_rx", "LUA_EDIT");
+    } else { // done
+        lua_code_mirror.setValue(lua_edit_code.replace(/\n\r/g, "\n"));
+        lua_edit_code = null;
+    }
+});
+
+var MAX_OLC_VAL_LEN = 1234;
+var olc_sender={};
+
+on_msdp("ACK_RX", function(vr, val) {
+    if (olc_sender[vr]) {
+        var val =
+    }
+}
+
 $(document).ready(function() {
-    /*
-    $('a#open_telnet').bind('click', function() {
-        socket.emit('open_telnet', {} ); 
-        return false;
+
+    $('#lua_win').jqxWindow({
+        position: {x: 150, y: 150}
     });
-    */
-    /*
-    $('form#send1').submit(function(event) {
-        socket.emit('send_command', {data: $('#send_command').val()});
-        // have to send ansi colors here
-        handle_data({data: "\x1b[1;33m"
-            + $('#send_command').val() 
-            + "\x1b[0m\n\r"});
-        $('#send_command').select();
-        return false;
+    lua_code_mirror = CodeMirror.fromTextArea($('#lua_code').get(0), {
+        lineNumbers: true,
+        mode: "lua"
+    });   
+    
+    $('#save_lua_button').click(function() {
+        var val = lua_code_mirror.getValue("\n\r");
+        
+        socket.emit('save_lua', {data: val});
+        $('#lua_win').jqxWindow('close'); 
     });
-    */
+
+    $('#trig_win').jqxWindow({
+        position: {x: 150, y: 150}
+    });
+    $('#trig_win').jqxWindow('close');
+
+    $('#trig_button').click(function() {
+        $('#trig_win').jqxWindow('open');
+    });
+
     var cmd_history = [];
     var cmd_index = -1;
     var send_func = function() {
