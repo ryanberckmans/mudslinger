@@ -326,9 +326,9 @@ var olc_sender={};
 
 on_msdp("ACK_RX", function(vr, val) {
     if (olc_sender[vr]) {
-        var val =
+        //var val =
     }
-}
+})
 
 $(document).ready(function() {
 
