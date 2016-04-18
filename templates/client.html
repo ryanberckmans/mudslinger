@@ -3,117 +3,11 @@
 <head>
   <meta charset="utf-8">
   <title>Aarchon WebClient</title>
+
   <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-  <link rel="stylesheet" 
-    href="{{url_for('static', filename='jqwidgets/styles/jqx.base.css')}}"
-  />
+  <link rel="stylesheet" href="{{url_for('static', filename='jqwidgets/styles/jqx.base.css')}}">
   <link rel="stylesheet" href="{{url_for('static', filename='lib/codemirror.css')}}">
-  <style>
-    #win_output, #win_chat {
-        font-family:Courier;
-        font-size: 11;
-        color:white;
-        background-color:black;
-        word-wrap:break-word;
-        overflow-y:scroll;
-        width:100%;
-        height:95%;
-    }
 
-    #win_stat {
-        font-family:Courier;
-        color:white;
-        background-color:black;
-        width:100%;
-        height:100%;
-    }
-    #win_stat h2 {
-        text-align:center;
-        color:white;
-        font-family:Courier;
-    }
-    #win_aff {
-        font-family:Courier;
-        color:yellow;
-        background-color:black;
-        width:100%;
-        height:100%;
-        overflow-x:scroll;
-        white-space: nowrap;
-    }
-    #win_aff h2 {
-        text-align:center;
-        color:white;
-        font-family:Courier;
-    }
-
-    #output_aff_split {
-    }
-
-    #output_gauge_split {
-        width:100%;
-        height:100%;
-    }
-    #main_vert_split {
-        width:90vw;
-        height:90vh;
-    }
-
-    #win_map {
-        background-color:grey;
-    }
-
-    #win_gauge {
-        background-color:black;
-    }
-    #hmv_cont {
-        width: 50%;
-        float: left;
-    }
-    #alt_gauge_cont {
-        width: 50%;
-        float: right;
-    }
-    .gauge_bar {
-        background-color:grey;
-    }
-
-    .gauge_bar .jqx-progressbar-text, .gauge_text {
-        color: yellow;
-        text-shadow: 0px 0px 2px black;
-        font-size: 24px;
-        font-family:Courier;
-    }
-
-    #enemy_bar .jqx-progressbar-text {
-        font-size: 75%;
-    }
-
-    #room_name {
-        min-height: 25px;
-        border-style: solid;
-        border-color: black;
-        background-color: green;
-        font-weight: bold;
-    }
-
-    #cmd_input {
-        width: 90vw;
-    }
-
-    #trigger_win {
-        display: none;
-        width: 150px;
-        height: 150px;
-        padding: 0.5em;
-        background-color:black;
-        color:red;
-        border-color: white;
-        border-style: solid;
-        border-width: 2px;
-    }
-
-  </style>
   <script src="//code.jquery.com/jquery-2.1.3.js"></script>
   <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
   <script src="{{url_for('static', filename='jqwidgets/jqxcore.js')}}"></script>
@@ -123,15 +17,23 @@
   <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
   <script src="{{url_for('static', filename='lib/codemirror.js')}}"></script>
   <script src="{{url_for('static', filename='mode/lua/lua.js')}}"></script>
-  <script type=text/javascript src="{{
-  url_for('static', filename='ansi_up.js') }}"></script>
-  <script type=text/javascript src="{{
-  url_for('static', filename='client.js') }}"></script>
-<script type="text/javascript">
-</script>
+  <script type=text/javascript src="{{url_for('static', filename='ansi_up.js') }}"></script>
+
+  <link rel="stylesheet" href="{{url_for('static', filename='css/client.css')}}">
+
+  <script src="{{url_for('static', filename='modules/Message.js')}}"></script>
+  <script src="{{url_for('static', filename='modules/Util.js')}}"></script>
+  <script src="{{url_for('static', filename='modules/OutputWin.js')}}"></script>
+  <script src="{{url_for('static', filename='modules/ChatWin.js')}}"></script>
+  <script src="{{url_for('static', filename='modules/MapWin.js')}}"></script>
+  <script src="{{url_for('static', filename='modules/GaugeWin.js')}}"></script>
+  <script src="{{url_for('static', filename='modules/AffWin.js')}}"></script>
+  <script src="{{url_for('static', filename='modules/StatWin.js')}}"></script>
+  <script src="{{url_for('static', filename='modules/CommandInput.js')}}"></script>
+  <script src="{{url_for('static', filename='modules/Socket.js')}}"></script>
+  <script src="{{url_for('static', filename='modules/Client.js')}}"></script>
 </head>
 <body>
-<input type="button" value="Triggers" id="trig_button" />
 <div id="main_vert_split">
     <div>
         <div id="output_aff_split">
@@ -166,7 +68,7 @@
                 </div>
                 <div id="win_stat" ></div>
             </div>
-            
+
             <div>
                 <center><span>CHAT</span></center>
             <div id="win_chat" ></div>
@@ -176,25 +78,5 @@
 </div>
 <br>
 <input type="text" id="cmd_input"> </input>
-<br>
-<div id="trig_win">
-    <div>
-        <span style="float: left">Triggers </span>
-    </div>
-    <div style="overflow: hidden">
-        <span>LOS TRIGGEROS</span>
-    </div>
-</div>
-
-<div id="lua_win">
-    <div>
-        <span style="floag: left">LUA </span>
-    </div>
-    <div style="overflow: hidden">
-        <textarea id="lua_code">
-        </textarea>
-        <input type="button" id="save_lua_button" value="SAVE AND CLOSE" />
-    </div>
-</div>
 </body>
 </html>
