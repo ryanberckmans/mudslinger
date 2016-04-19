@@ -2,10 +2,15 @@ var GaugeWin = new (function() {
     var o = self;
 
     var msdp_vals = {};
+    var update_funcs = {};
 
     var render_gauge_text = function(curr, max, tag) {
         var rtn = "<pre class='gauge_text'>"+("     " + curr).slice(-5) + " / " + ("     " + max).slice(-5) + " " + tag+"</pre>";
         return rtn;
+    };
+
+    o.prepare_reload_layout = function() {
+        // nada
     };
 
     o.load_layout = function() {
@@ -78,11 +83,15 @@ var GaugeWin = new (function() {
         });
         $('#tnl_bar .jqx-progressbar-value').css(
                 "background-color", "#04B404");
+
+        for (var k in update_funcs) {
+            update_funcs[k]();
+        }
     };
 
-    var update_funcs = {};
+
     update_funcs.HEALTH = function() {
-       var val = msdp_vals.HEALTH || 0;
+        var val = msdp_vals.HEALTH || 0;
         var max = msdp_vals.HEALTH_MAX || 0;
         if ( !max || max == 0) { return; }
         $('#hp_bar').jqxProgressBar({ value: 100*val/max });
@@ -134,9 +143,11 @@ var GaugeWin = new (function() {
 
 })();
 
-$(document).ready(function() {
-    GaugeWin.load_layout();
-});
+//$(document).ready(function() {
+//    GaugeWin.load_layout();
+//});
 
 
 Message.sub('msdp_var', GaugeWin.handle_msdp_var);
+Message.sub('prepare_reload_layout', GaugeWin.prepare_reload_layout);
+Message.sub('load_layout', GaugeWin.load_layout);

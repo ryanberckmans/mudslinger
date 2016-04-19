@@ -1,6 +1,15 @@
 var MapWin = new (function() {
     var o = this;
 
+    o.prepare_reload_layout = function() {
+        // nada
+    };
+
+    o.load_layout = function() {
+        o.update_grid();
+        o.update_room_name();
+    };
+
     var exits = {
         northwest: '<line x1="0" y1="0" x2="25" y2="25" style="stroke:rgb(255,0,0);stroke-width:4" />',
         north: '<line x1="50" y1="0" x2="50" y2="25" style="stroke:rgb(255,0,0);stroke-width:4" />',

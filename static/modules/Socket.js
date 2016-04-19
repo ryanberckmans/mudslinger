@@ -31,6 +31,10 @@ var Socket = new (function() {
         o._socket.emit("open_telnet", {});
     };
 
+    o.close_telnet = function() {
+        o._socket.emit("close_telnet", {});
+    };
+
     o.handle_send_command = function(msg) {
         o._socket.emit("send_command", msg);
     };

@@ -1,3 +1,8 @@
+#client {
+    width:90vw;
+    height:88vh;
+}
+
 #win_output, #win_chat {
     font-family:Courier;
     font-size: 11;
@@ -48,8 +53,6 @@
 }
 
 #main_vert_split {
-    width:90vw;
-    height:90vh;
 }
 
 #win_map {
@@ -94,7 +97,7 @@
 }
 
 #cmd_input {
-    width: 90vw;
+    width: 100%;
 }
 
 #trigger_win {

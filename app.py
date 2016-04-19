@@ -212,6 +212,9 @@ class TelnetConn:
 
         while True:
             if self.abort:
+                socketio.emit('telnet_disconnect', {},
+                              room=self.room_id,
+                              namespace='/telnet')
                 return
             d = None
             try:
@@ -219,7 +222,7 @@ class TelnetConn:
             except EOFError:
                 socketio.emit('telnet_disconnect', {},
                               room=self.room_id,
-                              namespace='/telnet' )
+                              namespace='/telnet')
                 return
 
             except Exception as ex:
@@ -287,6 +290,15 @@ def ws_open_telnet(message):
     tn = TelnetConn(request.sid)
     tn.start()
     telnets[request.sid] = tn
+
+
+@socketio.on('close_telnet', namespace='/telnet')
+def ws_close_telnet(message):
+    print 'closing telnet'
+    tn = telnets.get(request.sid, None)
+    if tn is not None:
+        tn.stop()
+        del telnets[request.sid]
 
 
 @socketio.on('send_command', namespace='/telnet')

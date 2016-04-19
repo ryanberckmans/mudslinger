@@ -11,6 +11,7 @@
   <script src="//code.jquery.com/jquery-2.1.3.js"></script>
   <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
   <script src="{{url_for('static', filename='jqwidgets/jqxcore.js')}}"></script>
+  <script src="{{url_for('static', filename='jqwidgets/jqxmenu.js')}}"></script>
   <script src="{{url_for('static', filename='jqwidgets/jqxwindow.js')}}"></script>
   <script src="{{url_for('static', filename='jqwidgets/jqxsplitter.js')}}"></script>
   <script src="{{url_for('static', filename='jqwidgets/jqxprogressbar.js')}}"></script>
@@ -30,10 +31,23 @@
   <script src="{{url_for('static', filename='modules/AffWin.js')}}"></script>
   <script src="{{url_for('static', filename='modules/StatWin.js')}}"></script>
   <script src="{{url_for('static', filename='modules/CommandInput.js')}}"></script>
+  <script src="{{url_for('static', filename='modules/MenuBar.js')}}"></script>
   <script src="{{url_for('static', filename='modules/Socket.js')}}"></script>
   <script src="{{url_for('static', filename='modules/Client.js')}}"></script>
 </head>
 <body>
+<div id="client">
+<div id="menu_bar">
+  <ul>
+    <li>Connection
+      <ul>
+        <li>Connect</li>
+        <li>Disconnect</li>
+      </ul>
+    </li>
+    <li>Reload Layout</li>
+  </ul>
+</div>
 <div id="main_vert_split">
     <div>
         <div id="output_aff_split">
@@ -78,5 +92,6 @@
 </div>
 <br>
 <input type="text" id="cmd_input"> </input>
+</div>
 </body>
 </html>

@@ -4,9 +4,17 @@ var CommandInput = new (function() {
     var cmd_history = [];
     var cmd_index = -1;
 
-    this.blah = 3;
+    o.blah = 3;
 
-    this.send_cmd = function() {
+    o.prepare_reload_layout = function() {
+        // nada
+    };
+
+    o.load_layout = function() {
+        $('#cmd_input').keydown(o.keydown);
+    };
+
+    o.send_cmd = function() {
         var cmd = $("#cmd_input").val();
         Message.pub('send_command', {data: cmd});
 
@@ -25,7 +33,7 @@ var CommandInput = new (function() {
         cmd_index = -1;
     };
 
-    this.keydown = function(event) {
+    o.keydown = function(event) {
         switch (event.which) {
             case 13: // enter
                 o.send_cmd();
@@ -55,9 +63,8 @@ var CommandInput = new (function() {
         }
     };
 
-    return this;
+    return o;
 })();
 
-$(document).ready(function() {
-    $('#cmd_input').keydown(CommandInput.keydown);
-});
+Message.sub('prepare_reload_layout', CommandInput.prepare_reload_layout);
+Message.sub('load_layout', CommandInput.load_layout);

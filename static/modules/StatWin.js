@@ -14,6 +14,20 @@ var StatWin = (function(){
         'LUC': null, 'LUC_PERM': null
     };
 
+    var html;
+
+    o.prepare_reload_layout = function() {
+        html = $('#win_stat').html();
+    };
+
+    o.load_layout = function() {
+        if (html) {
+            // it's a reload
+            $('#win_stat').html(html);
+            html = null;
+        }
+    };
+
     o.update_stat_win = function() {
         var output = '';
         output +=
@@ -84,4 +98,6 @@ var StatWin = (function(){
     return o;
 })();
 
+Message.sub('prepare_reload_layout', StatWin.prepare_reload_layout);
+Message.sub('load_layout', StatWin.load_layout);
 Message.sub('msdp_var', StatWin.handle_msdp_var);

@@ -2,6 +2,21 @@ var OutputWin = new (function(){
 
     var o = this;
 
+    var html;
+
+    o.prepare_reload_layout = function() {
+        html = $("#win_output").html();
+    }
+
+    o.load_layout = function() {
+        if (html) {
+            // it's a reload
+            $('#win_output').html(html);
+            o.scroll_bottom();
+            html = null;
+        }
+    }
+
     o.scroll_bottom = function() {
         $("#win_output").scrollTop($("#win_output").prop("scrollHeight"));
     };
@@ -100,6 +115,8 @@ var OutputWin = new (function(){
     return o;
 })();
 
+Message.sub('prepare_reload_layout', OutputWin.prepare_reload_layout);
+Message.sub('load_layout', OutputWin.load_layout);
 Message.sub('output_data', OutputWin.handle_output_data);
 Message.sub('telnet_connect', OutputWin.handle_telnet_connect);
 Message.sub('telnet_disconnect', OutputWin.handle_telnet_disconnect);
