@@ -8,7 +8,7 @@ var Client = new (function() {
         // use it for reloads
         if (!html_base) {
             html_base = $('#client').html();
-            console.log(html_base);
+//            console.log(html_base);
         } else {
             // it's a reload
             $('#client').html(html_base);

@@ -2,6 +2,12 @@ var OutputWin = new (function(){
 
     var o = this;
 
+    var replace_lt_gt = function(text) {
+        var rtn = text.replace(/</g, '&lt');
+        rtn = rtn.replace(/>/g, '&gt');
+        return rtn;
+    }
+
     var html;
 
     o.prepare_reload_layout = function() {
@@ -24,7 +30,7 @@ var OutputWin = new (function(){
     o.handle_send_command = function(msg) {
         $('#win_output').append(
             '<span style="color:yellow">'
-            + msg.data
+            + replace_lt_gt(msg.data)
             + "<br>"
             + '</span>');
         o.scroll_bottom();
@@ -51,49 +57,49 @@ var OutputWin = new (function(){
     o.handle_output_data = function(msg) {
         var rx = msg.data;
 
-        var new_rx='';
-        for (var i=0; i<rx.length; i++)
-        {
-            if ( rx[i] == '<' )
-            {
-                if ( i >= 4 ) {
-                    if ( rx.slice(i-4,i) == "\x1b\[1z" ) {
-                        new_rx += rx[i];
-                        continue;
-                    }
-                }
-                new_rx += '&lt';
-            }
-            else if ( rx[i] == '>' )
-            {
-                if ( (i+4) < rx.length ) {
-                    if ( rx.slice(i+1,i+5) == "\x1b\[7z" ) {
-                        new_rx += rx[i];
-                        continue;
-                    }
-                }
-                new_rx += '&gt';
-            }
-            else
-            {
-                new_rx += rx[i];
-            }
-        }
-        rx = new_rx
+//        var new_rx='';
+//        for (var i=0; i<rx.length; i++)
+//        {
+//            if ( rx[i] == '<' )
+//            {
+//                if ( i >= 4 ) {
+//                    if ( rx.slice(i-4,i) == "\x1b\[1z" ) {
+//                        new_rx += rx[i];
+//                        continue;
+//                    }
+//                }
+//                new_rx += '&lt';
+//            }
+//            else if ( rx[i] == '>' )
+//            {
+//                if ( (i+4) < rx.length ) {
+//                    if ( rx.slice(i+1,i+5) == "\x1b\[7z" ) {
+//                        new_rx += rx[i];
+//                        continue;
+//                    }
+//                }
+//                new_rx += '&gt';
+//            }
+//            else
+//            {
+//                new_rx += rx[i];
+//            }
+//        }
+//        rx = new_rx
 
-        /* DEST tag */
-        var commRe = /\x1b\[1z<DEST Comm>\x1b\[7z([^<]*)\x1b\[1z<\/DEST>/g;
-        var m;
-        while ((m = commRe.exec(rx)) !== null) {
-            Message.pub('chat_message', {data: m[1]});
-//            chat_buffer += m[1];
-//            var chat_buffer_raw = chat_buffer.replace(/\n\r/g, "<br>");
-//            var chat_html = ansi_up.ansi_to_html(chat_buffer_raw);
-//            $('#win_chat').html(chat_html);
-//            $('#win_chat').scrollTop($('#win_chat').prop("scrollHeight"));
-        }
-        rx = rx.replace(commRe, '');
-
+//        /* DEST tag */
+//        var commRe = /\x1b\[1z<DEST Comm>\x1b\[7z([^<]*)\x1b\[1z<\/DEST>/g;
+//        var m;
+//        while ((m = commRe.exec(rx)) !== null) {
+//            Message.pub('chat_message', {data: m[1]});
+////            chat_buffer += m[1];
+////            var chat_buffer_raw = chat_buffer.replace(/\n\r/g, "<br>");
+////            var chat_html = ansi_up.ansi_to_html(chat_buffer_raw);
+////            $('#win_chat').html(chat_html);
+////            $('#win_chat').scrollTop($('#win_chat').prop("scrollHeight"));
+//        }
+//        rx = rx.replace(commRe, '');
+        rx = replace_lt_gt(rx);
         rx = rx.replace(/\n\r/g, "<br>");
         rx = ansi_up.ansi_to_html(rx);
         rx = "<span>" + rx + "</span>";
