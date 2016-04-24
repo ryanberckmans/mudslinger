@@ -1,5 +1,5 @@
 var ChatWin = new (function() {
-    var o = this;
+    var o = new OutWinBase();
 
     var html;
 
@@ -11,17 +11,13 @@ var ChatWin = new (function() {
         if (html) {
             $('#win_chat').html(html);
             html = null;
+        } else {
+            o.set_root_elem($('#win_chat'));
         }
-    };
-
-    o.handle_chat_message = function(msg) {
-        var out = ansi_up.ansi_to_html(msg.data);
-        $('#win_chat').append("<span>" + out + "</span>");
     };
 
     return o;
 })();
 
-Message.sub('chat_message', ChatWin.handle_chat_message);
 Message.sub('prepare_reload_layout', ChatWin.prepare_reload_layout);
 Message.sub('load_layout', ChatWin.load_layout);

@@ -1,18 +1,17 @@
-var Message = {
+var Message = new (function() {
+    var o = this;
 
-    subs: {},
+    var subs = {};
 
-    pub: function(t, data) {
-        this.subs[t] = this.subs[t] || [];
-//        console.log("Pub: " + t)
-        for (var i=0 ; i < this.subs[t].length ; i++) {
-            this.subs[t][i](data);
+    o.pub = function(t, data) {
+        subs[t] = subs[t] || [];
+        for (var i=0 ; i < subs[t].length ; i++) {
+            subs[t][i](data);
         }
-    },
+    };
 
-    sub: function(t, callback) {
-        this.subs[t] = this.subs[t] || [];
-        this.subs[t].push(callback);
-//        console.log("Sub: " + t)
-    }
-}
+    o.sub = function(t, callback) {
+        subs[t] = subs[t] || [];
+        subs[t].push(callback);
+    };
+})();

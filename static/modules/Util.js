@@ -1,6 +1,28 @@
 var Util = new (function(){
 
-    this.strip_color_tags = function(text) {
+    var o = self;
+
+    o.replace_lt_gt = function(text) {
+        return text.replace(/</g, '&lt;')
+                   .replace(/>/g, '&gt;');
+    };
+
+    o.replace_amp = function(text) {
+        return text.replace(/&/g, '&amp;');
+    };
+
+    o.replace_cr = function(text) {
+        // We are presumably already stripping out lfs before this
+        return text.replace(/\n/g, '<br>');
+    };
+
+    o.raw_to_html = function(text) {
+        return o.replace_cr(
+                o.replace_lt_gt(
+                 o.replace_amp(text)));
+    };
+
+    o.strip_color_tags = function(text) {
         var rtn='';
         for (var i=0; i<text.length; i++) {
             if (text[i] == '{')
@@ -24,5 +46,5 @@ var Util = new (function(){
         return rtn;
     };
 
-    return this;
-});
+    return o;
+})();

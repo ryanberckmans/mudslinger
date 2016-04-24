@@ -1,4 +1,4 @@
-var StatWin = (function(){
+var StatWin = new (function(){
     var o = this;
 
     var msdp_vals = {

@@ -1,8 +1,6 @@
 var Socket = new (function() {
     var o = this;
 
-    var mxp_mode = null;
-
     o.open = function() {
         o._socket = io.connect('http://' + document.domain + ':' + location.port + '/telnet');
 
@@ -42,28 +40,11 @@ var Socket = new (function() {
     };
 
     var partial_seq;
-//    var partial_mxp;
-//    var partial_mxp = false;
     o._handle_telnet_data = function(msg) {
-        /* Cover these cases:
-            rx has no escapes
-                => just send it on through
-            rx has one or more escapes and they are all complete
-                => just send it on through
-            rx has one or more escapes and the last one is not complete
-                => send everything up until the last escape sequence and save the partial sequence for next round
-        */
         var rx = partial_seq || '';
         partial_seq = null;
         rx += msg.data;
 
-
-//        if ((mxp_mode != 'secure line')
-//            && (!rx.includes('\x1b'))) {
-//            Message.pub('output_data', {data: rx});
-////            console.log("Do it");
-//            return;
-//        }
 
         var output = '';
         var rx_len = rx.length;
@@ -72,41 +53,22 @@ var Socket = new (function() {
         for (var i=0; i < rx_len; ) {
             var char = rx[i];
 
-//            /* MXP tag */
-//            if (mxp_mode == 'secure line') {
-//                if (partial_mxp) {
-//
-//                }
-//            }
+            /* strip line feeds while we're at it */
+            if (char == '\r') {
+                i++; continue;
+            }
 
+            /* Always snip at a newline so other modules can more easily handle logic based on line barriers */
+            if (char == '\n') {
+                output += char;
+                i++;
 
-//            if (mxp_mode == 'secure line' && char == '<') {
-//                var substr = rx.slice(i);
-//
-//                var re;
-//                var match;
-//
-//                re = /^<(\S+)([^>]*)>/
-//                if (match) {
-//                    Message.pub('mxp_tag', {tag: match[1]});
-//                    i += match[0].length;
-//                    continue;
-//                }
-////
-////                partial = substr;
-////                partial_mxp = True;
-//                continue;
-//            }
-
-//            if (char != '\x1b') {
-//                if (char == "\n") {
-//                    if (mxp_mode == 'secure line') {
-//                        mxp_mode = 'lock locked';
-//                    }
-//                }
-//                i++;
-//                continue;
-//            }
+                OutputManager.handle_text(output);
+                MXP.handle_newline();
+//                Message.pub('output_data', {data: output});
+                output = '';
+                continue;
+            }
 
             if (char != '\x1b') {
                 output += char;
@@ -117,14 +79,18 @@ var Socket = new (function() {
             /* so we have an escape sequence ... */
             /* we only expect these to be color codes or MXP tags */
             var substr = rx.slice(i);
+            var re;
+            var match;
 
             /* ansi escapes */
-            var re = /^\x1b\[\d(?:;\d+)?m/;
-            var match = re.exec(substr);
+            re = /^\x1b\[\d(?:;\d+)?m/;
+            match = re.exec(substr);
             if (match) {
+                OutputManager.handle_text(output);
+                output = '';
+
                 i += match[0].length;
-                // send along as is, will be converted to html elsewhere
-                output += match[0];
+                OutputManager.handle_ansi_escape(match[0]);
                 continue;
             }
 
@@ -134,6 +100,8 @@ var Socket = new (function() {
             if (match) {
                 // MXP tag. no discerning what it is or if it's opening/closing tag here
                 i += match[0].length;
+                OutputManager.handle_text(output);
+                output = '';
                 Message.pub('mxp_tag', {data: match[1]});
                 continue;
             }
@@ -156,24 +124,12 @@ var Socket = new (function() {
                 continue;
             }
 
-//            re = /^\x1b\[([17])z/
-//            match = re.exec(substr);
-//            if (match) {
-//                i += match[0].length;
-//                switch(match[1]) {
-//                    case '1':
-//                        mxp_mode = 'open_line';
-//                        break;
-//                    case '7':
-//                        mxp_mode = 'lock locked';
-//                        break;
-//                }
-//                continue;
-//            }
-
-            /* must be a partial */
+            /* If we get here, must be a partial sequence
+                Send away everything up to the sequence start and assume it will get completed next time
+                we receive data...
+             */
             if (i != 0) {
-                Message.pub('output_data', {data: output});
+                OutputManager.handle_text(output);
             }
             partial_seq = rx.slice(i);
             console.log("Got partial:");
@@ -182,7 +138,7 @@ var Socket = new (function() {
         }
         if (!partial_seq) {
             /* if partial we already outputed, if not let's hit it */
-            Message.pub("output_data", {data: output});
+            OutputManager.handle_text(output);
         }
     };
 
