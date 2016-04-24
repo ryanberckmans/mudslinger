@@ -10,13 +10,15 @@ var CommandInput = new (function() {
         // nada
     };
 
+
     o.load_layout = function() {
         $('#cmd_input').keydown(o.keydown);
     };
 
     o.send_cmd = function() {
         var cmd = $("#cmd_input").val();
-        Message.pub('send_command', {data: cmd});
+        var alias = AliasManager.check_alias(cmd);
+        Message.pub('send_command', {data: alias});
 
         $('#cmd_input').select();
 

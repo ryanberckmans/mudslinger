@@ -12,19 +12,20 @@ var OutputWin = new (function(){
     }
 
     o.load_layout = function() {
+        o.set_root_elem($('#win_output'));
         if (html) {
             // it's a reload
             $('#win_output').html(html);
             o.scroll_bottom();
             html = null;
-        } else {
-            o.set_root_elem($('#win_output'));
+            console.log('asdfasd');
         }
-
     }
 
     o.handle_send_command = function(msg) {
-        $('#win_output').append(
+        //$('#win_output').append(
+//        o.new_line();
+        o.target.append(
             '<span style="color:yellow">'
             + Util.raw_to_html(msg.data)
             + "<br>"
@@ -32,8 +33,19 @@ var OutputWin = new (function(){
         o.scroll_bottom();
     };
 
+    o.handle_trigger_send_command = function(msg) {
+        o.target.append(
+            '<span style="color:cyan">'
+            + Util.raw_to_html(msg.data)
+            + "<br>"
+            + '</span>');
+        o.scroll_bottom();
+    };
+
     o.handle_telnet_connect = function(msg) {
-        $('#win_output').append(
+        //$('#win_output').append(
+//        o.new_line();
+        o.target.append(
             '<span style="color:cyan">'
             + '[[Telnet connected]]'
             + "<br>"
@@ -42,12 +54,17 @@ var OutputWin = new (function(){
     };
 
     o.handle_telnet_disconnect = function(msg) {
-        $('#win_output').append(
+//        o.new_line();
+        o.target.append(
             '<span style="color:cyan">'
             + "[[Telnet disconnected]]"
             + "<br>"
             + "</span>");
         o.scroll_bottom();
+    };
+
+    o.handle_line = function(line) {
+        TriggerManager.handle_line(line);
     };
 
 //    o.add_text = function(text) {
@@ -107,3 +124,4 @@ Message.sub('load_layout', OutputWin.load_layout);
 Message.sub('telnet_connect', OutputWin.handle_telnet_connect);
 Message.sub('telnet_disconnect', OutputWin.handle_telnet_disconnect);
 Message.sub('send_command', OutputWin.handle_send_command);
+Message.sub('trigger_send_command', OutputWin.handle_trigger_send_command);

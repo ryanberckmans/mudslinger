@@ -8,6 +8,8 @@ var OutputManager = new (function(){
         // Default output to OutputWin
         target_windows = [OutputWin];
         target = OutputWin;
+
+        o.init_color();
     };
 
     // Redirect output to another OutWinBase until it's popped
@@ -35,42 +37,86 @@ var OutputManager = new (function(){
     };
 
     o.handle_text = function(data) {
-        data = Util.raw_to_html(data);
-
         target.add_text(data);
     };
 
+    var colors = {
+        red: {
+            low: 'rgb(187,0,0)',
+            high: 'rgb(256,0,0)'
+        },
+        green: {
+            low: 'rgb(0,187,0)',
+            high: 'rgb(0,256,0)'
+        },
+        yellow: {
+            low: 'rgb(187,187,0)',
+            high: 'rgb(256,256,0)'
+        },
+        blue: {
+            low: 'rgb(0,0,187)',
+            high: 'rgb(0,0,256)'
+        },
+        magenta: {
+            low: 'rgb(187,0,187)',
+            high: 'rgb(256,0,256)'
+        },
+        cyan: {
+            low: 'rgb(0,187,187)',
+            high: 'rgb(0,256,256)'
+        },
+        white: {
+            low: 'rgb(192,192,192)',
+            high: 'rgb(256,256,256)'
+        },
+        black: {
+            low: 'rgb(0,0,0)',
+            high: 'rgb(128,128,128)'
+        }
+    }
+
     var color_seqs = {
-        '\x1b[0;31m': 'rgb(187,  0,  0)', //red
-        '\x1b[0;32m': 'rgb(  0,187,  0)', //green
-        '\x1b[0;33m': 'rgb(187,187,  0)', //yellow
-        '\x1b[0;34m': 'rgb(  0,  0,187)', //blue
-        '\x1b[0;35m': 'rgb(187,  0,187)', //magenta
-        '\x1b[0;36m': 'rgb(  0,187,187)', //cyan
-        '\x1b[0;37m': 'rgb(255,255,255)', //white
-        '\x1b[1;30m': 'rgb(120,120,120)', //grey
-        '\x1b[1;31m': 'rgb(255,  0,  0)', //bright red
-        '\x1b[1;32m': 'rgb(  0,255,  0)', //bright green
-        '\x1b[1;33m': 'rgb(255,255,  0)', //bright yellow
-        '\x1b[1;34m': 'rgb(  0,  0,255)', //bright blue
-        '\x1b[1;35m': 'rgb(255,  0,255)', //bright magenta
-        '\x1b[1;36m': 'rgb(  0,255,255)', //bright cyan
-        '\x1b[1;37m': 'rgb(255,255,255)', //bright white
+        '\x1b[0;31m': [colors.red, 'low'],
+        '\x1b[0;32m': [colors.green, 'low'],
+        '\x1b[0;33m': [colors.yellow, 'low'],
+        '\x1b[0;34m': [colors.blue.low, 'low'],
+        '\x1b[0;35m': [colors.magenta, 'low'],
+        '\x1b[0;36m': [colors.cyan, 'low'],
+        '\x1b[0;37m': [colors.white, 'low'],
+        '\x1b[1;30m': [colors.black, 'high'],
+        '\x1b[1;31m': [colors.red, 'high'],
+        '\x1b[1;32m': [colors.green, 'high'],
+        '\x1b[1;33m': [colors.yellow, 'high'],
+        '\x1b[1;34m': [colors.blue, 'high'],
+        '\x1b[1;35m': [colors.magenta, 'high'],
+        '\x1b[1;36m': [colors.cyan, 'high'],
+        '\x1b[1;37m': [colors.white, 'high']
     }
 
     var fg_color = null;
     var bg_color = null;
+
+    o.init_color = function() {
+        fg_color = [colors.green, 'low'];
+        target.set_fg_color(fg_color[0][fg_color[1]]);
+    };
+
     o.handle_ansi_escape = function(data) {
 
         if (data == '\x1b[0m') {
-            target.set_fg_color(null);
+            fg_color = [colors.green, 'low']
+            bg_color = null;
+            target.set_fg_color(fg_color[0][fg_color[1]]);
             target.set_bg_color(null);
             return;
-        } else if (data == '\x1b[7m') {
+        } else if (data == '\x1b[1m') { // bold
+            fg_color[1] = 'high';
+            target.set_fg_color(fg_color[0][fg_color[1]]);
+        } else if (data == '\x1b[7m') { // reverse
             bg_color = fg_color;
-            fg_color = color_codes.black;
-            target.set_fg_color(fg_color);
-            target.set_bg_color(bg_color);
+            fg_color = [colors.black, 'low']; // black text plz
+            target.set_fg_color(fg_color[0][fg_color[1]]);
+            target.set_bg_color(bg_color[0][bg_color[1]]);
             return;
         } else if (!(data in color_seqs)) {
             console.log("UNEXPECTED ansi sequence: ");
@@ -79,10 +125,10 @@ var OutputManager = new (function(){
         } else {
             var color = color_seqs[data];
             fg_color = color;
-            target.set_fg_color(color);
+            target.set_fg_color(fg_color[0][fg_color[1]]);
             if (bg_color) {
                 bg_color = null;
-                target.set_bg_color(bg_color);
+                target.set_bg_color(bg_color[0][bg_color[1]]);
             }
         }
     };

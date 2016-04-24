@@ -4,11 +4,13 @@
 }
 
 #win_output, #win_chat {
-    font-family:Courier;
-    font-size: 11;
+    font-family:"Courier", monospace;
+    /*font-family:monospace;*/
+    font-size: 10;
     color:white;
     background-color:black;
-    word-wrap:break-word;
+    /*word-wrap:break-word;*/
+    white-space: pre-wrap;
     overflow-y:scroll;
     width:100%;
     height:95%;

@@ -39,6 +39,10 @@ var Socket = new (function() {
         o._socket.emit("send_command", msg);
     };
 
+    o.handle_trigger_send_command = function(msg) {
+        o._socket.emit("send_command", msg);
+    };
+
     var partial_seq;
     o._handle_telnet_data = function(msg) {
         var rx = partial_seq || '';
@@ -64,9 +68,11 @@ var Socket = new (function() {
                 i++;
 
                 OutputManager.handle_text(output);
-                MXP.handle_newline();
-//                Message.pub('output_data', {data: output});
                 output = '';
+
+                // MXP needs to force close any open tags on newline
+                MXP.handle_newline();
+
                 continue;
             }
 
@@ -146,3 +152,4 @@ var Socket = new (function() {
 })();
 
 Message.sub('send_command', Socket.handle_send_command)
+Message.sub('trigger_send_command', Socket.handle_trigger_send_command);

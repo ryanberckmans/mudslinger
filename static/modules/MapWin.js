@@ -87,3 +87,5 @@ var MapWin = new (function() {
 })();
 
 Message.sub("msdp_var", MapWin.handle_msdp_var);
+Message.sub('prepare_reload_layout', MapWin.prepare_reload_layout);
+Message.sub('load_layout', MapWin.load_layout);
