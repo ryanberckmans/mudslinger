@@ -89,7 +89,7 @@ class TelnetConn:
 
             cmd = self.write_queue.get(True, None)
             self.write_lock.acquire()
-            print("locked")
+            # print("locked")
             try:
                 self.telnet.write(str(cmd))
             except:
@@ -98,20 +98,20 @@ class TelnetConn:
                               namespace='telnet')
             finally:
                 self.write_lock.release()
-                print("unlocked")
+                # print("unlocked")
 
     def write(self, cmd):
         self.write_queue.put(cmd)
         #self._write(cmd)
 
     def sock_write(self, cmd):
-        print("sock_write")
+        # print("sock_write")
         self.write_lock.acquire()
-        print("slocked")
+        # print("slocked")
         self.telnet.get_socket().sendall(cmd)
         self.write_lock.release()
-        print("sunlocked")
-    
+        # print("sunlocked")
+
     def handle_msdp(self, msdp):
         env = {'ind': 0}
 
@@ -166,9 +166,9 @@ class TelnetConn:
                       namespace='/telnet')
 
     def write_msdp_var(self, var, val):
-        print("write_msdp_var")
+        # print("write_msdp_var")
         seq = IAC + SB + TelnetOpts.MSDP + MSDP.VAR + str(var) + MSDP.VAL + str(val) + IAC + SE
-        print("Seq:",seq)
+        # print("Seq:",seq)
         self.sock_write(seq)
 
     def _negotiate(self, socket, command, option):
@@ -212,9 +212,6 @@ class TelnetConn:
 
         while True:
             if self.abort:
-                socketio.emit('telnet_disconnect', {},
-                              room=self.room_id,
-                              namespace='/telnet')
                 return
             d = None
             try:
@@ -222,7 +219,7 @@ class TelnetConn:
             except EOFError:
                 socketio.emit('telnet_disconnect', {},
                               room=self.room_id,
-                              namespace='/telnet')
+                              namespace='/telnet' )
                 return
 
             except Exception as ex:
@@ -295,15 +292,17 @@ def ws_open_telnet(message):
 @socketio.on('close_telnet', namespace='/telnet')
 def ws_close_telnet(message):
     print 'closing telnet'
-    tn = telnets.get(request.sid, None)
-    if tn is not None:
-        tn.stop()
-        del telnets[request.sid]
+    tn = telnets.get()
 
 
 @socketio.on('send_command', namespace='/telnet')
 def ws_send_command(message):
     cmd = message['data']
+    if request.sid not in telnets:
+        socketio.emit('telnet_error', {'data': 'Telnet connection does not exist.'},
+                      room=request.sid,
+                      namespace='/telnet')
+
     telnets[request.sid].write(cmd+"\n")
 
 

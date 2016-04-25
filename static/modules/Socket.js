@@ -45,6 +45,8 @@ var Socket = new (function() {
 
     var partial_seq;
     o._handle_telnet_data = function(msg) {
+        console.time("_handle_telnet_data");
+
         var rx = partial_seq || '';
         partial_seq = null;
         rx += msg.data;
@@ -146,10 +148,12 @@ var Socket = new (function() {
             /* if partial we already outputed, if not let's hit it */
             OutputManager.handle_text(output);
         }
+        OutputManager.output_done();
+        console.timeEnd("_handle_telnet_data");
     };
 
     return o;
 })();
 
 Message.sub('send_command', Socket.handle_send_command)
-Message.sub('trigger_send_command', Socket.handle_trigger_send_command);
+Message.sub('trigger_send_command', Socket.handle_trigger_send_command)

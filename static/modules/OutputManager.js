@@ -12,6 +12,10 @@ var OutputManager = new (function(){
         o.init_color();
     };
 
+    o.output_done = function() {
+        target.output_done();
+    };
+
     // Redirect output to another OutWinBase until it's popped
     o.push_target = function(tgt) {
         target_windows.push(tgt);
@@ -79,7 +83,7 @@ var OutputManager = new (function(){
         '\x1b[0;31m': [colors.red, 'low'],
         '\x1b[0;32m': [colors.green, 'low'],
         '\x1b[0;33m': [colors.yellow, 'low'],
-        '\x1b[0;34m': [colors.blue.low, 'low'],
+        '\x1b[0;34m': [colors.blue, 'low'],
         '\x1b[0;35m': [colors.magenta, 'low'],
         '\x1b[0;36m': [colors.cyan, 'low'],
         '\x1b[0;37m': [colors.white, 'low'],
@@ -128,7 +132,7 @@ var OutputManager = new (function(){
             target.set_fg_color(fg_color[0][fg_color[1]]);
             if (bg_color) {
                 bg_color = null;
-                target.set_bg_color(bg_color[0][bg_color[1]]);
+                target.set_bg_color(null);
             }
         }
     };

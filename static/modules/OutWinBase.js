@@ -39,12 +39,16 @@ function OutWinBase() {
 //        console.log(o);
 //        console.log("elem pushed");
 //        console.log(elem);
+        o.write_buffer();
+
         o.target.append(elem);
         o.target_elems.push(elem);
         o.target = elem;
     };
 
     o.pop_elem = function() {
+        o.write_buffer();
+
         var popped = o.target_elems.pop();
 //        console.log(o);
 //        console.log("elem popped");
@@ -56,6 +60,7 @@ function OutWinBase() {
         // default to nothing, main output window will send it to trigger manager
     };
 
+    var append_buffer = '';
     var line_text = ''; // track full text of the line with no escape sequences or tags
     o.add_text = function(txt) {
 //        console.log("add text");
@@ -63,21 +68,33 @@ function OutWinBase() {
 //        console.log(o.target);
         line_text += txt;
         var html = Util.raw_to_html(txt);
-        var span = $(document.createElement('span'));
-        if (o.fg_color) {
-            span.css('color', o.fg_color);
+//        var span = $(document.createElement('span'));
+        var span_text = '<span'
+        var style = ''
+        if (o.fg_color || o.bg_color) {
+            style = ' style="'
+            if (o.fg_color) {
+                style += 'color:' + o.fg_color + ';';
+            }
+            if (o.bg_color) {
+                style += 'background-color:' + o.bg_color + ';';
+            }
+            style += '"';
         }
-        if (o.bg_color) {
-            span.css('background-color', o.bg_color);
-        }
-        span.append(html);
-        span.appendTo(o.target);
+        span_text += style + '>';
+//        if (o.bg_color) {
+//            span.css('background-color', o.bg_color);
+//        }
+        span_text += html;
+        append_buffer += span_text;
 
         if (txt.endsWith('\n')) {
+            o.target.append(append_buffer);
+            append_buffer = '';
             o.new_line();
         }
 
-        o.scroll_bottom();
+        //o.scroll_bottom();
     };
 
     o.new_line = function() {
@@ -97,9 +114,35 @@ function OutWinBase() {
         }
     }
 
-    o.scroll_bottom = function() {
+    o.write_buffer = function() {
+        o.target.append(append_buffer);
+        append_buffer = '';
+    };
+
+    o.output_done = function() {
+        o.write_buffer();
+        o.scroll_bottom();
+    };
+
+    var scroll_requested = false;
+    var _scroll_bottom = function() {
         var elem = o.root_elem;
         elem.scrollTop(elem.prop('scrollHeight'));
+        scroll_requested = false;
+    };
+
+    o.scroll_bottom = function() {
+        if (scroll_requested) {
+            return;
+        }
+        requestAnimationFrame(_scroll_bottom);
+        scroll_requested = true;
+//        //if (true) {return;}
+//        var elem = o.root_elem;
+//        //var scrollHeight = elem.prop('scrollHeight');
+//        console.log("scroll calt");
+////        var scrollHeight = elem[0].scrollHeight;
+//        elem.scrollTop(line_count * 20);
     };
 
     return o;

@@ -63,6 +63,25 @@ var OutputWin = new (function(){
         o.scroll_bottom();
     };
 
+    o.handle_telnet_error= function(msg) {
+//        o.new_line();
+        o.target.append(
+            '<span style="color:red">'
+            + "[[Telnet error]]"
+            + "<br>"
+            + "</span>");
+        o.scroll_bottom();
+    };
+
+    o.handle_ws_error = function(msg) {
+        o.target.append(
+            '<span style="color:red">'
+            + "[[Websocket error]]"
+            + "<br>"
+            + "</span>");
+        o.scroll_bottom();
+    };
+
     o.handle_line = function(line) {
         TriggerManager.handle_line(line);
     };
@@ -123,5 +142,7 @@ Message.sub('prepare_reload_layout', OutputWin.prepare_reload_layout);
 Message.sub('load_layout', OutputWin.load_layout);
 Message.sub('telnet_connect', OutputWin.handle_telnet_connect);
 Message.sub('telnet_disconnect', OutputWin.handle_telnet_disconnect);
+Message.sub('telnet_error', OutputWin.handle_telnet_error);
+Message.sub('ws_error', OutputWin.handle_ws_error);
 Message.sub('send_command', OutputWin.handle_send_command);
 Message.sub('trigger_send_command', OutputWin.handle_trigger_send_command);
