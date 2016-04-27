@@ -1,7 +1,7 @@
 var TriggerManager = new (function(){
     var o = this;
 
-    var triggers = [
+    o.triggers = [
         {
             pattern: 'You gossip',
             regex: false,
@@ -9,10 +9,12 @@ var TriggerManager = new (function(){
         }
     ];
 
+
+
     o.handle_line = function(line) {
 //        console.log("TRIGGER: " + line);
-        for (var i=0; i < triggers.length; i++) {
-            var trig = triggers[i];
+        for (var i=0; i < o.triggers.length; i++) {
+            var trig = o.triggers[i];
             if (line.includes(trig.pattern)) {
                 Message.pub('trigger_send_command', {data: trig.send});
             }

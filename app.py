@@ -88,29 +88,18 @@ class TelnetConn:
                 return
 
             cmd = self.write_queue.get(True, None)
-            self.write_lock.acquire()
-            # print("locked")
-            try:
+            with self.write_lock:
                 self.telnet.write(str(cmd))
-            except:
                 socketio.emit('telnet_error', {},
                               room=self.room_id,
                               namespace='telnet')
-            finally:
-                self.write_lock.release()
-                # print("unlocked")
 
     def write(self, cmd):
         self.write_queue.put(cmd)
-        #self._write(cmd)
 
     def sock_write(self, cmd):
-        # print("sock_write")
-        self.write_lock.acquire()
-        # print("slocked")
-        self.telnet.get_socket().sendall(cmd)
-        self.write_lock.release()
-        # print("sunlocked")
+        with self.write_lock:
+            self.telnet.get_socket().sendall(cmd)
 
     def handle_msdp(self, msdp):
         env = {'ind': 0}
@@ -263,6 +252,11 @@ def ws_save_lua(message):
         return
 
     tn.write_msdp_var("LUA_EDIT", message['data']) 
+
+
+@socketio.on('request_test_socket_response', namespace='/telnet')
+def asdf(message):
+    emit('reply_test_socket_response', {}, namespace='/telnet')
 
 
 @socketio.on('connect', namespace='/telnet')

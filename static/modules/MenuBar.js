@@ -30,6 +30,14 @@ var MenuBar = new (function() {
         Socket.close_telnet();
     };
 
+    click_funcs['Triggers'] = function() {
+        TriggerEditor.show();
+    };
+
+    click_funcs['Test socket response'] = function() {
+        Socket.test_socket_response();
+    };
+
     o.handle_click = function(event) {
         var item = event.args;
         var text = $(item).text();

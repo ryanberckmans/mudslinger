@@ -10,7 +10,6 @@ var CommandInput = new (function() {
         // nada
     };
 
-
     o.load_layout = function() {
         $('#cmd_input').keydown(o.keydown);
     };

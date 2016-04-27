@@ -20,7 +20,7 @@ var Socket = new (function() {
             Message.pub('msdp_var', msg);
         });
 
-        o._socket.on("telnet_data", this._handle_telnet_data);
+        o._socket.on("telnet_data", o._handle_telnet_data);
 
         o._socket.onerror = function(msg) {
             Message.pub("ws_error", msg);
@@ -36,7 +36,10 @@ var Socket = new (function() {
     };
 
     o.handle_send_command = function(msg) {
-        o._socket.emit("send_command", msg);
+        console.time('send_command');
+        o._socket.emit("send_command", msg, function(){
+            console.timeEnd('send_command');
+        });
     };
 
     o.handle_trigger_send_command = function(msg) {
@@ -149,7 +152,17 @@ var Socket = new (function() {
             OutputManager.handle_text(output);
         }
         OutputManager.output_done();
-        console.timeEnd("_handle_telnet_data");
+//        console.timeEnd("_handle_telnet_data");
+//        requestAnimationFrame(function() {
+            console.timeEnd("_handle_telnet_data");
+//        });
+    };
+
+    o.test_socket_response = function() {
+        console.time('test_socket_response');
+        o._socket.emit('request_test_socket_response', {}, function() {
+            console.timeEnd('test_socket_response');
+        });
     };
 
     return o;
