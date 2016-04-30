@@ -60,7 +60,7 @@ var MapWin = new (function() {
         output += '<rect x="25" y="25" width="50" height="50" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)">';
 
 //        console.log(output);
-        $('#svg_map').html(output);
+        $('#svg_cont').html('<center><svg height="100%" width="100%">' + output + '<</svg></center>');
     };
 
     o.update_room_name = function() {
@@ -74,7 +74,13 @@ var MapWin = new (function() {
                 o.update_room_name();
                 break;
             case 'ROOM_EXITS':
-                o.dirs = $.extend({}, msg.val);
+                var val;
+                if (msg.val == '') {
+                    val = {};
+                } else {
+                    val = msg.val;
+                }
+                o.dirs = $.extend({}, val);
                 o.update_grid();
                 break;
             default:
