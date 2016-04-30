@@ -30,6 +30,10 @@ var MenuBar = new (function() {
         Socket.close_telnet();
     };
 
+    click_funcs['Aliases'] = function() {
+        AliasEditor.show();
+    };
+
     click_funcs['Triggers'] = function() {
         TriggerEditor.show();
     };

@@ -17,7 +17,12 @@ var CommandInput = new (function() {
     o.send_cmd = function() {
         var cmd = $("#cmd_input").val();
         var alias = AliasManager.check_alias(cmd);
-        Message.pub('send_command', {data: alias});
+        if (!alias) {
+            Message.pub('send_command', {data: cmd});
+        } else {
+            Message.pub('alias_send_commands', {orig: cmd, cmds: alias.replace('\r', '').split('\n')});
+        }
+
 
         $('#cmd_input').select();
 

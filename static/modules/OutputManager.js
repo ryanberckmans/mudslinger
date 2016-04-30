@@ -37,7 +37,7 @@ var OutputManager = new (function(){
     };
 
     o.pop_mxp_elem = function() {
-        target.pop_elem();
+        return target.pop_elem();
     };
 
     o.handle_text = function(data) {

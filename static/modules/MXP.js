@@ -73,6 +73,57 @@ var MXP = new (function(){
             return true;
         }
     });
+    tag_handlers.push(function(tag) {
+        var re = /^<send/i;
+        var match = re.exec(tag);
+        if (match) {
+            /* match with explicit href */
+            var tag_re = /^<send (?:href=)?['"](.*)['"]>$/i;
+            var tag_m = tag_re.exec(tag);
+            if (tag_m) {
+                var cmd = tag_m[1];
+                var html_tag = '<a href="#" title="' + cmd + '">';
+                var elem = $(html_tag);
+                elem.click(function() {
+                    Message.pub('send_command', {data: tag_m[1]});
+                });
+                open_tags.push('send');
+                OutputManager.push_mxp_elem(elem);
+                return true;
+            }
+
+            /* just the tag */
+            tag_re = /^<send>$/i;
+            tag_m = tag_re.exec(tag);
+            if (tag_m) {
+                open_tags.push('send');
+                var html_tag = '<a href="#">';
+                var elem = $(html_tag);
+                OutputManager.push_mxp_elem(elem);
+                return true;
+            }
+        }
+
+        re = /^<\/send>/i;
+        match = re.exec(tag);
+        if (match) {
+            if (open_tags[open_tags.length - 1] != 'send') {
+                console.log("Got closing send tag with no opening tag.");
+            } else {
+                open_tags.pop();
+                var elem = OutputManager.pop_mxp_elem();
+                if (!elem[0].hasAttribute('title')) {
+                    /* didn't have explicit href so we need to do it here */
+                    var txt = elem.text();
+                    elem[0].setAttribute('title', txt);
+                    elem.click(function() {
+                        Message.pub('send_command', {data: txt});
+                    })
+                }
+            }
+            return true;
+        }
+    });
 
     o.handle_mxp_tag = function(msg) {
         var handled = false;

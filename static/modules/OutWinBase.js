@@ -54,6 +54,7 @@ function OutWinBase() {
 //        console.log("elem popped");
 //        console.log(popped);
         o.target = o.target_elems[o.target_elems.length-1];
+        return popped;
     };
 
     o.handle_line = function(line) {

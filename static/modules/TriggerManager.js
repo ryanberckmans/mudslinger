@@ -14,16 +14,12 @@ var TriggerManager = new (function(){
             if (!trig.regex) {
                 if (line.includes(trig.pattern)) {
                     var cmds = trig.value.replace('\r', '').split('\n');
-                    for (var j=0; j < cmds.length; j++) {
-                        Message.pub('trigger_send_command', {data: cmds[j]});
-                    }
+                    Message.pub('trigger_send_commands', {cmds: cmds});
                 }
             } else {
                 if (line.match(trig.pattern)) {
                     var cmds = trig.value.replace('\r', '').split('\n');
-                    for (var j=0; j < cmds.length; j++) {
-                        Message.pub('trigger_send_command', {data: cmds[j]});
-                    }
+                    Message.pub('trigger_send_commands', {cmds: cmds});
                 }
             }
         }

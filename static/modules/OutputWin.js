@@ -33,12 +33,36 @@ var OutputWin = new (function(){
         o.scroll_bottom();
     };
 
-    o.handle_trigger_send_command = function(msg) {
-        o.target.append(
-            '<span style="color:cyan">'
-            + Util.raw_to_html(msg.data)
-            + "<br>"
-            + '</span>');
+    o.handle_trigger_send_commands = function(msg) {
+        var html = '<span style="color:cyan">';
+
+        for (var i=0; i < msg.cmds.length; i++) {
+            if (i >= 3) {
+                html += '...<br>';
+                break;
+            } else {
+                html += Util.raw_to_html(msg.cmds[i]) + "<br>";
+            }
+        }
+        o.target.append(html);
+        o.scroll_bottom();
+    };
+
+    o.handle_alias_send_commands = function(msg) {
+        var html = '<span style="color:yellow">'
+        html += Util.raw_to_html(msg.orig);
+        html += '</span><span style="color:cyan"> --> ';
+
+        for (var i=0; i < msg.cmds.length; i++) {
+            if (i >= 3) {
+                html += '...<br>';
+                break;
+            } else {
+                html += Util.raw_to_html(msg.cmds[i]) + "<br>";
+            }
+        }
+
+        o.target.append(html);
         o.scroll_bottom();
     };
 
@@ -86,55 +110,6 @@ var OutputWin = new (function(){
         TriggerManager.handle_line(line);
     };
 
-//    o.add_text = function(text) {
-//        curr_elem = $(document.createElement('span'));
-//        if (bg_color) {
-//            curr_elem.css('background-color', bg_color);
-//        }
-//        if (fg_color) {
-//            curr_elem.css('color', fg_color);
-//        }
-//        curr_elem.append(text);
-//        $('#win_output').append(curr_elem);
-//        o.scroll_bottom();
-//    };
-
-//    o.set_fg_color = function(color) {
-//        fg_color = color;
-//    };
-//
-//    o.set_bg_color = function(color) {
-//        bg_color = color;
-//    };
-
-//    o.handle_output_data = function(msg) {
-//        if (gag_output) {
-//            return;
-//        }
-//        var rx = msg.data;
-//
-//        $("#win_output").append(Util.raw_to_html(rx));
-////        outlen += rx.length;
-////
-////        if (outlen >= 1000000) {
-////            //$("#win_output").children(":lt(1000)").remove();
-////            //console.log("outlen: " + outlen);
-////            $("#win_output *").slice(0, 10000).remove();
-////            outlen = $("#win_output").html().length;
-////            //console.log("trimmmed");
-////            //console.log("new outlen: " + outlen);
-////        }
-//
-//        o.scroll_bottom();
-//    };
-//
-//    o.handle_output_html = function(msg) {
-//        if (gag_output) {
-//            return;
-//        }
-//        $('#win_output').append(msg.data);
-//    };
-
     return o;
 })();
 
@@ -145,4 +120,5 @@ Message.sub('telnet_disconnect', OutputWin.handle_telnet_disconnect);
 Message.sub('telnet_error', OutputWin.handle_telnet_error);
 Message.sub('ws_error', OutputWin.handle_ws_error);
 Message.sub('send_command', OutputWin.handle_send_command);
-Message.sub('trigger_send_command', OutputWin.handle_trigger_send_command);
+Message.sub('trigger_send_commands', OutputWin.handle_trigger_send_commands);
+Message.sub('alias_send_commands', OutputWin.handle_alias_send_commands);

@@ -43,8 +43,16 @@ var Socket = new (function() {
         });
     };
 
-    o.handle_trigger_send_command = function(msg) {
-        o._socket.emit("send_command", msg);
+    o.handle_trigger_send_commands = function(msg) {
+        for (var i=0; i < msg.cmds.length; i++) {
+            o._socket.emit("send_command", {data: msg.cmds[i]});
+        }
+    };
+
+    o.handle_alias_send_commands = function(msg) {
+        for (var i=0; i < msg.cmds.length; i++) {
+            o._socket.emit("send_command", {data: msg.cmds[i]});
+        }
     };
 
     var partial_seq;
@@ -170,5 +178,6 @@ var Socket = new (function() {
     return o;
 })();
 
-Message.sub('send_command', Socket.handle_send_command)
-Message.sub('trigger_send_command', Socket.handle_trigger_send_command)
+Message.sub('send_command', Socket.handle_send_command);
+Message.sub('trigger_send_commands', Socket.handle_trigger_send_commands);
+Message.sub('alias_send_commands', Socket.handle_alias_send_commands);

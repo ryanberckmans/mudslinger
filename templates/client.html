@@ -27,6 +27,8 @@
 
   <script src="{{url_for('static', filename='modules/Message.js')}}"></script>
   <script src="{{url_for('static', filename='modules/Util.js')}}"></script>
+  <script src="{{url_for('static', filename='modules/TrigAlEditBase.js')}}"></script>
+  <script src="{{url_for('static', filename='modules/AliasEditor.js')}}"></script>
   <script src="{{url_for('static', filename='modules/TriggerEditor.js')}}"></script>
   <script src="{{url_for('static', filename='modules/AliasManager.js')}}"></script>
   <script src="{{url_for('static', filename='modules/TriggerManager.js')}}"></script>
@@ -55,12 +57,13 @@
       </ul>
     </li>
     <li>Reload Layout</li>
+    <li>Aliases</li>
     <li>Triggers</li>
-    <li>Debug
-      <ul>
-        <li>Test socket response</li>
-      </ul>
-    </li>
+    <!--<li>Debug-->
+      <!--<ul>-->
+        <!--<li>Test socket response</li>-->
+      <!--</ul>-->
+    <!--</li>-->
   </ul>
 </div>
 <div id="main_vert_split">
@@ -126,8 +129,9 @@
       </div>
       <!--right pane-->
       <div>
-        <input type="text" id="trig_pattern" style="height:5%" disabled>
-        Regex</span><br>
+        Pattern:<br>
+        <input type="text" id="trig_pattern" style="height:5%" disabled><br>
+        Regex<br>
         <input type="checkbox" id="trig_regex_checkbox" style="height:5%" disabled>
 
 
@@ -135,8 +139,41 @@
           <button id="trig_save_button" style="height:5%" disabled>SAVE</button>
           <button id="trig_cancel_button" style="height:5%" disabled>CANCEL</button>
         </div>
-
+        Value:<br>
         <textarea id="trig_text_area" style="height:85%;width:100%" disabled></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+<!--AliasEditor-->
+<div id="win_alias_edit" style="display:none">
+  <!--header-->
+  <div>ALIASES</div>
+  <!--content-->
+  <div>
+    <div id="alias_main_split">
+      <!--left pane-->
+      <div>
+        <div style="height:5%">
+          <button id="alias_new_button">NEW</button>
+          <button id="alias_delete_button">DELETE</button>
+        </div>
+        <select id="alias_list_box" size="100%" style="height:95%"></select>
+      </div>
+      <!--right pane-->
+      <div>
+        Pattern:<br>
+        <input type="text" id="alias_pattern" style="height:5%" disabled><br>
+        Regex<br>
+        <input type="checkbox" id="alias_regex_checkbox" style="height:5%" disabled>
+
+        <div>
+          <button id="alias_save_button" style="height:5%" disabled>SAVE</button>
+          <button id="alias_cancel_button" style="height:5%" disabled>CANCEL</button>
+        </div>
+
+        Value:<br>
+        <textarea id="alias_text_area" style="height:85%;width:100%" disabled></textarea>
       </div>
     </div>
   </div>

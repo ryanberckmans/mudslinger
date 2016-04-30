@@ -102,32 +102,11 @@
 #cmd_input {
     width: 100%;
 }
-
-#trigger_win {
-    display: none;
-    width: 150px;
-    height: 150px;
-    padding: 0.5em;
-    background-color:black;
-    color:red;
-    border-color: white;
-    border-style: solid;
-    border-width: 2px;
-}
-
-#trig_pattern {
+#trig_pattern, #alias_pattern {
     width: 100%;
 }
 
-#trig_list_box {
+#trig_list_box, #alias_list_box {
     width: 100%;
     height: 100%;
-}
-
-#trig_text_area {
-    width: auto;
-    height: auto;
-}
-
-#trig_buttons {
 }
