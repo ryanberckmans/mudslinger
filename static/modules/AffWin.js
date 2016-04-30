@@ -30,7 +30,13 @@ var AffWin = new (function(){
         if (msg.var != "AFFECTS") {
             return;
         }
-        o.show_affects(msg.val)
+        var val;
+        if (msg.val == '') {
+            val = [];
+        } else {
+            val = msg.val;
+        }
+        o.show_affects(val);
     };
 
     return o;

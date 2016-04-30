@@ -71,7 +71,6 @@ var Socket = new (function() {
         partial_seq = null;
         rx += msg.data;
 
-
         var output = '';
         var rx_len = rx.length;
         var max_i = rx.length-1;
