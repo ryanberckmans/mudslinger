@@ -37,6 +37,7 @@ var Socket = new (function() {
 
     o.handle_send_command = function(msg) {
         console.time('send_command');
+        console.time('command_resp');
         o._socket.emit("send_command", msg, function(){
             console.timeEnd('send_command');
         });
@@ -48,6 +49,7 @@ var Socket = new (function() {
 
     var partial_seq;
     o._handle_telnet_data = function(msg) {
+        console.timeEnd('command_resp');
         console.time("_handle_telnet_data");
 
         var rx = partial_seq || '';

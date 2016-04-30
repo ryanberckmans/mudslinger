@@ -190,8 +190,8 @@ class TelnetConn:
 
     def _listen(self):
         self.ttype_index = 0
-        # self.telnet=Telnet('aarchonmud.com', 7000)
-        self.telnet = Telnet('rooflez.com', 7101)
+        self.telnet=Telnet('aarchonmud.com', 7000)
+        # self.telnet = Telnet('rooflez.com', 7101)
 
         self.telnet.set_option_negotiation_callback(self._negotiate)
 
@@ -423,5 +423,5 @@ if __name__ == "__main__":
     # app.debug=True
     # app.run('0.0.0.0')
     # db.create_all()
-    socketio.run(app, '0.0.0.0', port=5000)
+    socketio.run(app, '0.0.0.0', port=5000, worker=1)
     # db.session.commit()

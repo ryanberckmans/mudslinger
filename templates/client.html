@@ -118,19 +118,25 @@
     <div id="trig_main_split">
       <!--left pane-->
       <div>
-        <div id="trig_list_box"></div>
+        <div style="height:5%">
+          <button id="trig_new_button">NEW</button>
+          <button id="trig_delete_button">DELETE</button>
+        </div>
+        <select id="trig_list_box" size="100%" style="height:95%"></select>
       </div>
       <!--right pane-->
       <div>
-        <input type="text" id="trig_pattern">
-        <input type="checkbox" id="trig_regex_checkbox">Regex<br>
+        <input type="text" id="trig_pattern" style="height:5%" disabled>
+        Regex</span><br>
+        <input type="checkbox" id="trig_regex_checkbox" style="height:5%" disabled>
 
-        <div id="trig_buttons">
-          <button id="trig_save">SAVE</button>
-          <button id="trig_cancel">CANCEL</button>
+
+        <div>
+          <button id="trig_save_button" style="height:5%" disabled>SAVE</button>
+          <button id="trig_cancel_button" style="height:5%" disabled>CANCEL</button>
         </div>
 
-        <textarea id="trig_text_area"></textarea>
+        <textarea id="trig_text_area" style="height:85%;width:100%" disabled></textarea>
       </div>
     </div>
   </div>

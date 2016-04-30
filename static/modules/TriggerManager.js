@@ -1,25 +1,42 @@
 var TriggerManager = new (function(){
     var o = this;
 
-    o.triggers = [
-        {
-            pattern: 'You gossip',
-            regex: false,
-            send: 'dance'
-        }
-    ];
+    o.triggers = null;
 
-
+    o.save_triggers = function() {
+        localStorage.setItem('triggers', JSON.stringify(o.triggers));
+    };
 
     o.handle_line = function(line) {
 //        console.log("TRIGGER: " + line);
         for (var i=0; i < o.triggers.length; i++) {
             var trig = o.triggers[i];
-            if (line.includes(trig.pattern)) {
-                Message.pub('trigger_send_command', {data: trig.send});
+            if (!trig.regex) {
+                if (line.includes(trig.pattern)) {
+                    var cmds = trig.value.replace('\r', '').split('\n');
+                    for (var j=0; j < cmds.length; j++) {
+                        Message.pub('trigger_send_command', {data: cmds[j]});
+                    }
+                }
+            } else {
+                if (line.match(trig.pattern)) {
+                    var cmds = trig.value.replace('\r', '').split('\n');
+                    for (var j=0; j < cmds.length; j++) {
+                        Message.pub('trigger_send_command', {data: cmds[j]});
+                    }
+                }
             }
         }
     };
 
     return o;
 })();
+
+$(document).ready(function() {
+    var saved_triggers = localStorage.getItem("triggers");
+    if (!saved_triggers) {
+        TriggerManager.triggers = [];
+    } else {
+        TriggerManager.triggers = JSON.parse(saved_triggers);
+    }
+});

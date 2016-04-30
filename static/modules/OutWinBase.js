@@ -126,9 +126,11 @@ function OutWinBase() {
 
     var scroll_requested = false;
     var _scroll_bottom = function() {
+        console.time("_scroll_bottom");
         var elem = o.root_elem;
         elem.scrollTop(elem.prop('scrollHeight'));
         scroll_requested = false;
+        console.timeEnd("_scroll_bottom");
     };
 
     o.scroll_bottom = function() {
