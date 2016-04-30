@@ -95,7 +95,7 @@ function OutWinBase() {
             o.new_line();
         }
 
-        //o.scroll_bottom();
+//        o.scroll_bottom();
     };
 
     o.new_line = function() {

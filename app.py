@@ -3,7 +3,7 @@ import traceback
 from Queue import Queue
 import time
 import threading
-from telnetlib import Telnet, IAC, DO, WILL, SB, SE
+from telnetlib import Telnet, IAC, DO, WILL, WONT, SB, SE
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, g
 from flask.ext.socketio import SocketIO, emit
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -163,14 +163,18 @@ class TelnetConn:
     def _negotiate(self, socket, command, option):
         # print 'Got ',ord(command),ord(option)
         if command == WILL:
-            if option == TelnetOpts.MSDP:
+            if option == TelnetOpts.ECHO:
+                socketio.emit('server_echo', {'data': True}, room=self.room_id, namespace="/telnet")
+            elif option == TelnetOpts.MSDP:
                 self.sock_write(IAC + DO + TelnetOpts.MSDP)
                 
                 self.write_msdp_var('CLIENT_ID', "ArcWeb");
                 for var_name in self.MSDP_VARS:
                     self.write_msdp_var("REPORT", var_name)
-            
-        if command == DO:
+        elif command == WONT:
+            if option == TelnetOpts.ECHO:
+                socketio.emit('server_echo', {'data': False}, room=self.room_id, namespace="/telnet")
+        elif command == DO:
             if option == TelnetOpts.TTYPE:
                 self.sock_write(IAC + WILL + TelnetOpts.TTYPE)
             elif option == TelnetOpts.MXP:
@@ -399,6 +403,7 @@ def before_request():
 
 
 class TelnetOpts(object):
+    ECHO = chr(1)
     TTYPE = chr(24)
     MSDP = chr(69)
     MXP = chr(91)

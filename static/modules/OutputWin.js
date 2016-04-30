@@ -22,12 +22,23 @@ var OutputWin = new (function(){
         }
     }
 
+    var echo = true;
+    o.handle_set_echo = function(msg) {
+        echo = msg.data;
+    };
+
     o.handle_send_command = function(msg) {
         //$('#win_output').append(
 //        o.new_line();
+        var cmd;
+        if (echo) {
+            cmd = msg.data;
+        } else {
+            cmd = '*'.repeat(msg.data.length);
+        }
         o.target.append(
             '<span style="color:yellow">'
-            + Util.raw_to_html(msg.data)
+            + Util.raw_to_html(cmd)
             + "<br>"
             + '</span>');
         o.scroll_bottom();
@@ -122,3 +133,4 @@ Message.sub('ws_error', OutputWin.handle_ws_error);
 Message.sub('send_command', OutputWin.handle_send_command);
 Message.sub('trigger_send_commands', OutputWin.handle_trigger_send_commands);
 Message.sub('alias_send_commands', OutputWin.handle_alias_send_commands);
+Message.sub('set_echo', OutputWin.handle_set_echo);

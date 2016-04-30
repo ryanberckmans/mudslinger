@@ -22,8 +22,6 @@ var AliasManager = new (function(){
 
 $(document).ready(function() {
     var saved_aliases = localStorage.getItem("aliases");
-    console.log(saved_aliases);
-    console.log(typeof(saved_aliases));
     if (!saved_aliases) {
         AliasManager.aliases = [];
     } else {

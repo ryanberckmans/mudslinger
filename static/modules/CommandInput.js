@@ -4,14 +4,23 @@ var CommandInput = new (function() {
     var cmd_history = [];
     var cmd_index = -1;
 
-    o.blah = 3;
-
     o.prepare_reload_layout = function() {
         // nada
     };
 
     o.load_layout = function() {
         $('#cmd_input').keydown(o.keydown);
+    };
+
+    var echo = true;
+    o.handle_set_echo = function(msg) {
+        echo = msg.data;
+
+        if (echo) {
+            $('#cmd_input')[0].setAttribute('type', 'text');
+        } else {
+            $('#cmd_input')[0].setAttribute('type', 'password');
+        }
     };
 
     o.send_cmd = function() {
@@ -23,7 +32,6 @@ var CommandInput = new (function() {
             Message.pub('alias_send_commands', {orig: cmd, cmds: alias.replace('\r', '').split('\n')});
         }
 
-
         $('#cmd_input').select();
 
         if (cmd.trim() == '') {
@@ -34,8 +42,14 @@ var CommandInput = new (function() {
             return;
         }
 
-        cmd_history.push(cmd);
-        cmd_history.slice(-20);
+        if (echo) {
+            cmd_history.push(cmd);
+            o.save_history();
+            cmd_history.slice(-20);
+        }
+        else {
+            $('#cmd_input').val('');
+        }
         cmd_index = -1;
     };
 
@@ -69,8 +83,24 @@ var CommandInput = new (function() {
         }
     };
 
+    o.save_history = function() {
+        localStorage.setItem('cmd_history', JSON.stringify(cmd_history));
+    };
+
+    o.load_history = function() {
+        var cmds = localStorage.getItem('cmd_history');
+        if (cmds) {
+            cmd_history = JSON.parse(cmds);
+        }
+    };
+
     return o;
 })();
 
 Message.sub('prepare_reload_layout', CommandInput.prepare_reload_layout);
 Message.sub('load_layout', CommandInput.load_layout);
+Message.sub('set_echo', CommandInput.handle_set_echo);
+
+$(document).ready(function() {
+    CommandInput.load_history();
+});

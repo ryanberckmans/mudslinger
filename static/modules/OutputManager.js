@@ -25,6 +25,7 @@ var OutputManager = new (function(){
     };
 
     o.pop_target = function() {
+        target.output_done();
         target_windows.pop();
         target = target_windows[target_windows.length-1];
 //        console.log("target popped, new target");
