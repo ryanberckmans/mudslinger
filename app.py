@@ -57,12 +57,13 @@ class TelnetConn:
         'AFFECTS',
         'LUA_EDIT']
 
-    def __init__(self, room_id):
+    def __init__(self, room_id, player_ip):
         self.telnet = None
         self.read_thread = None
         self.write_thread = None
 
         self.room_id = room_id
+        self.player_ip = player_ip
         self.write_lock = threading.Lock()
         self.ttype_index = 0
         self.write_queue = Queue()
@@ -184,18 +185,20 @@ class TelnetConn:
             # print 'got',[ord(x) for x in d]
             
             if d == TelnetOpts.TTYPE + TelnetSubNeg.SEND:
-                self.sock_write(IAC + SB + TelnetOpts.TTYPE + TelnetSubNeg.IS + self.ttypes[self.ttype_index] + IAC + SE)
-                self.ttype_index += 1
-                if self.ttype_index > len(self.ttypes)-1:
-                    self.ttype_index = len(self.ttypes)-1
+                if self.ttype_index >= len(self.ttypes):  # We already sent them all, so send the player IP
+                    ttype = self.player_ip
+                else:
+                    ttype = self.ttypes[self.ttype_index]
+                    self.ttype_index += 1
+                self.sock_write(IAC + SB + TelnetOpts.TTYPE + TelnetSubNeg.IS + ttype + IAC + SE)
             elif d[0] == TelnetOpts.MSDP:
                 # print 'get the msdp'
                 self.handle_msdp(d[1:])
 
     def _listen(self):
         self.ttype_index = 0
-        self.telnet=Telnet('aarchonmud.com', 7000)
-        # self.telnet = Telnet('rooflez.com', 7101)
+        # self.telnet = Telnet('aarchonmud.com', 7000)
+        self.telnet = Telnet('rooflez.com', 7101)
 
         self.telnet.set_option_negotiation_callback(self._negotiate)
 
@@ -205,6 +208,9 @@ class TelnetConn:
 
         while True:
             if self.abort:
+                socketio.emit('telnet_disconnect', {},
+                              room=self.room_id,
+                              namespace='/telnet')
                 return
             d = None
             try:
@@ -212,7 +218,7 @@ class TelnetConn:
             except EOFError:
                 socketio.emit('telnet_disconnect', {},
                               room=self.room_id,
-                              namespace='/telnet' )
+                              namespace='/telnet')
                 return
 
             except Exception as ex:
@@ -282,7 +288,7 @@ def ws_disconnect():
 @socketio.on('open_telnet', namespace='/telnet')
 def ws_open_telnet(message):
     print 'opening telnet'
-    tn = TelnetConn(request.sid)
+    tn = TelnetConn(request.sid, request.remote_addr)
     tn.start()
     telnets[request.sid] = tn
 
@@ -290,7 +296,10 @@ def ws_open_telnet(message):
 @socketio.on('close_telnet', namespace='/telnet')
 def ws_close_telnet(message):
     print 'closing telnet'
-    tn = telnets.get()
+    tn = telnets.get(request.sid, None)
+    if tn is not None:
+        tn.stop()
+        del telnets[request.sid]
 
 
 @socketio.on('send_command', namespace='/telnet')
