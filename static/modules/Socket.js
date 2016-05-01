@@ -4,6 +4,14 @@ var Socket = new (function() {
     o.open = function() {
         o._socket = io.connect('http://' + document.domain + ':' + location.port + '/telnet');
 
+        o._socket.on('connect', function(msg) {
+            Message.pub('ws_connect', {});
+        });
+
+        o._socket.on('disconnect', function(msg) {
+            Message.pub('ws_disconnect', {});
+        });
+
         o._socket.on('server_echo', function(msg) {
             /* server echo true means we should NOT echo */
 //            console.log("echo");

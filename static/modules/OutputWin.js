@@ -81,8 +81,6 @@ var OutputWin = new (function(){
     };
 
     o.handle_telnet_connect = function(msg) {
-        //$('#win_output').append(
-//        o.new_line();
         o.target.append(
             '<span style="color:cyan">'
             + '[[Telnet connected]]'
@@ -90,19 +88,25 @@ var OutputWin = new (function(){
             + '</span>');
         o.scroll_bottom();
     };
-
-    o.handle_telnet_disconnect = function(msg) {
-//        o.new_line();
+    o.handle_ws_connect = function(msg) {
         o.target.append(
             '<span style="color:cyan">'
-            + "[[Telnet disconnected]]"
+            + '[[Websocket connected]]'
+            + "<br>"
+            + '</span>');
+        o.scroll_bottom();
+    };
+
+    o.handle_ws_disconnect = function(msg) {
+        o.target.append(
+            '<span style="color:cyan">'
+            + "[[Websocket disconnected]]"
             + "<br>"
             + "</span>");
         o.scroll_bottom();
     };
 
     o.handle_telnet_error= function(msg) {
-//        o.new_line();
         o.target.append(
             '<span style="color:red">'
             + "[[Telnet error]]"
@@ -120,6 +124,18 @@ var OutputWin = new (function(){
         o.scroll_bottom();
     };
 
+    o.handle_window_error = function(message, source, lineno, colno, error) {
+        o.target.append(
+            '<span style="color:red">'
+            + "[[Web Client Error<br>"
+            + message + "<br>"
+            + source + "<br>"
+            + lineno + "<br>"
+            + colno + "<br>"
+        );
+        o.scroll_bottom();
+    };
+
     o.handle_line = function(line) {
         TriggerManager.handle_line(line);
     };
@@ -133,7 +149,13 @@ Message.sub('telnet_connect', OutputWin.handle_telnet_connect);
 Message.sub('telnet_disconnect', OutputWin.handle_telnet_disconnect);
 Message.sub('telnet_error', OutputWin.handle_telnet_error);
 Message.sub('ws_error', OutputWin.handle_ws_error);
+Message.sub('ws_connect', OutputWin.handle_ws_connect);
+Message.sub('ws_disconnect', OutputWin.handle_ws_disconnect);
 Message.sub('send_command', OutputWin.handle_send_command);
 Message.sub('trigger_send_commands', OutputWin.handle_trigger_send_commands);
 Message.sub('alias_send_commands', OutputWin.handle_alias_send_commands);
 Message.sub('set_echo', OutputWin.handle_set_echo);
+
+$(document).ready(function() {
+    window.onerror = OutputWin.handle_window_error;
+});
