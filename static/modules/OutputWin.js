@@ -30,6 +30,9 @@ var OutputWin = new (function(){
     o.handle_send_command = function(msg) {
         //$('#win_output').append(
 //        o.new_line();
+        if (msg.no_print) {
+            return;
+        }
         var cmd;
         if (echo) {
             cmd = msg.data;

@@ -108,7 +108,7 @@ var OutputManager = new (function(){
 
     o.handle_ansi_escape = function(data) {
 
-        if (data == '\x1b[0m') {
+        if (data == '\x1b[0m' || data == '\x1b[0;00m') {
             fg_color = [colors.green, 'low']
             bg_color = null;
             target.set_fg_color(fg_color[0][fg_color[1]]);

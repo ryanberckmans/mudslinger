@@ -110,7 +110,7 @@ var Socket = new (function() {
             var match;
 
             /* ansi escapes */
-            re = /^\x1b\[\d(?:;\d+)?m/;
+            re = /^\x1b\[\d+(?:;\d+)?m/;
             match = re.exec(substr);
             if (match) {
                 OutputManager.handle_text(output);
@@ -187,3 +187,4 @@ var Socket = new (function() {
 Message.sub('send_command', Socket.handle_send_command);
 Message.sub('trigger_send_commands', Socket.handle_trigger_send_commands);
 Message.sub('alias_send_commands', Socket.handle_alias_send_commands);
+

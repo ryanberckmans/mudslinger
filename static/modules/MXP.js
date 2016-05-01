@@ -5,6 +5,19 @@ var MXP = new (function(){
     var tag_handlers = [];
 
     tag_handlers.push(function(tag) {
+        var re = /^<version>$/i;
+        var match = re.exec(tag);
+        if (match) {
+            Message.pub('send_command', {
+               data: '\x1b[1z<VERSION CLIENT=ArcWeb MXP=0.01>', // using closing line tag makes it print twice...
+               no_print: true
+            });
+            return true;
+        }
+        return false;
+    });
+
+    tag_handlers.push(function(tag) {
         /* handle dest tags */
         var re = /^<dest comm>$/i;
         var match = re.exec(tag);
