@@ -132,6 +132,7 @@ var OutputWin = new (function(){
             + source + "<br>"
             + lineno + "<br>"
             + colno + "<br>"
+            + ']]'
         );
         o.scroll_bottom();
     };

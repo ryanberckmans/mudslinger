@@ -1,6 +1,13 @@
 var TriggerEditor = new (function() {
     var o = new TrigAlEditBase();
 
+    o.default_value =
+         "Put the trigger value here.\n"
+        +"This can be 1 or more commands, including match parameters (e.g. $1) for regex triggers.\n\n"
+        +"For regex triggers, use ${groupnum} to represent the matches from your regex pattern.\n"
+        +"Example: Trigger pattern '(\\w+) has arrived.', trigger value 'say Hi $1', "
+        +"then if 'Vodur has arrived' comes through, 'say hi Vodur' will be sent.";
+
     o.get_elements = function() {
         o.win = $('#win_trig_edit');
         o.list_box = $('#trig_list_box');

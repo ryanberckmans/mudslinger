@@ -11,13 +11,22 @@ var TriggerManager = new (function(){
 //        console.log("TRIGGER: " + line);
         for (var i=0; i < o.triggers.length; i++) {
             var trig = o.triggers[i];
-            if (!trig.regex) {
-                if (line.includes(trig.pattern)) {
-                    var cmds = trig.value.replace('\r', '').split('\n');
-                    Message.pub('trigger_send_commands', {cmds: cmds});
+            if (trig.regex) {
+                var match = line.match(trig.pattern);
+                if (!match) {
+                    continue;
                 }
+
+                var value = trig.value;
+
+                value = value.replace(/\$(\d+)/g, function(m, d) {
+                    return match[parseInt(d)] || '';
+                });
+
+                var cmds = value.replace('\r', '').split('\n');
+                Message.pub('trigger_send_commands', {cmds: cmds});
             } else {
-                if (line.match(trig.pattern)) {
+                if (line.includes(trig.pattern)) {
                     var cmds = trig.value.replace('\r', '').split('\n');
                     Message.pub('trigger_send_commands', {cmds: cmds});
                 }

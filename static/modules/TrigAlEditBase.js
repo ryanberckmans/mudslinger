@@ -71,8 +71,8 @@ var TrigAlEditBase = function() {
     var handle_new_button_click = function() {
         o.set_editor_disabled(false);
         o.select_none();
-        o.pattern.val("INPUT PATTERN HERE");
-        o.text_area.val("INPUT VALUE HERE");
+        o.pattern.val(o.default_pattern || "INPUT PATTERN HERE");
+        o.text_area.val(o.default_value || "INPUT VALUE HERE");
     };
 
     var handle_delete_button_click = function() {

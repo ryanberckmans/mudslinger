@@ -1,6 +1,16 @@
 var AliasEditor = new (function() {
     var o = new TrigAlEditBase();
 
+    o.default_value =
+         "Put the alias value here.\n"
+        +"This can be 1 or more commands, including match parameters (e.g. $1).\n\n"
+        +"For non-regex aliases, use $1 in the value to represent the full argument to the command.\n"
+        +"Example: Alias pattern 'blah', alias value 'say $1', "
+        +"then issue 'blah asadf dfdfa' and 'say asadf dfdfa' will be sent.\n\n"
+        +"For regex aliases, use ${groupnum} to represent the matches from your regex pattern.\n"
+        +"Example: Alias pattern 'blah (\\w+)', alias value 'say $1', "
+        +"then issue 'blah asadf' and 'say asadf' will be sent.";
+
     o.get_elements = function() {
         o.win = $('#win_alias_edit');
         o.list_box = $('#alias_list_box');
