@@ -99,7 +99,13 @@ var OutputManager = new (function(){
     }
 
     var fg_color = null;
+    o.get_fg_color = function() {
+        return fg_color[0][fg_color[1]];
+    };
     var bg_color = null;
+    o.get_bg_color = function() {
+        return bg_color[0][bg_color[1]];
+    };
 
     o.init_color = function() {
         fg_color = [colors.green, 'low'];

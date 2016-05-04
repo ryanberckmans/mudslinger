@@ -1,3 +1,7 @@
+a:link, a:visited {
+    text-decoration: none;
+}
+
 #client {
     width:90vw;
     height:88vh;
