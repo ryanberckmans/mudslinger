@@ -3,8 +3,8 @@ a:link, a:visited {
 }
 
 #client {
-    width:90vw;
-    height:88vh;
+    width:95vw;
+    height:92vh;
 }
 
 #win_output, #win_chat {
@@ -18,7 +18,16 @@ a:link, a:visited {
     overflow-y:scroll;
     overflow-x:scroll;
     width:100%;
-    height:95%;
+}
+
+#win_output {
+    height:calc(100% - 21px);
+    margin:0;
+    padding:0;
+}
+
+#win_chat {
+    height: 100%;
 }
 
 #win_stat {
@@ -105,6 +114,9 @@ a:link, a:visited {
 
 #cmd_input {
     width: 100%;
+    height: 20px;
+    margin: 0;
+    padding: 0;
 }
 #trig_pattern, #alias_pattern {
     width: 100%;
