@@ -44,8 +44,8 @@ var CommandInput = new (function() {
 
         if (echo) {
             cmd_history.push(cmd);
+            cmd_history = cmd_history.slice(-20);
             o.save_history();
-            cmd_history.slice(-20);
         }
         else {
             $('#cmd_input').val('');
