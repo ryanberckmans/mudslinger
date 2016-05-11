@@ -80,11 +80,13 @@ a:link, a:visited {
 }
 
 #hmv_cont {
+    height: 100%;
     width: 50%;
     float: left;
 }
 
 #alt_gauge_cont {
+    height: 100%;
     width: 50%;
     float: right;
 }
@@ -97,7 +99,7 @@ a:link, a:visited {
     color: yellow;
     text-shadow: 0px 0px 2px black;
     font-size: 24px;
-    font-family:Courier;
+    font-family: Courier;
 }
 
 #enemy_bar .jqx-progressbar-text {

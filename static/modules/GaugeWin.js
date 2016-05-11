@@ -16,7 +16,7 @@ var GaugeWin = new (function() {
     o.load_layout = function() {
         $('#hp_bar').jqxProgressBar({
             width: '100%',
-            height: 20,
+            height: '33%',
             value: 50,
             showText: true,
             animationDuration: 0,
@@ -30,7 +30,7 @@ var GaugeWin = new (function() {
 
         $('#mana_bar').jqxProgressBar({
             width: '100%',
-            height: 20,
+            height: '33%',
             value: 50,
             showText: true,
             animationDuration: 0,
@@ -44,7 +44,7 @@ var GaugeWin = new (function() {
 
         $('#move_bar').jqxProgressBar({
             width: '100%',
-            height: 20,
+            height: '33%',
             value: 50,
             showText: true,
             animationDuration: 0,
@@ -58,8 +58,8 @@ var GaugeWin = new (function() {
 
         $('#enemy_bar').jqxProgressBar({
             width: '100%',
-            height: 20,
-            value: 50,
+            height: '33%',
+            value: 0,
             showText: true,
             animationDuration: 0,
             renderText: function(text) {
@@ -71,7 +71,7 @@ var GaugeWin = new (function() {
 
         $('#tnl_bar').jqxProgressBar({
             width: '100%',
-            height: 20,
+            height: '33%',
             value: 50,
             showText: true,
             animationDuration: 0,
