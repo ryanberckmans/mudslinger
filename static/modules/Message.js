@@ -11,6 +11,10 @@ var Message = new (function() {
     };
 
     o.sub = function(t, callback) {
+        if (typeof callback != 'function') {
+            console.trace();
+            throw "Not a function";
+        }
         subs[t] = subs[t] || [];
         subs[t].push(callback);
     };

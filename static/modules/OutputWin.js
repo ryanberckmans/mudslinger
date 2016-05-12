@@ -88,6 +88,14 @@ var OutputWin = new (function(){
             + '</span>');
         o.scroll_bottom();
     };
+    o.handle_telnet_disconnect = function(msg) {
+        o.target.append(
+            '<span style="color:cyan">'
+            + '[[Telnet disconnected]]'
+            + "<br>"
+            + '</span>');
+        o.scroll_bottom();
+    };
     o.handle_ws_connect = function(msg) {
         o.target.append(
             '<span style="color:cyan">'
