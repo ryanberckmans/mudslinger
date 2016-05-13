@@ -87,6 +87,7 @@ function OutWinBase() {
 //            span.css('background-color', o.bg_color);
 //        }
         span_text += html;
+        span_text += '</span>';
         append_buffer += span_text;
 
         if (txt.endsWith('\n')) {

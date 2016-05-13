@@ -98,6 +98,8 @@ var OutputManager = new (function(){
         '\x1b[1;37m': [colors.white, 'high']
     }
 
+    var ansi_reverse = false;
+
     var fg_color = null;
     o.get_fg_color = function() {
         return fg_color[0][fg_color[1]];
@@ -115,19 +117,29 @@ var OutputManager = new (function(){
     o.handle_ansi_escape = function(data) {
 
         if (data == '\x1b[0m' || data == '\x1b[0;00m') {
+            ansi_reverse = false;
             fg_color = [colors.green, 'low']
             bg_color = null;
             target.set_fg_color(fg_color[0][fg_color[1]]);
             target.set_bg_color(null);
             return;
         } else if (data == '\x1b[1m') { // bold
-            fg_color[1] = 'high';
-            target.set_fg_color(fg_color[0][fg_color[1]]);
+            if (ansi_reverse) {
+                bg_color[1] = 'high';
+                target.set_bg_color(bg_color[0][bg_color[1]]);
+            } else {
+                fg_color[1] = 'high';
+                target.set_fg_color(fg_color[0][fg_color[1]]);
+            }
         } else if (data == '\x1b[7m') { // reverse
-            bg_color = fg_color;
-            fg_color = [colors.black, 'low']; // black text plz
+            // swap fg and bg colors
+            var new_bg = fg_color;
+            var new_fg = bg_color || [colors.black, 'low'];
+            fg_color = new_fg;
+            bg_color = new_bg;
             target.set_fg_color(fg_color[0][fg_color[1]]);
             target.set_bg_color(bg_color[0][bg_color[1]]);
+            ansi_reverse = !ansi_reverse;
             return;
         } else if (!(data in color_seqs)) {
             console.log("UNEXPECTED ansi sequence: ");
@@ -135,11 +147,12 @@ var OutputManager = new (function(){
             return;
         } else {
             var color = color_seqs[data];
-            fg_color = color;
-            target.set_fg_color(fg_color[0][fg_color[1]]);
-            if (bg_color) {
-                bg_color = null;
-                target.set_bg_color(null);
+            if (ansi_reverse) {
+                bg_color = color;
+                target.set_bg_color(bg_color[0][bg_color[1]]);
+            } else {
+                fg_color = color;
+                target.set_fg_color(fg_color[0][fg_color[1]]);
             }
         }
     };
