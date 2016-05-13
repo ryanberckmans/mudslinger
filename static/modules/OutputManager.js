@@ -125,10 +125,10 @@ var OutputManager = new (function(){
             return;
         } else if (data == '\x1b[1m') { // bold
             if (ansi_reverse) {
-                bg_color[1] = 'high';
+                bg_color = [bg_color[0], 'high'];
                 target.set_bg_color(bg_color[0][bg_color[1]]);
             } else {
-                fg_color[1] = 'high';
+                fg_color = [fg_color[0], 'high'];
                 target.set_fg_color(fg_color[0][fg_color[1]]);
             }
         } else if (data == '\x1b[7m') { // reverse
