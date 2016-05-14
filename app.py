@@ -34,7 +34,7 @@ telnets = {}
 
 
 class TelnetConn:
-    ttypes = ['ArcWeb', 'ANSI']
+    ttypes = ['ArcWeb', 'ANSI', '-256color']
     MSDP_VARS = [
         'CHARACTER_NAME',
         'HEALTH', 'HEALTH_MAX',

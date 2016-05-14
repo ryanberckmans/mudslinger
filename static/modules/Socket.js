@@ -129,6 +129,18 @@ var Socket = new (function() {
                 continue;
             }
 
+            /* xterm 256 color */
+            re = /^\x1b\[[34]8;5;\d+m/;
+            match = re.exec(substr);
+            if (match) {
+                OutputManager.handle_text(output);
+                output = '';
+
+                i += match[0].length;
+                OutputManager.handle_xterm_escape(match[0]);
+                continue;
+            }
+
             /* MXP escapes */
             re = /^\x1b\[1z(<.*?>)\x1b\[7z/;
             match = re.exec(substr);

@@ -11,7 +11,7 @@ a:link, a:visited {
     font-family:"Courier", monospace;
     /*font-family:monospace;*/
     font-size: 10;
-    color:white;
+    color:rgb(0,187,0); /* low green */
     background-color:black;
     /*word-wrap:break-word;*/
     white-space: pre-wrap;
