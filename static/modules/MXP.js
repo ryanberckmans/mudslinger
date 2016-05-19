@@ -99,7 +99,7 @@ var MXP = new (function(){
                 var cmd = tag_m[1];
                 var html_tag = '<a href="#" title="' + cmd + '">';
                 var elem = $(html_tag);
-                var color = OutputManager.get_fg_color();
+                var color = OutputManager.get_fg_color() || elem.css('color');
                 elem.css('border-bottom', '1px solid ' + color);
                 elem.click(function() {
                     Message.pub('send_command', {data: tag_m[1]});
