@@ -116,6 +116,8 @@ var MXP = new (function(){
                 open_tags.push('send');
                 var html_tag = '<a href="#">';
                 var elem = $(html_tag);
+                var color = OutputManager.get_fg_color() || elem.css('color');
+                elem.css('border-bottom', '1px solid ' + color);
                 OutputManager.push_mxp_elem(elem);
                 return true;
             }
