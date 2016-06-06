@@ -117,7 +117,9 @@ var OutputWin = new (function(){
     o.handle_telnet_error= function(msg) {
         o.target.append(
             '<span style="color:red">'
-            + "[[Telnet error]]"
+            + "[[Telnet error" + "<br>"
+            + msg.data + "<br>"
+            + "]]"
             + "<br>"
             + "</span>");
         o.scroll_bottom();
@@ -141,6 +143,8 @@ var OutputWin = new (function(){
             + lineno + "<br>"
             + colno + "<br>"
             + ']]'
+            + '<br>'
+            + '</span>'
         );
         o.scroll_bottom();
     };

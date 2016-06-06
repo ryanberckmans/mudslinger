@@ -90,10 +90,13 @@ class TelnetConn:
 
             cmd = self.write_queue.get(True, None)
             with self.write_lock:
-                self.telnet.write(str(cmd))
-                socketio.emit('telnet_error', {},
-                              room=self.room_id,
-                              namespace='telnet')
+                try:
+                    self.telnet.write(str(cmd))
+                except Exception as ex:
+                    print ex
+                    socketio.emit('telnet_error', {'data': str(ex)},
+                                  room=self.room_id,
+                                  namespace='/telnet')
 
     def write(self, cmd):
         self.write_queue.put(cmd)
@@ -234,7 +237,7 @@ class TelnetConn:
 
             except Exception as ex:
                 with app.test_request_context('/telnet'):
-                    socketio.emit('telnet_error', {'message': ex.message},
+                    socketio.emit('telnet_error', {'data': ex.message},
                                   room=self.room_id,
                                   namespace='/telnet')
                 return
