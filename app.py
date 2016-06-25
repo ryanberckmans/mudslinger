@@ -1,34 +1,16 @@
-#!venv/bin/python2.7
-import traceback
 from Queue import Queue
 import time
 import threading
 from telnetlib import Telnet, IAC, DO, WILL, WONT, SB, SE
-from flask import Flask, jsonify, render_template, request, redirect, url_for, flash, g
-from flask.ext.socketio import SocketIO, emit
-from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.bcrypt import Bcrypt
-from flask.ext.login import LoginManager, login_user, logout_user, \
-        current_user, login_required
-from flask_wtf import Form
-from wtforms import TextField, PasswordField
-from wtforms.validators import DataRequired, Length, Email, EqualTo
-import re
+from flask import Flask, render_template, request
+from flask_socketio import SocketIO, emit
 
 
 app = Flask(__name__)
-app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
-db = SQLAlchemy(app)
-bcrypt = Bcrypt(app)
-from models import *
-#app.config['SERVER_NAME'] = 'vps.rooflez.com'
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
 
 
 socketio = SocketIO(app)
+
 
 telnets = {}
 
@@ -54,8 +36,7 @@ class TelnetConn:
         'CHA', 'CHA_PERM',
         'LUC', 'LUC_PERM',
         'ROOM_NAME', 'ROOM_EXITS',
-        'AFFECTS',
-        'LUA_EDIT']
+        'AFFECTS']
 
     def __init__(self, room_id, player_ip):
         self.telnet = None
@@ -159,19 +140,10 @@ class TelnetConn:
                       namespace='/telnet')
 
     def write_msdp_var(self, var, val):
-        # print("write_msdp_var")
         seq = IAC + SB + TelnetOpts.MSDP + MSDP.VAR + str(var) + MSDP.VAL + str(val) + IAC + SE
-        # print("Seq:",seq)
         self.sock_write(seq)
-        # print 'Write: ' + str(seq)
 
     def _negotiate(self, socket, command, option):
-        # print 'Got ',ord(command),ord(option)
-        # tmp = 'Got {} {}'.format(
-        #     TelnetCmdLookup.get(command, ord(command)),
-        #     TelnetOptLookup.get(option, ord(option))
-        # )
-        # print tmp
         if command == WILL:
             if option == TelnetOpts.ECHO:
                 socketio.emit('server_echo', {'data': True}, room=self.room_id, namespace="/telnet")
@@ -191,12 +163,6 @@ class TelnetConn:
                 self.sock_write(IAC + WILL + TelnetOpts.MXP)
         elif command == SE:
             d = self.telnet.read_sb_data()
-            # print 'got',[ord(x) for x in d]
-            # tmp = 'SB got {} {}'.format(
-            #     TelnetOptLookup.get(d[0], ord(d[0])),
-            #     str([ord(x) for x in d[1:]])
-            # )
-            # print tmp
             
             if d == TelnetOpts.TTYPE + TelnetSubNeg.SEND:
                 if self.ttype_index >= len(self.ttypes):  # We already sent them all, so send the player IP
@@ -206,7 +172,6 @@ class TelnetConn:
                     self.ttype_index += 1
                 self.sock_write(IAC + SB + TelnetOpts.TTYPE + TelnetSubNeg.IS + ttype + IAC + SE)
             elif d[0] == TelnetOpts.MSDP:
-                # print 'get the msdp'
                 self.handle_msdp(d[1:])
 
     def _listen(self):
@@ -249,35 +214,6 @@ class TelnetConn:
             time.sleep(0.050)
 
 
-@socketio.on('ack_rx', namespace='/telnet')
-def ws_ack_rx(message):
-    # print("ack_rx running")
-    tn = telnets.get(request.sid, None)
-    if tn is None:
-        print("OMG")
-        return
-
-    # print "Message ",  message
-    try:
-        tn.write_msdp_var("ACK_RX", message)
-    except Exception as e:
-        print "help"
-        print e.message
-        print traceback.print_exc()
-
-    # print "FINISSIMO"
-
-
-@socketio.on('save_lua', namespace='/telnet')
-def ws_save_lua(message):
-    print("save_lua running")
-    tn = telnets.get(request.sid, None)
-    if tn is None:
-        return
-
-    tn.write_msdp_var("LUA_EDIT", message['data']) 
-
-
 @socketio.on('request_test_socket_response', namespace='/telnet')
 def asdf(message):
     emit('reply_test_socket_response', {}, namespace='/telnet')
@@ -296,7 +232,6 @@ def ws_disconnect():
         tn = telnets[request.sid]
         tn.stop()
         del telnets[request.sid]
-    # emit('ws_disconnect', {}, namespace="/telnet")
 
 
 @socketio.on('open_telnet', namespace='/telnet')
@@ -329,100 +264,7 @@ def ws_send_command(message):
 
 @app.route("/")
 def client():
-    print "client.html baby"
     return render_template('client.html')
-
-
-@app.route("/resize")
-@login_required
-def resize():
-    print "resize"
-    return render_template('resize.html')
-
-
-#login_manager.login_view = "users.login"
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    #User.query.filter(User.id == int(user_id)).first()
-    return User.query.get(user_id)
-
-
-class LoginForm(Form):
-    username = TextField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
-
-
-class RegisterForm(Form):
-    username = TextField(
-        'username',
-        validators=[DataRequired(), Length(min=3, max=25)]
-    )
-    email = TextField(
-        'email',
-        validators=[DataRequired(), Email(message=None), Length(min=6, max=40)]
-    )
-    password = PasswordField(
-        'password',
-        validators=[DataRequired(), Length(min=6, max=25)]
-    )
-    confirm = PasswordField(
-        'Repeat password',
-        validators=[
-            DataRequired(), EqualTo('password', message='Passwords must match.')
-        ]
-    )
-
-
-@app.route("/login", methods=['GET', 'POST'])
-def login():
-    if g.user is not None and g.user.is_authenticated:
-        return redirect(url_for('client'))
-
-    error = None
-    form = LoginForm(request.form)
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            user = User.query.filter_by(name=request.form['username']).first()
-            if user is not None and bcrypt.check_password_hash(
-                user.password, request.form['password']):
-                login_user(user)
-                # flash('You were logged in. Go Crazy.')
-                print user
-                return redirect(url_for('client'))
-
-            else:
-                error = 'Invalid username or password.'
-    return render_template('login.html', form=form, error=error)
-
-
-@app.route("/logout", methods=['GET'])
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('client'))
-
-
-@app.route("/register", methods=['GET', 'POST'])
-def register():
-    form = RegisterForm()
-    if form.validate_on_submit():
-        user = User(
-            name=form.username.data,
-            email=form.email.data,
-            password=form.password.data
-        )
-        db.session.add(user)
-        db.session.commit()
-        login_user(user)
-        return redirect(url_for('client'))
-    return render_template("register.html", form=form)
-
-
-@app.before_request
-def before_request():
-    g.user = current_user
 
 
 class TelnetCmds(object):
@@ -481,7 +323,4 @@ MSDPLookup = {v: k for k, v in MSDP.__dict__.iteritems()}
 
 if __name__ == "__main__":
     # app.debug=True
-    # app.run('0.0.0.0')
-    # db.create_all()
-    socketio.run(app, '0.0.0.0', port=5000, worker=1)
-    # db.session.commit()
+    socketio.run(app, '0.0.0.0', port=5000)
