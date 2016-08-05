@@ -86,12 +86,12 @@ var Socket = new (function() {
         for (var i=0; i < rx_len; ) {
             var char = rx[i];
 
-            /* strip line feeds while we're at it */
+            /* strip carriage returns while we're at it */
             if (char == '\r') {
                 i++; continue;
             }
 
-            /* Always snip at a newline so other modules can more easily handle logic based on line barriers */
+            /* Always snip at a newline so other modules can more easily handle logic based on line boundaries */
             if (char == '\n') {
                 output += char;
                 i++;
@@ -161,7 +161,7 @@ var Socket = new (function() {
                 continue;
             }
 
-            /* need to account for malformed tags or sequences somehow... for now just treat a newline as a barrier */
+            /* need to account for malformed tags or sequences somehow... for now just treat a newline as a boundary */
             var nl_ind = substr.indexOf('\n');
             if (nl_ind != -1) {
                 var bad_stuff = substr.slice(0, nl_ind+1);
