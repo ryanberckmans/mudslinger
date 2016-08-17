@@ -1,6 +1,6 @@
 The Aarchon Web Client is a web based MUD client for Aarchon MUD. It consists of a flask based Python web server and a HTML/CSS/Javascript frontend.
 
-The flask webserver makes telnet connections to the target host/port and acts as a telnet proxy for the frontend application. 
+The Flask webserver makes telnet connections to the target host/port and acts as a telnet proxy for the frontend application. 
 
 
 # Python version #
