@@ -11,13 +11,13 @@ var Util = new (function(){
         return text.replace(/&/g, '&amp;');
     };
 
-    o.replace_cr = function(text) {
-        // We are presumably already stripping out lfs before this
+    o.replace_lf = function(text) {
+        // We are presumably already stripping out CRs before this
         return text.replace(/\n/g, '<br>');
     };
 
     o.raw_to_html = function(text) {
-        return o.replace_cr(
+        return o.replace_lf(
                 o.replace_lt_gt(
                  o.replace_amp(text)));
     };
