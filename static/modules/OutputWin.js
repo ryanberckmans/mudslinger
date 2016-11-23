@@ -16,9 +16,8 @@ var OutputWin = new (function(){
         if (html) {
             // it's a reload
             $('#win_output').html(html);
-            o.scroll_bottom();
+            o.scroll_bottom(true);
             html = null;
-            console.log('asdfasd');
         }
     }
 
@@ -44,7 +43,7 @@ var OutputWin = new (function(){
             + Util.raw_to_html(cmd)
             + "<br>"
             + '</span>');
-        o.scroll_bottom();
+        o.scroll_bottom(true);
     };
 
     o.handle_trigger_send_commands = function(msg) {
@@ -77,7 +76,7 @@ var OutputWin = new (function(){
         }
 
         o.target.append(html);
-        o.scroll_bottom();
+        o.scroll_bottom(true);
     };
 
     o.handle_telnet_connect = function(msg) {
@@ -86,7 +85,7 @@ var OutputWin = new (function(){
             + '[[Telnet connected]]'
             + "<br>"
             + '</span>');
-        o.scroll_bottom();
+        o.scroll_bottom(true);
     };
     o.handle_telnet_disconnect = function(msg) {
         o.target.append(
@@ -94,7 +93,7 @@ var OutputWin = new (function(){
             + '[[Telnet disconnected]]'
             + "<br>"
             + '</span>');
-        o.scroll_bottom();
+        o.scroll_bottom(true);
     };
     o.handle_ws_connect = function(msg) {
         o.target.append(
@@ -122,7 +121,7 @@ var OutputWin = new (function(){
             + "]]"
             + "<br>"
             + "</span>");
-        o.scroll_bottom();
+        o.scroll_bottom(true);
     };
 
     o.handle_ws_error = function(msg) {
@@ -131,7 +130,7 @@ var OutputWin = new (function(){
             + "[[Websocket error]]"
             + "<br>"
             + "</span>");
-        o.scroll_bottom();
+        o.scroll_bottom(true);
     };
 
     o.handle_window_error = function(message, source, lineno, colno, error) {
@@ -146,7 +145,7 @@ var OutputWin = new (function(){
             + '<br>'
             + '</span>'
         );
-        o.scroll_bottom();
+        o.scroll_bottom(true);
     };
 
     o.handle_line = function(line) {

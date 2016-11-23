@@ -7,8 +7,8 @@ function OutWinBase() {
         max_lines = count;
     }
 
-    o.fg_color = null
-    o.bg_color = null
+    o.fg_color = null;
+    o.bg_color = null;
 
     o.set_fg_color = function(color) {
         o.fg_color = color;
@@ -23,6 +23,21 @@ function OutWinBase() {
     o.target = null;
     o.root_elem = null;
 
+    var scroll_lock = false; // true when we should not scroll to bottom
+    var handle_scroll = function(e) {
+        var scrollHeight = o.root_elem.prop('scrollHeight');
+        var scrollTop = o.root_elem.scrollTop();
+        var outerHeight = o.root_elem.outerHeight();
+        var is_at_bottom = outerHeight + scrollTop >= scrollHeight;
+
+        console.log("Bottom:" + is_at_bottom);
+        console.log(scrollHeight);
+        console.log(scrollTop);
+        console.log(outerHeight);
+
+        scroll_lock = !is_at_bottom;
+    };
+
     // must set root elem before actually using it
     o.set_root_elem = function(elem) {
         // this may be called upon layout reload
@@ -32,6 +47,8 @@ function OutWinBase() {
 
         // direct children of the root will be line containers, let's push the first one.
         o.push_elem($('<span>').appendTo(elem));
+
+        o.root_elem.bind('scroll', handle_scroll);
     };
 
     // elem is the actual jquery element
@@ -83,9 +100,6 @@ function OutWinBase() {
             style += '"';
         }
         span_text += style + '>';
-//        if (o.bg_color) {
-//            span.css('background-color', o.bg_color);
-//        }
         span_text += html;
         span_text += '</span>';
         append_buffer += span_text;
@@ -95,8 +109,6 @@ function OutWinBase() {
             append_buffer = '';
             o.new_line();
         }
-
-//        o.scroll_bottom();
     };
 
     o.new_line = function() {
@@ -135,7 +147,10 @@ function OutWinBase() {
         console.timeEnd("_scroll_bottom");
     };
 
-    o.scroll_bottom = function() {
+    o.scroll_bottom = function(force) {
+        if (scroll_lock && !(force == true)) {
+            return;
+        }
         if (scroll_requested) {
             return;
         }
