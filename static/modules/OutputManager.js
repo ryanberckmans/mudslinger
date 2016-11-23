@@ -431,10 +431,10 @@ var OutputManager = new (function(){
     };
 
     o.get_fg_color = function() {
-        return fg_color;
+        return fg_color || default_ansi_fg[0][default_ansi_fg[1]];
     };
     o.get_bg_color = function() {
-        return bg_color;
+        return bg_color || default_ansi_bg[0][default_ansi_bg[1]];
     };
 
     o.init_color = function() {
