@@ -30,10 +30,10 @@ function OutWinBase() {
         var outerHeight = o.root_elem.outerHeight();
         var is_at_bottom = outerHeight + scrollTop >= scrollHeight;
 
-        console.log("Bottom:" + is_at_bottom);
-        console.log(scrollHeight);
-        console.log(scrollTop);
-        console.log(outerHeight);
+//        console.log("Bottom:" + is_at_bottom);
+//        console.log(scrollHeight);
+//        console.log(scrollTop);
+//        console.log(outerHeight);
 
         scroll_lock = !is_at_bottom;
     };
@@ -143,6 +143,7 @@ function OutWinBase() {
         console.time("_scroll_bottom");
         var elem = o.root_elem;
         elem.scrollTop(elem.prop('scrollHeight'));
+        scroll_lock = false;
         scroll_requested = false;
         console.timeEnd("_scroll_bottom");
     };
