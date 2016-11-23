@@ -18,6 +18,19 @@ var MXP = new (function(){
     });
 
     tag_handlers.push(function(tag) {
+        /* hande image tags */
+        var re = /^<image\s*(\S+)\s*url="(.*)">$/i;
+        var match = re.exec(tag);
+        if (match) {
+            /* push and pop is dirty way to do this, clean it up later */
+            var elem = $('<img src="' + match[2] + match[1] + '">');
+            OutputManager.push_mxp_elem(elem);
+            OutputManager.pop_mxp_elem();
+            return true;
+        }
+    });
+
+    tag_handlers.push(function(tag) {
         /* handle dest tags */
         var re = /^<dest comm>$/i;
         var match = re.exec(tag);
