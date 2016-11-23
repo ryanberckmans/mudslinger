@@ -259,6 +259,7 @@ def ws_send_command(message):
                       room=request.sid,
                       namespace='/telnet')
 
+    cmd = cmd.encode('utf-8', 'replace')
     telnets[request.sid].write(cmd+"\n")
 
 
