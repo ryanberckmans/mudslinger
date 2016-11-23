@@ -401,6 +401,9 @@ var OutputManager = new (function(){
 
     var ansi_reverse = false;
 
+    var default_ansi_fg = [colors.green, "low"];
+    var default_ansi_bg = [colors.black, "low"]
+
     var ansi_fg = null;
     var ansi_bg = null;
 
@@ -464,12 +467,14 @@ var OutputManager = new (function(){
         } else if (data == '\x1b[1m') { // bold
             // On the chance that we have xterm colors, just ignore bold
             if (ansi_reverse) {
-                if (ansi_bg) {
-                    set_ansi_bg([ansi_bg[0], 'high']);
+                if (ansi_bg || !bg_color) {
+                    var bg = ansi_bg || default_ansi_bg;
+                    set_ansi_bg([bg[0], 'high']);
                 }
             } else {
-                if (ansi_fg) {
-                    set_ansi_fg([ansi_fg[0], 'high']);
+                if (ansi_fg || !fg_color) {
+                    var fg = ansi_fg || default_ansi_fg;
+                    set_ansi_fg([fg[0], 'high']);
                 }
             }
         } else if (data == '\x1b[7m') { // reverse
