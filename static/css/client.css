@@ -11,19 +11,6 @@ a:link, a:visited {
     height:92vh;
 }
 
-#win_output, #win_chat {
-    font-family:"Courier", monospace;
-    /*font-family:monospace;*/
-    font-size: 10;
-    color:rgb(0,187,0); /* low green */
-    background-color:black;
-    /*word-wrap:break-word;*/
-    white-space: pre-wrap;
-    overflow-y:scroll;
-    overflow-x:scroll;
-    width:100%;
-}
-
 #win_output {
     height:calc(100% - 21px);
     margin:0;
@@ -32,6 +19,17 @@ a:link, a:visited {
 
 #win_chat {
     height: 100%;
+}
+
+.output_text {
+    font-size: 10;
+    background-color:black;
+    font-family:"Courier", monospace;
+    color:rgb(0,187,0); /* low green */
+    white-space: pre-wrap;
+    overflow-y:scroll;
+    overflow-x:scroll;
+    width:100%;
 }
 
 #win_stat {

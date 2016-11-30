@@ -523,7 +523,39 @@ var OutputManager = new (function(){
         }
     };
 
+    o.set_default_ansi_fg = function(color, level) {
+        default_ansi_fg = [color, level];
+        $('.output_text').css('color', default_ansi_fg[0][default_ansi_fg[1]]);
+    };
+
+    o.handle_change_default_color = function(color_name) {
+        var color = colors[color_name];
+        var level = "low";
+
+        o.set_default_ansi_fg(color, level);
+        o.save_color_cfg();
+    };
+
+    o.save_color_cfg = function() {
+        localStorage.setItem('color_cfg', JSON.stringify({
+            'default_ansi_fg': default_ansi_fg
+        }));
+    };
+
+
     return o;
 })();
 
 Message.sub('load_layout', OutputManager.handle_load_layout);
+Message.sub('change_default_color', OutputManager.handle_change_default_color);
+
+$(document).ready(function() {
+    var saved_color_cfg = localStorage.getItem("color_cfg");
+    if (!saved_color_cfg) {
+        return;
+    } else {
+        var cfg = JSON.parse(saved_color_cfg);
+        var default_ansi_fg = cfg.default_ansi_fg;
+        OutputManager.set_default_ansi_fg(default_ansi_fg[0], default_ansi_fg[1]);
+    }
+});

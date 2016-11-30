@@ -42,6 +42,14 @@ var MenuBar = new (function() {
         Socket.test_socket_response();
     };
 
+    click_funcs['Green'] = function() {
+        Message.pub('change_default_color', 'green');
+    };
+
+    click_funcs['White'] = function() {
+        Message.pub('change_default_color', 'white');
+    };
+
     o.handle_click = function(event) {
         var item = event.args;
         var text = $(item).text();
