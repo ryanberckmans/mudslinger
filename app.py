@@ -351,7 +351,7 @@ def _get_msdp_var(msdp):
 
 def parse_msdp(msdp):
     # At the highest level, msdp value should always come as a VAR/VAL pair.
-    print ''.join([('{' + MSDPLookup[c] + '}') if c in MSDPLookup else c for c in msdp])
+    # print ''.join([('{' + MSDPLookup[c] + '}') if c in MSDPLookup else c for c in msdp])
     var, val, j = _get_msdp_var(msdp)
 
     return var, val
