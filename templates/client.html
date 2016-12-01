@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Aarchon Web Client V0.7.2</title>
+  <title>Aarchon Web Client V0.7.3</title>
 
   <link rel="stylesheet" href="{{url_for('static', filename='jqwidgets/styles/jqx.base.css')}}">
 
@@ -75,7 +75,8 @@
                 <div style="width:100%;height:100%;margin:0;padding:0">
                   <pre id="win_output" class="output_text"></pre>
                   <!--<br>-->
-                  <input type="text" id="cmd_input">
+                  <textarea id="cmd_input"></textarea>
+                  <input id="cmd_input_pw" type="password" style="display:none">
                 </div>
 
                 <div id="win_gauge" >
