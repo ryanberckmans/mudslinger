@@ -125,6 +125,8 @@ a:link, a:visited {
 #cmd_input {
     height: 100;
     resize: none;
+    font-family:"Courier", monospace;
+    font-size: 10;
 }
 
 #cmd_input_pw {
