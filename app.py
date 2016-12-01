@@ -87,54 +87,11 @@ class TelnetConn:
             self.telnet.get_socket().sendall(cmd)
 
     def handle_msdp(self, msdp):
-        env = {'ind': 0}
 
-        def get_msdp_table():
-            env['ind'] += 1
-            rtn = {}
-            while msdp[env['ind']] != MSDP.TABLE_CLOSE:
-                kv = get_msdp_var()
-                rtn[kv[0]] = kv[1]
-            
-            return rtn 
+        result = parse_msdp(msdp)
+        # except Exception as e:
+        #     print e
 
-        def get_msdp_array():
-            env['ind'] += 1
-            rtn = []
-            while msdp[env['ind']] != MSDP.ARRAY_CLOSE:
-                v = get_msdp_val()
-                rtn.append(v)
-
-            return rtn
-
-        def get_msdp_val():
-            env['ind'] += 1
-
-            if env['ind'] >= len(msdp):
-                return ''
-
-            if msdp[env['ind']] == MSDP.ARRAY_OPEN:
-                return get_msdp_array()
-            elif msdp[env['ind']] == MSDP.TABLE_OPEN:
-                return get_msdp_table()
-                
-            # normal var
-            start_ind = env['ind'] 
-            while env['ind'] < len(msdp) and msdp[env['ind']] not in (MSDP.VAR, MSDP.VAL, MSDP.ARRAY_CLOSE, MSDP.TABLE_CLOSE):
-                env['ind'] += 1 
-            
-            return msdp[start_ind:env['ind']]
-
-        def get_msdp_var():
-            env['ind'] += 1
-            start_ind = env['ind']
-
-            while msdp[env['ind']] != MSDP.VAL:
-                env['ind'] += 1 
-
-            return msdp[start_ind:env['ind']], get_msdp_val()
-
-        result = get_msdp_var()
         socketio.emit('msdp_var', {'var': result[0], 'val': result[1]},
                       room=self.room_id,
                       namespace='/telnet')
@@ -322,6 +279,84 @@ class MSDP(object):
 MSDPLookup = {v: k for k, v in MSDP.__dict__.iteritems()}
 
 
+def _get_msdp_table(msdp):
+    # skip first char which should be MSDP.TABLE_OPEN
+    i = 1
+
+    rtn = {}
+    while msdp[i] != MSDP.TABLE_CLOSE:
+        k, v, j = _get_msdp_var(msdp[i:])
+        i += j
+        rtn[k] = v
+
+    i += 1
+    return rtn, i
+
+
+def _get_msdp_array(msdp):
+    # skip first char which should be MSDP.ARRAY_OPEN
+    i = 1
+
+    rtn = []
+    while msdp[i] != MSDP.ARRAY_CLOSE:
+        v, j = _get_msdp_val(msdp[i:])
+        i += j
+        rtn.append(v)
+
+    i += 1
+    return rtn, i
+
+
+def _get_msdp_val(msdp):
+    # skip first char which should be MSDP.VAL
+    i = 1
+
+    if i >= len(msdp):
+        return '', i
+
+    if msdp[i] == MSDP.ARRAY_OPEN:
+        rtn, j = _get_msdp_array(msdp[i:])
+        i += j
+        return rtn, i
+    elif msdp[i] == MSDP.TABLE_OPEN:
+        rtn, j = _get_msdp_table(msdp[i:])
+        i += j
+        return rtn, i
+
+    # normal var
+    start_ind = i
+    while True:
+        if i >= len(msdp):
+            break
+        if msdp[i] in (MSDP.VAR, MSDP.VAL, MSDP.ARRAY_CLOSE, MSDP.TABLE_CLOSE):
+            break
+        i += 1
+
+    return msdp[start_ind:i], i
+
+
+def _get_msdp_var(msdp):
+    # skip first char which should be MSDP.VAR
+    i = 1
+
+    while msdp[i] != MSDP.VAL:
+        i += 1
+
+    var = msdp[1:i]
+    val, j = _get_msdp_val(msdp[i:])
+    i += j
+
+    return var, val, i
+
+
+def parse_msdp(msdp):
+    # At the highest level, msdp value should always come as a VAR/VAL pair.
+    print ''.join([('{' + MSDPLookup[c] + '}') if c in MSDPLookup else c for c in msdp])
+    var, val, j = _get_msdp_var(msdp)
+
+    return var, val
+
+
 if __name__ == "__main__":
-    # app.debug=True
+    app.debug=True
     socketio.run(app, '0.0.0.0', port=5000)
