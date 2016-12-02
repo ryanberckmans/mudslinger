@@ -35,7 +35,8 @@ class TelnetConn:
         'DIS', 'DIS_PERM',
         'CHA', 'CHA_PERM',
         'LUC', 'LUC_PERM',
-        'ROOM_NAME', 'ROOM_EXITS',
+        'ROOM_NAME', 'ROOM_EXITS', 'ROOM_VNUM', 'ROOM_SECTOR',
+        'EDIT_MODE', 'EDIT_VNUM',
         'AFFECTS']
 
     def __init__(self, room_id, player_ip):

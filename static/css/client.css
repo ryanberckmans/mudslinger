@@ -116,6 +116,12 @@ a:link, a:visited {
     font-weight: bold;
 }
 
+#olc_status {
+    border-style: solid;
+    border-color: black;
+    font-weight: bold;
+}
+
 #cmd_input, #cmd_input_pw {
     width: 100%;
     margin: 0;

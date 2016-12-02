@@ -40,6 +40,11 @@ var MapWin = new (function() {
 
     o.dirs = {};
     o.room_name = '';
+    o.room_vnum = null;
+    o.room_sector = null;
+
+    o.edit_mode = null;
+    o.edit_vnum = null;
 
     o.update_grid = function() {
         var output='';
@@ -64,13 +69,40 @@ var MapWin = new (function() {
     };
 
     o.update_room_name = function() {
-        $('#room_name').html(Util.strip_color_tags(o.room_name));
+        var room_name = Util.strip_color_tags(o.room_name);
+        if (o.room_vnum && o.room_sector) {
+            room_name += ' [Room ' + o.room_vnum + ' ' + o.room_sector + ']';
+        }
+        $('#room_name').html(room_name);
+    };
+
+    o.update_olc_status = function() {
+        if (!o.edit_mode || !o.edit_vnum) {
+            return;
+        }
+        $('#olc_status').html(o.edit_mode + ' ' + o.edit_vnum);
     };
 
     o.handle_msdp_var = function(msg) {
         switch(msg.var) {
+            case 'EDIT_MODE':
+                o.edit_mode = msg.val;
+                o.update_olc_status();
+                break
+            case 'EDIT_VNUM':
+                o.edit_vnum = msg.val;
+                o.update_olc_status();
+                break;
             case 'ROOM_NAME':
                 o.room_name = msg.val;
+                o.update_room_name();
+                break;
+            case 'ROOM_VNUM':
+                o.room_vnum = msg.val;
+                o.update_room_name();
+                break;
+            case 'ROOM_SECTOR':
+                o.room_sector = msg.val;
                 o.update_room_name();
                 break;
             case 'ROOM_EXITS':
