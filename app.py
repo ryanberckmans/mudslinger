@@ -1,3 +1,8 @@
+try:
+    import eventlet
+    eventlet.monkey_patch()
+except ImportError:
+    pass
 from Queue import Queue
 import time
 import threading
