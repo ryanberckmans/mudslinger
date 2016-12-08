@@ -381,28 +381,10 @@ var OutputManager = new (function(){
 
     }
 
-    var color_seqs = {
-        '\x1b[0;31m': [colors.red, 'low'],
-        '\x1b[0;32m': [colors.green, 'low'],
-        '\x1b[0;33m': [colors.yellow, 'low'],
-        '\x1b[0;34m': [colors.blue, 'low'],
-        '\x1b[0;35m': [colors.magenta, 'low'],
-        '\x1b[0;36m': [colors.cyan, 'low'],
-        '\x1b[0;37m': [colors.white, 'low'],
-        '\x1b[1;30m': [colors.black, 'high'],
-        '\x1b[1;31m': [colors.red, 'high'],
-        '\x1b[1;32m': [colors.green, 'high'],
-        '\x1b[1;33m': [colors.yellow, 'high'],
-        '\x1b[1;34m': [colors.blue, 'high'],
-        '\x1b[1;35m': [colors.magenta, 'high'],
-        '\x1b[1;36m': [colors.cyan, 'high'],
-        '\x1b[1;37m': [colors.white, 'high']
-    }
-
     var ansi_reverse = false;
 
-    var default_ansi_fg = [colors.green, "low"];
-    var default_ansi_bg = [colors.black, "low"]
+    var default_ansi_fg = ["green", "low"];
+    var default_ansi_bg = ["black", "low"];
 
     var ansi_fg = null;
     var ansi_bg = null;
@@ -417,7 +399,7 @@ var OutputManager = new (function(){
 
     var set_ansi_fg = function(color) {
         ansi_fg = color;
-        set_fg_color(ansi_fg ? (ansi_fg[0][ansi_fg[1]]) : null);
+        set_fg_color(ansi_fg ? (colors[ansi_fg[0]][ansi_fg[1]]) : null);
     };
 
     var set_bg_color = function(color) {
@@ -427,14 +409,14 @@ var OutputManager = new (function(){
 
     var set_ansi_bg = function(color) {
         ansi_bg = color;
-        set_bg_color(ansi_bg ? (ansi_bg[0][ansi_bg[1]]) : null);
+        set_bg_color(ansi_bg ? (colors[ansi_bg[0]][ansi_bg[1]]) : null);
     };
 
     o.get_fg_color = function() {
-        return fg_color || default_ansi_fg[0][default_ansi_fg[1]];
+        return fg_color || colors[default_ansi_fg[0]][default_ansi_fg[1]];
     };
     o.get_bg_color = function() {
-        return bg_color || default_ansi_bg[0][default_ansi_bg[1]];
+        return bg_color || colors[default_ansi_bg[0]][default_ansi_bg[1]];
     };
 
     o.init_color = function() {
@@ -458,81 +440,125 @@ var OutputManager = new (function(){
         }
     };
 
-    o.handle_ansi_escape = function(data) {
-        if (data == '\x1b[0m' || data == '\x1b[0;0m' || data == '\x1b[0;00m') {
-            ansi_reverse = false;
-            set_ansi_fg(null);
-            set_ansi_bg(null);
-            return;
-        } else if (data == '\x1b[1m') { // bold
-            // On the chance that we have xterm colors, just ignore bold
-            if (ansi_reverse) {
-                if (ansi_bg || !bg_color) {
-                    var bg = ansi_bg || default_ansi_bg;
-                    set_ansi_bg([bg[0], 'high']);
-                }
-            } else {
-                if (ansi_fg || !fg_color) {
-                    var fg = ansi_fg || default_ansi_fg;
-                    set_ansi_fg([fg[0], 'high']);
-                }
-            }
-        } else if (data == '\x1b[7m') { // reverse
-            if (ansi_reverse) {
-                return;
+    var ansi_fg_lookup = {
+        30: 'black',
+        31: 'red',
+        32: 'green',
+        33: 'yellow',
+        34: 'blue',
+        35: 'magenta',
+        36: 'cyan',
+        37: 'white'
+    };
+
+    var ansi_bg_lookup = {
+        40: 'black',
+        41: 'red',
+        42: 'green',
+        43: 'yellow',
+        44: 'blue',
+        45: 'magenta',
+        46: 'cyan',
+        47: 'white'
+    };
+
+    /* handles graphics mode codes http://ascii-table.com/ansi-escape-sequences.php*/
+    o.handle_ansi_graphic_codes = function(codes) {
+        console.log(codes);
+        var new_fg;
+        var new_bg;
+
+        for (var i=0; i < codes.length; i++) {
+
+            var code = parseInt(codes[i]);
+
+            /* all off */
+            if (code == 0) {
+                new_fg = null;
+                new_bg = null;
+                ansi_reverse = false;
+                continue;
             }
 
-            if (!fg_color && !bg_color) { // no fg or bg set (swap defaults)
-                set_ansi_fg([colors.black, 'low']);
-                set_ansi_bg([colors.green, 'low'])
-            } else if (ansi_fg) { // ansi fg with possible xterm BG
-                if (!bg_color) {
-                    var new_ansi_bg = ansi_fg;
-                    var new_ansi_fg = [colors.black, 'low'];
-                    set_ansi_bg(new_ansi_bg);
-                    set_ansi_fg(new_ansi_fg);
-                } else if (!ansi_bg) {
-                    var new_ansi_bg = ansi_fg;
-                    var new_fg = bg_color;
-                    set_ansi_bg(new_ansi_bg);
-                    set_fg_color(new_fg);
-                    ansi_fg = null;
+            /* bold on */
+            if (code == 1) {
+                // On the chance that we have xterm colors, just ignore bold
+
+                if (ansi_reverse) {
+                    if (new_bg || ansi_bg || !bg_color) {
+                        new_bg = new_bg || ansi_bg || default_ansi_bg.slice();
+                        new_bg[1] = 'high';
+                    }
                 } else {
-                    console.log("Unexpected case...ansi bg already???");
+                    if (new_fg || ansi_fg || !fg_color) {
+                        new_fg = new_fg || ansi_fg || default_ansi_fg.slice();
+                        new_fg[1] = 'high';
+                    }
                 }
-            } else { // xterm fg and possible xterm bg
-                var new_bg = fg_color;
-                var new_fg = bg_color;
-                set_fg_color(new_fg);
-                set_bg_color(new_bg);
+                continue;
             }
 
-            ansi_reverse = true;
-            return;
-        } else if (!(data in color_seqs)) {
-            console.log("UNEXPECTED ansi sequence: ");
-            console.log(data);
-            return;
-        } else {
-            var color = color_seqs[data];
-            if (ansi_reverse) {
-                set_ansi_bg(color);
-            } else {
-                set_ansi_fg(color);
+            /* reverse */
+            if (code == 7) {
+                /* TODO: handle xterm reversing */
+                if (ansi_reverse) {
+                    continue;
+                }
+                ansi_reverse = true;
+                var fg = new_fg || ansi_fg || default_ansi_fg.slice();
+                var bg = new_bg || ansi_bg || default_ansi_bg.slice();
+                new_fg = bg;
+                new_bg = fg;
+
+                continue;
             }
+
+            /* foreground colors */
+            if (code >= 30 && code <= 37) {
+                /* other clients seem to cancel reverse on any color change... */
+                if (ansi_reverse) {
+                    ansi_reverse = false;
+                    new_bg = null;
+                }
+
+                var color_name = ansi_fg_lookup[code];
+                new_fg = new_fg || default_ansi_fg.slice();
+                new_fg[0] = color_name;
+                continue;
+            }
+
+            /* background colors */
+            if (code >= 40 && code <= 47) {
+                /* other clients seem to cancel reverse on any color change... */
+                if (ansi_reverse) {
+                    ansi_reverse = false;
+                    new_fg = null;
+                }
+
+                var color_name = ansi_bg_lookup[code];
+                new_bg = new_bg || default_ansi_bg.slice();
+                new_bg[0] = color_name;
+                continue;
+            }
+        }
+
+        if (new_fg !== undefined) {
+            set_ansi_fg(new_fg);
+        }
+        if (new_bg !== undefined) {
+            set_ansi_bg(new_bg);
         }
     };
 
-    o.set_default_ansi_fg = function(color, level) {
-        default_ansi_fg = [color, level];
-        $('.output_text').css('color', default_ansi_fg[0][default_ansi_fg[1]]);
+    o.set_default_ansi_fg = function(color_name, level) {
+        default_ansi_fg = [color_name, level];
+        $('.output_text').css('color', colors[color_name][level]);
     };
 
     o.handle_change_default_color = function(color_name) {
-        var color = colors[color_name];
         var level = "low";
 
-        o.set_default_ansi_fg(color, level);
+        o.set_default_ansi_fg(color_name, level);
         o.save_color_cfg();
     };
 

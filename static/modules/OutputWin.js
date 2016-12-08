@@ -3,9 +3,6 @@ var OutputWin = new (function(){
     var o = new OutWinBase();
 
     var html;
-    var curr_elem;
-    var fg_color;
-    var bg_color;
 
     o.prepare_reload_layout = function() {
         html = $("#win_output").html();

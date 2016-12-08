@@ -118,14 +118,15 @@ var Socket = new (function() {
             var match;
 
             /* ansi escapes */
-            re = /^\x1b\[\d+(?:;\d+)?m/;
+            re = /^\x1b\[(\d+(?:;\d+)?)m/;
             match = re.exec(substr);
             if (match) {
                 OutputManager.handle_text(output);
                 output = '';
 
                 i += match[0].length;
-                OutputManager.handle_ansi_escape(match[0]);
+                var codes = match[1].split(';');
+                OutputManager.handle_ansi_graphic_codes(codes);
                 continue;
             }
 
