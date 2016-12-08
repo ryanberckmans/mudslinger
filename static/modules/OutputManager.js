@@ -459,7 +459,7 @@ var OutputManager = new (function(){
     };
 
     o.handle_ansi_escape = function(data) {
-        if (data == '\x1b[0m' || data == '\x1b[0;00m') {
+        if (data == '\x1b[0m' || data == '\x1b[0;0m' || data == '\x1b[0;00m') {
             ansi_reverse = false;
             set_ansi_fg(null);
             set_ansi_bg(null);
