@@ -464,7 +464,6 @@ var OutputManager = new (function(){
 
     /* handles graphics mode codes http://ascii-table.com/ansi-escape-sequences.php*/
     o.handle_ansi_graphic_codes = function(codes) {
-        console.log(codes);
         var new_fg;
         var new_bg;
 
