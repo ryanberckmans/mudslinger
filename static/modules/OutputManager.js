@@ -556,7 +556,8 @@ var OutputManager = new (function(){
             console.log("Invalid color_name: " + color_name);
             return;
         }
-        if ( !(level in ['low','high']) ) {
+	
+        if ( !((['low','high']).includes(level)) ) {
             console.log("Invalid level: " + level);
             return;
         }
