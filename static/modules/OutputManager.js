@@ -550,6 +550,17 @@ var OutputManager = new (function(){
     };
 
     o.set_default_ansi_fg = function(color_name, level) {
+        console.log(color_name);
+        console.log(level);
+        if ( !(color_name in colors) ) {
+            console.log("Invalid color_name: " + color_name);
+            return;
+        }
+        if ( !(level in ['low','high']) ) {
+            console.log("Invalid level: " + level);
+            return;
+        }
+       
         default_ansi_fg = [color_name, level];
         $('.output_text').css('color', colors[color_name][level]);
     };
