@@ -22,11 +22,22 @@ var CommandInput = new (function() {
         if (echo) {
             $('#cmd_input_pw').hide();
             $('#cmd_input').show();
-            $('#cmd_input').select();
+            $('#cmd_input').val('');
+            $('#cmd_input').focus();
         } else {
             $('#cmd_input').hide();
             $('#cmd_input_pw').show();
-            $('#cmd_input_pw').select();
+            $('#cmd_input_pw').focus();
+
+            var current = $('#cmd_input').val();
+            if (cmd_history.length > 0
+                && current != cmd_history[cmd_history.length-1]) {
+                /* If they already started typing password before getting echo command*/
+                $('#cmd_input_pw').val(current);
+                $('#cmd_input_pw')[0].setSelectionRange(current.length, current.length);
+            } else {
+                $('#cmd_input_pw').val('');
+            }
         }
     };
 
