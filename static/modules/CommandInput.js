@@ -54,9 +54,19 @@ var CommandInput = new (function() {
         var cmd = $("#cmd_input").val();
         var alias = AliasManager.check_alias(cmd);
         if (!alias) {
-            Message.pub('send_command', {data: cmd});
+            var cmds = cmd.split(';');
+            for (var i=0; i < cmds.length; i++) {
+                Message.pub('send_command', {data: cmds[i]});
+            }
         } else {
-            Message.pub('alias_send_commands', {orig: cmd, cmds: alias.replace('\r', '').split('\n')});
+            console.log(alias);
+            var cmds = [];
+            var lines = alias.replace('\r', '').split('\n');
+            for (var i=0; i < lines.length; i++) {
+                cmds = cmds.concat(lines[i].split(';'));
+            }
+            console.log(cmds);
+            Message.pub('alias_send_commands', {orig: cmd, cmds: cmds});
         }
 
         $('#cmd_input').select();
