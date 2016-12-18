@@ -11,15 +11,25 @@ a:link, a:visited {
     height:92vh;
 }
 
+#left_panel {
+    height:100%;
+    width:100%;
+}
+
 #win_output {
     height:calc(100% - 21px);
     margin:0;
     padding:0;
 }
 
+#win_chat_cont {
+    flex-grow: 1;
+}
 #win_chat {
     height: 100%;
+    flex-grow: 1;
 }
+
 
 .output_text {
     font-size: 10;
@@ -30,36 +40,6 @@ a:link, a:visited {
     overflow-y:scroll;
     overflow-x:scroll;
     width:100%;
-}
-
-#win_stat {
-    font-family:Courier;
-    color:white;
-    background-color:black;
-    width:100%;
-    height:100%;
-}
-
-#win_stat h2 {
-    text-align:center;
-    color:white;
-    font-family:Courier;
-}
-
-#win_aff {
-    font-family:Courier;
-    color:yellow;
-    background-color:black;
-    width:100%;
-    height:100%;
-    overflow-x:scroll;
-    white-space: nowrap;
-}
-
-#win_aff h2 {
-    text-align:center;
-    color:white;
-    font-family:Courier;
 }
 
 #output_aff_split {
@@ -73,24 +53,20 @@ a:link, a:visited {
 #main_vert_split {
 }
 
+#right_panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
 #win_map {
     background-color:grey;
 }
 
 #win_gauge {
     background-color:black;
-}
-
-#hmv_cont {
-    height: 100%;
-    width: 50%;
-    float: left;
-}
-
-#alt_gauge_cont {
-    height: 100%;
-    width: 50%;
-    float: right;
+    height: 10%;
+    width: 100%;
 }
 
 .gauge_bar {
@@ -100,7 +76,7 @@ a:link, a:visited {
 .gauge_bar .jqx-progressbar-text, .gauge_text {
     color: yellow;
     text-shadow: 0px 0px 2px black;
-    font-size: 24px;
+    font-size: 10px;
     font-family: Courier;
 }
 
@@ -129,7 +105,6 @@ a:link, a:visited {
 }
 
 #cmd_input {
-    height: 100;
     resize: none;
     font-family:"Courier", monospace;
     font-size: 10;

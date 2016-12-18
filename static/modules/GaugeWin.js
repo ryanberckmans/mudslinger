@@ -1,4 +1,7 @@
 var GaugeWin = new (function() {
+    var GAUGE_HEIGHT = '18%';
+    var GAUGE_WIDTH = '100%';
+
     var o = self;
 
     var msdp_vals = {};
@@ -15,13 +18,13 @@ var GaugeWin = new (function() {
 
     o.load_layout = function() {
         $('#hp_bar').jqxProgressBar({
-            width: '100%',
-            height: '33%',
+            width: GAUGE_WIDTH,
+            height: GAUGE_HEIGHT,
             value: 50,
             showText: true,
             animationDuration: 0,
             renderText: function(text) {
-                return render_gauge_text( msdp_vals.HEALTH || 0, msdp_vals.HEALTH_MAX || 0, "hp");
+                return render_gauge_text( msdp_vals.HEALTH || 0, msdp_vals.HEALTH_MAX || 0, "hp ");
             }
         });
 
@@ -29,36 +32,36 @@ var GaugeWin = new (function() {
             "background-color", "#DF0101");
 
         $('#mana_bar').jqxProgressBar({
-            width: '100%',
-            height: '33%',
+            width: GAUGE_WIDTH,
+            height: GAUGE_HEIGHT,
             value: 50,
             showText: true,
             animationDuration: 0,
             renderText: function(text) {
                 //return (msdp_vals.MANA || 0) + " / " + (msdp_vals.MANA_MAX || 0) + " mn";
-                return render_gauge_text( msdp_vals.MANA || 0, msdp_vals.MANA_MAX || 0, "mn");
+                return render_gauge_text( msdp_vals.MANA || 0, msdp_vals.MANA_MAX || 0, "mn ");
             }
         });
         $('#mana_bar .jqx-progressbar-value').css(
                 "background-color", "#2E64FE");
 
         $('#move_bar').jqxProgressBar({
-            width: '100%',
-            height: '33%',
+            width: GAUGE_WIDTH,
+            height: GAUGE_HEIGHT,
             value: 50,
             showText: true,
             animationDuration: 0,
             renderText: function(text) {
                 //return (msdp_vals.MOVEMENT || 0) + " / " + (msdp_vals.MOVEMENT_MAX || 0) + " mv";
-                return render_gauge_text( msdp_vals.MOVEMENT || 0, msdp_vals.MOVEMENT_MAX || 0, "mv");
+                return render_gauge_text( msdp_vals.MOVEMENT || 0, msdp_vals.MOVEMENT_MAX || 0, "mv ");
             }
         });
         $('#move_bar .jqx-progressbar-value').css(
                 "background-color", "#04B4AE");
 
         $('#enemy_bar').jqxProgressBar({
-            width: '100%',
-            height: '33%',
+            width: GAUGE_WIDTH,
+            height: GAUGE_HEIGHT,
             value: 0,
             showText: true,
             animationDuration: 0,
@@ -70,8 +73,8 @@ var GaugeWin = new (function() {
                 "background-color", "purple");
 
         $('#tnl_bar').jqxProgressBar({
-            width: '100%',
-            height: '33%',
+            width: GAUGE_WIDTH,
+            height: GAUGE_HEIGHT,
             value: 50,
             showText: true,
             animationDuration: 0,

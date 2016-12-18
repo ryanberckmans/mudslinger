@@ -22,27 +22,12 @@ var Client = new (function() {
             panels: [{size:'75%'},{size:'25%'}]
         });
 
-        $('#output_aff_split').jqxSplitter({
-            orientation: 'vertical',
-            panels: [{size:'20%'},{size:'80%'}]
-        });
-
-        $("#output_gauge_split").jqxSplitter({
-            orientation: 'horizontal',
-            panels: [{size:'90%'},{size:'60px'}]
-        });
-
-        $('#map_chat_split').jqxSplitter({
-            orientation: 'horizontal'
-        });
-
         // let the other guys do their thing
         Message.pub("load_layout", null);
     };
 
     o.reload_layout = function() {
         // Let the other guys prepare
-        console.log("RELOAD LAYOUT AW YEAH");
         Message.pub("prepare_reload_layout", {});
         o.load_layout();
     }

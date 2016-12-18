@@ -126,12 +126,11 @@ var CommandInput = new (function() {
     };
 
     o.input_change = function() {
+
         var input = $('#cmd_input');
         input.height('1px');
         var scrollHeight = input[0].scrollHeight;
-//        console.log(scrollHeight);
         var new_height = 10 + scrollHeight;
-//        console.log(new_height);
         input.height(new_height + "px");
     };
 

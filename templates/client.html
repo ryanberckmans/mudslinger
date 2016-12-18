@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Aarchon Web Client V0.7.4</title>
+  <title>Aarchon Web Client V0.7.5</title>
 
   <link rel="stylesheet" href="{{url_for('static', filename='jqwidgets/styles/jqx.base.css')}}">
 
@@ -32,8 +32,6 @@
   <script src="{{url_for('static', filename='modules/ChatWin.js')}}"></script>
   <script src="{{url_for('static', filename='modules/MapWin.js')}}"></script>
   <script src="{{url_for('static', filename='modules/GaugeWin.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/AffWin.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/StatWin.js')}}"></script>
   <script src="{{url_for('static', filename='modules/CommandInput.js')}}"></script>
   <script src="{{url_for('static', filename='modules/MenuBar.js')}}"></script>
   <script src="{{url_for('static', filename='modules/MXP.js')}}"></script>
@@ -66,55 +64,38 @@
   </ul>
 </div>
 <div id="main_vert_split">
-    <div>
-        <div id="output_aff_split">
-            <div id="win_aff"></div>
-
-            <div>
-            <div id="output_gauge_split" >
-                <div style="width:100%;height:100%;margin:0;padding:0">
-                  <pre id="win_output" class="output_text"></pre>
-                  <!--<br>-->
-                  <textarea id="cmd_input"></textarea>
-                  <input id="cmd_input_pw" type="password" style="display:none">
-                </div>
-
-                <div id="win_gauge" >
-                    <div id="hmv_cont">
-                        <div id='hp_bar' class='gauge_bar'></div>
-                        <div id='mana_bar' class='gauge_bar'></div>
-                        <div id='move_bar' class='gauge_bar'></div>
-                    </div>
-                    <div id="alt_gauge_cont">
-                        <div id='enemy_bar' class='gauge_bar'></div>
-                        <div id='tnl_bar' class='gauge_bar'></div>
-                    </div>
-                </div>
-            </div>
-            </div>
-        </div>
+  <div>
+    <div id="left_panel">
+      <pre id="win_output" class="output_text"></pre>
+      <!--<br>-->
+      <textarea rows="1" id="cmd_input"></textarea>
+      <input id="cmd_input_pw" type="password" style="display:none">
     </div>
+  </div>
 
-    <div>
-        <div id="map_chat_split" >
-            <div>
-                <div id="win_map" >
-                    <center><div id=room_name></div>
-                    <div id="svg_cont" style="width:125px;height:100px"></div>
-                    </center>
-                    <center>
-                    <div id="olc_status"></div>
-                    </center>
-                </div>
-                <div id="win_stat" ></div>
-            </div>
-
-            <div>
-                <center><span>CHAT</span></center>
-            <div id="win_chat" class="output_text"></div>
-            </div>
-        </div>
+  <div>
+    <div id="right_panel">
+      <div id="win_map" >
+        <center><div id=room_name></div>
+          <div id="svg_cont" style="width:125px;height:100px"></div>
+        </center>
+        <center>
+          <div id="olc_status"></div>
+        </center>
+      </div>
+      <!--<hr>-->
+      <div id="win_gauge" >
+        <div id='hp_bar' class='gauge_bar'></div>
+        <div id='mana_bar' class='gauge_bar'></div>
+        <div id='move_bar' class='gauge_bar'></div>
+        <div id='tnl_bar' class='gauge_bar'></div>
+        <div id='enemy_bar' class='gauge_bar'></div>
+      </div>
+      <!--<hr>-->
+      <center><span>CHAT</span></center>
+      <div id="win_chat" class="output_text"></div>
     </div>
+  </div>
 </div>
 </div>
 </body>
