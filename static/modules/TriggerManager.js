@@ -17,18 +17,28 @@ var TriggerManager = new (function(){
                     continue;
                 }
 
-                var value = trig.value;
+                if (trig.is_script) {
+                    var script = new JsScript(trig.value);
+                    if (script) {script.RunScript(match)};
+                } else {
+                    var value = trig.value;
 
-                value = value.replace(/\$(\d+)/g, function(m, d) {
-                    return match[parseInt(d)] || '';
-                });
+                    value = value.replace(/\$(\d+)/g, function(m, d) {
+                        return match[parseInt(d)] || '';
+                    });
 
-                var cmds = value.replace('\r', '').split('\n');
-                Message.pub('trigger_send_commands', {cmds: cmds});
+                    var cmds = value.replace('\r', '').split('\n');
+                    Message.pub('trigger_send_commands', {cmds: cmds});
+                }
             } else {
                 if (line.includes(trig.pattern)) {
-                    var cmds = trig.value.replace('\r', '').split('\n');
-                    Message.pub('trigger_send_commands', {cmds: cmds});
+                    if (trig.is_script) {
+                        var script = new JsScript(trig.value);
+                        if (script) {script.RunScript(null)};
+                    } else {
+                        var cmds = trig.value.replace('\r', '').split('\n');
+                        Message.pub('trigger_send_commands', {cmds: cmds});
+                    }
                 }
             }
         }

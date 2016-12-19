@@ -11,12 +11,27 @@ var AliasEditor = new (function() {
         +"Example: Alias pattern 'blah (\\w+)', alias value 'say $1', "
         +"then issue 'blah asadf' and 'say asadf' will be sent.";
 
+    o.default_script =
+         "/* Put the script here.\n"
+        +"This is javascript code that will run when the trigger fires.\n"
+        +"You are prevented from creating global variables.\n"
+        +"Use 'var' keyword to create local variables.\n"
+        +"Add values to the 'this' object to share persistent data between scripts.\n"
+        +"Example: this.my_val = 123;\n"
+        +"Every script that runs has the same 'this' object.\n"
+        +"\n"
+        +"Use the send() function to send commands to the mud. Example: send('kill orc');\n"
+        +"For regex aliases, 'match' will be the javascript match array, with \n"
+        +"indices according to match groups.\n";
+
     o.get_elements = function() {
         o.win = $('#win_alias_edit');
         o.list_box = $('#alias_list_box');
         o.pattern = $('#alias_pattern');
         o.regex_checkbox = $('#alias_regex_checkbox');
+        o.script_checkbox = $('#alias_script_checkbox');
         o.text_area = $('#alias_text_area');
+        o.script_area = $('#alias_script_area');
         o.new_button = $('#alias_new_button');
         o.delete_button = $('#alias_delete_button');
         o.save_button = $('#alias_save_button');
@@ -43,11 +58,12 @@ var AliasEditor = new (function() {
         }
     };
 
-    o.save_item = function(ind, pattern, value, regex) {
+    o.save_item = function(ind, pattern, value, regex, is_script) {
         var alias = {
             pattern: pattern,
             value: value,
-            regex: regex
+            regex: regex,
+            is_script: is_script
         }
         if (ind < 0) {
             // New alias

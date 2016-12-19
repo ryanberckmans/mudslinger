@@ -18,6 +18,17 @@ var OutputWin = new (function(){
         }
     }
 
+    o.handle_script_print = function(msg) {
+        var message = msg.data;
+        var output = JSON.stringify(message);
+        o.target.append(
+            '<span style="color:orange">'
+            + Util.raw_to_html(output)
+            + "<br>"
+            + '</span>');
+        o.scroll_bottom(true);
+    };
+
     o.handle_send_pw = function(msg) {
         var stars = '*'.repeat(msg.data.length);
 
@@ -42,11 +53,24 @@ var OutputWin = new (function(){
         o.scroll_bottom(true);
     };
 
+    o.handle_script_send_command = function(msg) {
+        if (msg.no_print) {
+            return;
+        }
+        var cmd = msg.data;
+        o.target.append(
+            '<span style="color:cyan">'
+            + Util.raw_to_html(cmd)
+            + "<br>"
+            + '</span>');
+        o.scroll_bottom(true);
+    };
+
     o.handle_trigger_send_commands = function(msg) {
         var html = '<span style="color:cyan">';
 
         for (var i=0; i < msg.cmds.length; i++) {
-            if (i >= 3) {
+            if (i >= 5) {
                 html += '...<br>';
                 break;
             } else {
@@ -63,7 +87,7 @@ var OutputWin = new (function(){
         html += '</span><span style="color:cyan"> --> ';
 
         for (var i=0; i < msg.cmds.length; i++) {
-            if (i >= 3) {
+            if (i >= 5) {
                 html += '...<br>';
                 break;
             } else {
@@ -144,6 +168,36 @@ var OutputWin = new (function(){
         o.scroll_bottom(true);
     };
 
+    o.handle_script_eval_error = function(msg) {
+        var err = msg.data;
+        var stack = Util.raw_to_html(err.stack);
+
+        o.target.append(
+            '<span style="color:red">'
+            + "[[Script eval error<br>"
+            + stack + "<br>"
+            + ']]'
+            + '<br>'
+            + '</span>'
+        );
+        o.scroll_bottom(true);
+    };
+
+    o.handle_script_exec_error = function(msg) {
+        var err = msg.data;
+        var stack = Util.raw_to_html(err.stack);
+
+        o.target.append(
+            '<span style="color:red">'
+            + "[[Script execution error<br>"
+            + stack + "<br>"
+            + ']]'
+            + '<br>'
+            + '</span>'
+        );
+        o.scroll_bottom(true);
+    };
+
     o.handle_line = function(line) {
         TriggerManager.handle_line(line);
     };
@@ -160,9 +214,13 @@ Message.sub('ws_error', OutputWin.handle_ws_error);
 Message.sub('ws_connect', OutputWin.handle_ws_connect);
 Message.sub('ws_disconnect', OutputWin.handle_ws_disconnect);
 Message.sub('send_command', OutputWin.handle_send_command);
+Message.sub('script_send_command', OutputWin.handle_script_send_command);
 Message.sub('send_pw', OutputWin.handle_send_pw);
 Message.sub('trigger_send_commands', OutputWin.handle_trigger_send_commands);
 Message.sub('alias_send_commands', OutputWin.handle_alias_send_commands);
+Message.sub('script_print', OutputWin.handle_script_print);
+Message.sub('script_eval_error', OutputWin.handle_script_eval_error);
+Message.sub('script_exec_error', OutputWin.handle_script_exec_error);
 
 $(document).ready(function() {
     window.onerror = OutputWin.handle_window_error;

@@ -30,6 +30,9 @@ a:link, a:visited {
     flex-grow: 1;
 }
 
+.CodeMirror {
+    border: 1px solid black;
+}
 
 .output_text {
     font-size: 10;
@@ -40,9 +43,6 @@ a:link, a:visited {
     overflow-y:scroll;
     overflow-x:scroll;
     width:100%;
-}
-
-#output_aff_split {
 }
 
 #output_gauge_split {

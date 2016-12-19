@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Aarchon Web Client V0.7.5</title>
+  <title>Aarchon Web Client V0.7.6</title>
 
   <link rel="stylesheet" href="{{url_for('static', filename='jqwidgets/styles/jqx.base.css')}}">
 
@@ -16,11 +16,19 @@
   <script src="{{url_for('static', filename='jqwidgets/jqxribbon.js')}}"></script>
   <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 
+  <link rel="stylesheet" href="{{url_for('static', filename='codemirror-5.21.0/lib/codemirror.css')}}">
+  <link rel="stylesheet" href="{{url_for('static', filename='codemirror-5.21.0/theme/neat.css')}}">
+  <script src="{{url_for('static', filename='codemirror-5.21.0/lib/codemirror.js')}}"></script>
+  <script src="{{url_for('static', filename='codemirror-5.21.0/addon/display/autorefresh.js')}}"></script>
+  <script src="{{url_for('static', filename='codemirror-5.21.0/mode/javascript/javascript.js')}}"></script>
+
   <link rel="stylesheet" href="{{url_for('static', filename='css/client.css')}}">
 
   <script src="{{url_for('static', filename='modules/Polyfill.js')}}"></script>
   <script src="{{url_for('static', filename='modules/Message.js')}}"></script>
   <script src="{{url_for('static', filename='modules/Util.js')}}"></script>
+  <script src="{{url_for('static', filename='modules/JsScript.js')}}"></script>
+  <script src="{{url_for('static', filename='modules/JsScriptWin.js')}}"></script>
   <script src="{{url_for('static', filename='modules/TrigAlEditBase.js')}}"></script>
   <script src="{{url_for('static', filename='modules/AliasEditor.js')}}"></script>
   <script src="{{url_for('static', filename='modules/TriggerEditor.js')}}"></script>
@@ -51,6 +59,7 @@
     <li>Reload Layout</li>
     <li>Aliases</li>
     <li>Triggers</li>
+    <li>Script</li>
     <li>Config
       <ul>
         <li>Text Color
@@ -119,15 +128,19 @@
         Pattern:<br>
         <input type="text" id="trig_pattern" style="height:5%" disabled><br>
         Regex<br>
-        <input type="checkbox" id="trig_regex_checkbox" style="height:5%" disabled>
-
+        <input type="checkbox" id="trig_regex_checkbox" style="height:5%" disabled><br>
+        Script<br>
+        <input type="checkbox" id="trig_script_checkbox" style="height:5%" disabled>
 
         <div>
           <button id="trig_save_button" style="height:5%" disabled>SAVE</button>
           <button id="trig_cancel_button" style="height:5%" disabled>CANCEL</button>
         </div>
         Value:<br>
-        <textarea id="trig_text_area" style="height:85%;width:100%" disabled></textarea>
+        <div id="trig_val_cont" style="height:50%;width:100%">
+          <textarea id="trig_text_area" style="height:100%;width:100%" disabled></textarea>
+          <textarea id="trig_script_area" style="height:100%;width:100%" disabled></textarea>
+        </div>
       </div>
     </div>
   </div>
@@ -152,16 +165,32 @@
         Pattern:<br>
         <input type="text" id="alias_pattern" style="height:5%" disabled><br>
         Regex<br>
-        <input type="checkbox" id="alias_regex_checkbox" style="height:5%" disabled>
-
+        <input type="checkbox" id="alias_regex_checkbox" style="height:5%" disabled><br>
+        Script<br>
+        <input type="checkbox" id="alias_script_checkbox" style="height:5%" disabled>
         <div>
           <button id="alias_save_button" style="height:5%" disabled>SAVE</button>
           <button id="alias_cancel_button" style="height:5%" disabled>CANCEL</button>
         </div>
-
         Value:<br>
-        <textarea id="alias_text_area" style="height:85%;width:100%" disabled></textarea>
+        <div id="alias_val_cont" style="height:50%;width:100%">
+          <textarea id="alias_text_area" style="height:100%;width:100%" disabled></textarea>
+          <textarea id="alias_script_area" style="height:100%;width:100%" disabled></textarea>
+        </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!--JsScriptWin-->
+<div id="win_js_script" style="display:none">
+  <!--header-->
+  <div>JAVASCRIPT SCRIPT</div>
+  <!--content-->
+  <div>
+    <button id="win_js_script_run_button" style="height:10%">RUN SCRIPT</button>
+    <div style="height:90%">
+      <textarea id="win_js_script_code"></textarea>
     </div>
   </div>
 </div>

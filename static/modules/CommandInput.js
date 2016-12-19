@@ -58,16 +58,14 @@ var CommandInput = new (function() {
             for (var i=0; i < cmds.length; i++) {
                 Message.pub('send_command', {data: cmds[i]});
             }
-        } else {
-            console.log(alias);
+        } else if (alias !== true) {
             var cmds = [];
             var lines = alias.replace('\r', '').split('\n');
             for (var i=0; i < lines.length; i++) {
                 cmds = cmds.concat(lines[i].split(';'));
             }
-            console.log(cmds);
             Message.pub('alias_send_commands', {orig: cmd, cmds: cmds});
-        }
+        } /* else the script ran already */
 
         $('#cmd_input').select();
 
@@ -136,7 +134,6 @@ var CommandInput = new (function() {
     };
 
     o.input_change = function() {
-
         var input = $('#cmd_input');
         input.height('1px');
         var scrollHeight = input[0].scrollHeight;

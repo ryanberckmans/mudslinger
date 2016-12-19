@@ -6,12 +6,6 @@ var MenuBar = new (function() {
     };
 
     o.load_layout = function() {
-//        console.log("taco");
-//        var menu = $('#menu_bar');
-//        menu.append('<ul>');
-//        menu.append('<li><a href="#">Ribbit</a></li>');
-//        menu.append('</ul>');
-
         $('#menu_bar').jqxMenu({ width: '100%', height: '4%'});
         $('#menu_bar').on('itemclick', o.handle_click);
     };
@@ -48,6 +42,10 @@ var MenuBar = new (function() {
 
     click_funcs['White'] = function() {
         Message.pub('change_default_color', 'white');
+    };
+
+    click_funcs['Script'] = function() {
+        JsScriptWin.show();
     };
 
     o.handle_click = function(event) {

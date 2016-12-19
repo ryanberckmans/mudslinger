@@ -364,5 +364,5 @@ def parse_msdp(msdp):
 
 
 if __name__ == "__main__":
-    app.debug=True
+    app.debug = True
     socketio.run(app, '0.0.0.0', port=5000)
