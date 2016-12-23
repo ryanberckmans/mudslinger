@@ -43,3 +43,8 @@ $(document).ready(function() {
 //    $(window).resize(Client.reload_layout);
     Client.load_layout();
 });
+
+// Prevent navigating away accidentally
+window.onbeforeunload = function(){
+    return "";
+};
