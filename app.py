@@ -141,7 +141,7 @@ class TelnetConn:
 
     def _listen(self):
         self.ttype_index = 0
-        self.telnet = Telnet(config.GAME_HOST, config.GAME_IP)
+        self.telnet = Telnet(config.GAME_HOST, config.GAME_PORT)
 
         self.telnet.set_option_negotiation_callback(self._negotiate)
 

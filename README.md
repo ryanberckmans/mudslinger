@@ -21,11 +21,10 @@ Python optional requirements:
 
 # Getting started #
 1. Install flask and flask-socketio.
-2. Edit app.py to set the target host/port for telnet connections.
+2. Edit config.py to set the target host/port for telnet connections.
 
 ## Without gunicorn/eventlet ##
-1. Edit app.py to set the web application host and port in the ``if name == '__main__'`` block.
-2. Run app.py to start the server.
+1. Run app.py to start the server (debug mode).
 
 ## With gunicorn/eventlet ##
 1. Install gunicorn and eventlet.
