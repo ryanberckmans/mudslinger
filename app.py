@@ -10,6 +10,8 @@ from telnetlib import Telnet, IAC, DO, WILL, WONT, SB, SE
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
 
+import config
+
 
 app = Flask(__name__)
 
@@ -21,7 +23,7 @@ telnets = {}
 
 
 class TelnetConn:
-    ttypes = ['ArcWeb', 'ANSI', '-256color']
+    ttypes = [config.CLIENT_NAME, 'ANSI', '-256color']
     MSDP_VARS = [
         'CHARACTER_NAME',
         'HEALTH', 'HEALTH_MAX',
@@ -139,8 +141,7 @@ class TelnetConn:
 
     def _listen(self):
         self.ttype_index = 0
-        # self.telnet = Telnet('aarchonmud.com', 7000)
-        self.telnet = Telnet('rooflez.com', 7101)
+        self.telnet = Telnet(config.GAME_HOST, config.GAME_IP)
 
         self.telnet.set_option_negotiation_callback(self._negotiate)
 
@@ -364,5 +365,15 @@ def parse_msdp(msdp):
 
 
 if __name__ == "__main__":
+    import sys
+    # Running directly is assumed for debug/development
+    serve_host = '0.0.0.0'
+    serve_port = 5000
+
+    if len(sys.argv) > 1:
+        serve_host = sys.argv[1]
+    if len(sys.argv) > 2:
+        serve_port = int(sys.argv[2])
+
     app.debug = True
-    socketio.run(app, '0.0.0.0', port=5000)
+    socketio.run(app, serve_host, port=serve_port)
