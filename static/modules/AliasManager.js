@@ -1,16 +1,25 @@
 var AliasManager = new (function(){
     var o = this;
 
+    var enabled = true;
+    o._get_enabled = function() {return enabled;};
+
     o.aliases = null;
 
     o.save_aliases = function() {
         localStorage.setItem('aliases', JSON.stringify(o.aliases));
     };
 
+    o.handle_set_aliases_enabled = function(value) {
+        enabled = value;
+    };
+
     // return the result of the alias if any (string with embedded lines)
     // return true if matched and script ran
     // return null if no match
     o.check_alias = function(cmd) {
+        if (!enabled) return;
+
         for (var i=0; i < o.aliases.length; i++) {
             var alias = o.aliases[i];
 
@@ -66,3 +75,5 @@ $(document).ready(function() {
         AliasManager.aliases = JSON.parse(saved_aliases);
     }
 });
+
+Message.sub('set_aliases_enabled', AliasManager.handle_set_aliases_enabled);

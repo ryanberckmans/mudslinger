@@ -1,13 +1,21 @@
 var TriggerManager = new (function(){
     var o = this;
 
+    var enabled = true;
+    o._get_enabled = function() {return enabled;};
+
     o.triggers = null;
 
     o.save_triggers = function() {
         localStorage.setItem('triggers', JSON.stringify(o.triggers));
     };
 
+    o.handle_set_triggers_enabled = function(value) {
+        enabled = value;
+    };
+
     o.handle_line = function(line) {
+        if (!enabled) return;
 //        console.log("TRIGGER: " + line);
         for (var i=0; i < o.triggers.length; i++) {
             var trig = o.triggers[i];
@@ -55,3 +63,5 @@ $(document).ready(function() {
         TriggerManager.triggers = JSON.parse(saved_triggers);
     }
 });
+
+Message.sub('set_triggers_enabled', TriggerManager.handle_set_triggers_enabled);

@@ -8,6 +8,14 @@ var MenuBar = new (function() {
     o.load_layout = function() {
         $('#menu_bar').jqxMenu({ width: '100%', height: '4%'});
         $('#menu_bar').on('itemclick', o.handle_click);
+
+        $('#chk_enable_trig').change(function() {
+            Message.pub('set_triggers_enabled', this.checked);
+        });
+
+        $('#chk_enable_alias').change(function() {
+            Message.pub('set_aliases_enabled', this.checked);
+        });
     };
 
     var click_funcs = {};
