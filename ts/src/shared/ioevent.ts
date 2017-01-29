@@ -10,4 +10,7 @@ export module EvtDef {
     export interface ReqTelnetWrite {
         data: ArrayBuffer;
     }
+    export interface ReqSendCommand {
+        value: string;
+    }
 }

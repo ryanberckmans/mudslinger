@@ -1,28 +1,19 @@
-export class EventEmitter {
-    private events: {[k: string]: Array<(data: any) => void>} = {};
-
-    on(event: string, listener: (data: any) => void): this {
-        if (this.events[event] === undefined) {
-            this.events[event] = [];
-        }
-        this.events[event].push(listener);
-
-        return this;
+export class EventHook<TData> {
+    private handlers: Array<(data: TData) => void> = [];
+    
+    public handle(callback: (data: TData) => void) {
+        this.handlers.push(callback);
     }
 
-    emit(event: string, data: any): boolean {
-        let fired = false;
-
-        if (this.events[event] === undefined) {
+    public fire(data: TData): boolean {
+        if (this.handlers.length < 1) {
             return false;
         }
 
-        for (let listener of this.events[event]) {
-            listener.call(this, data);
-            
-            fired = true;
+        for (let cb of this.handlers) {
+            cb(data);
         }
 
-        return fired;
+        return true;
     }
 }

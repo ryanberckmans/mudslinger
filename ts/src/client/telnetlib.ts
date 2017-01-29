@@ -1,28 +1,21 @@
-import { EventEmitter } from "./event";
-
-export interface Telnet {
-    on(event: "data", listener: (data: ArrayBuffer) => void): this;
-    emit(event: "data", data: ArrayBuffer): boolean;
-    
-    on(event: "negotiation", listener: (data: NegotiationData) => void): this;
-    emit(event: "negotiation", data: NegotiationData): boolean;
-}
+import { EventHook } from "./event";
 
 export interface NegotiationData {
     cmd: number;
     opt: number;
 }
 
-export class Telnet extends EventEmitter {
+export class Telnet {
     private iacSeq: number[] = [];
     private buf: Array<Array<number>> = [[], []];
     private sb: number = 0;
 
     constructor(writeFunc: (data: ArrayBuffer) => void) {
-        super();
-
         this.writeFunc = writeFunc;
     }
+
+    public EvtData = new EventHook<ArrayBuffer>();
+    public EvtNegotiation = new EventHook<NegotiationData>();
 
     protected writeFunc: (data: ArrayBuffer) => void;
     protected writeBuff(data: ArrayBuffer): void {
@@ -74,11 +67,15 @@ export class Telnet extends EventEmitter {
                 if (c === Cmd.IAC) {
                     this.buf[this.sb].push(c);
                 } else if (c === Cmd.SB) {
+                    this.sb = 1;
                     this.buf[1] = [];
-                    this.emit("negotiation", {cmd: c, opt: null});
+                    this.EvtNegotiation.fire({cmd: c, opt: null});
                 } else if (c === Cmd.SE) {
-                    this.emit("negotiation", {cmd: c, opt: null})
+                    this.sb = 0;
+                    this.EvtNegotiation.fire({cmd: c, opt: null});
                     this.buf[1] = [];
+                } else {
+                    console.log("IAC " + c + " not recognized");
                 }
             } else if (this.iacSeq.length === 2) {
                 let cmd = this.iacSeq[1];
@@ -87,17 +84,13 @@ export class Telnet extends EventEmitter {
                 let opt = c;
 
                 if ([Cmd.DO, Cmd.DONT].indexOf(cmd) !== -1) {
-                    let d: NegotiationData = {cmd: cmd, opt: opt};
-
-                    let handled = this.emit("negotiation", d);
+                    let handled = this.EvtNegotiation.fire({cmd: cmd, opt:opt});
 
                     if (!handled) {
                         this.writeArr([Cmd.IAC, Cmd.WONT, opt]);
                     }
                 } else if ([Cmd.WILL, Cmd.WONT].indexOf(cmd) !== -1) {
-                    let d: NegotiationData = {cmd: cmd, opt: opt};
-
-                    let handled = this.emit("negotiation", d);
+                    let handled = this.EvtNegotiation.fire({cmd: cmd, opt: opt});
 
                     if (handled) {
                         this.writeArr([Cmd.IAC, Cmd.DONT, opt]);
@@ -108,11 +101,8 @@ export class Telnet extends EventEmitter {
 
         if (this.buf[0].length > 0) {
             let arr = new Uint8Array(this.buf[0]);
-            console.log("arr ", arr);
-
-            this.emit("data", arr.buffer);
+            this.EvtData.fire(arr.buffer);
             this.buf[0] = [];
-            console.log("arr2 ", arr);
         }
     }
 }

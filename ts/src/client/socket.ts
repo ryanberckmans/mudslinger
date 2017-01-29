@@ -43,9 +43,7 @@ export class Socket {
         });
 
         this.ioConn.on("telnetData", (data: EvtDef.TelnetData) => {
-            console.log("telnetData", data);
             this.telnetClient.handleData(data.value);
-            //this.handleTelnetData(data);
         });
 
         this.ioConn.on("error", (msg: any) => {
@@ -56,12 +54,8 @@ export class Socket {
             this.ioConn.emit("reqTelnetWrite", {data: data} as EvtDef.ReqTelnetWrite);
         });
 
-        this.telnetClient.on("data", (data) => {
-            console.log("telnetClient data", data);
-            let arr = new Uint8Array(data);
-            console.log("telnetClient data arr", arr);
+        this.telnetClient.EvtData.handle((data) => {
             this.handleTelnetData(data);
-            //this.telnetClient.handleData(data);
         });
     };
 
@@ -76,20 +70,20 @@ export class Socket {
     private handleSendCommand(data: MsgDef.SendCommandMsg) {
         console.time("send_command");
         console.time("command_resp");
-        this.ioConn.emit("send_command", data, () => {
+        this.ioConn.emit("reqSendCommand", data, () => {
             console.timeEnd("send_command");
         });
     };
 
     private handleTriggerSendCommands(data: MsgDef.TriggerSendCommandsMsg) {
         for (let i = 0; i < data.commands.length; i++) {
-            this.ioConn.emit("send_command", {data: data.commands[i]});
+            this.ioConn.emit("reqSendCommand", {data: data.commands[i]});
         }
     };
 
     private handleAliasSendCommands(data: MsgDef.AliasSendCommandsMsg) {
         for (let i = 0; i < data.commands.length; i++) {
-            this.ioConn.emit("send_command", {data: data.commands[i]});
+            this.ioConn.emit("reqSendCommand", {data: data.commands[i]});
         }
     };
 
@@ -97,12 +91,10 @@ export class Socket {
     private handleTelnetData(data: ArrayBuffer) {
         console.timeEnd("command_resp");
         console.time("_handle_telnet_data");
-        console.log("handle it ", new Uint8Array(data));
 
         let rx = this.partialSeq || "";
         this.partialSeq = null;
         rx += String.fromCharCode.apply(String, new Uint8Array(data));
-        console.log("rx", rx);
 
         let output = "";
         let rx_len = rx.length;

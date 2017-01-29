@@ -38,6 +38,10 @@ telnetNs.on('connection', (client: SocketIO.Socket) => {
     client.on('reqTelnetWrite', (data: EvtDef.ReqTelnetWrite) => {
         telnet.write(data.data);
     });
+
+    client.on('reqSendCommand', (data: EvtDef.ReqSendCommand) => {
+        telnet.write(data.value + '\n');
+    });
 });
 
 app.use(express.static("static"));
