@@ -27,7 +27,7 @@ export class OutputWin extends OutWinBase {
         this.message.scriptExecError.subscribe(this.handleScriptExecError, this);
 
         $(document).ready(() => {
-            window.onerror = this.handleWindowError;
+            window.onerror = this.handleWindowError.bind(this);
         });
     }
 

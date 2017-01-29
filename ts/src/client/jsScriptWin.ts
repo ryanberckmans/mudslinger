@@ -13,7 +13,7 @@ export class JsScriptWin {
     private handleRunButtonClick() {
         let code_text = this.codeMirror.getValue();
         let script = this.jsScript.makeScript(code_text);
-        if (script) { script.RunScript(); };
+        if (script) { script(); };
     };
 
     private getElements() {
@@ -36,7 +36,7 @@ export class JsScriptWin {
             }
         );
 
-        this.runButton.click(this.handleRunButtonClick);
+        this.runButton.click(this.handleRunButtonClick.bind(this));
 
     };
 

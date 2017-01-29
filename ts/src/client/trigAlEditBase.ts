@@ -179,12 +179,12 @@ export abstract class TrigAlEditBase {
         this.codeMirrorWrapper.height("100%");
         this.codeMirrorWrapper.hide();
 
-        this.listBox.change(this.handleListBoxChange);
-        this.newButton.click(this.handleNewButtonClick);
-        this.deleteButton.click(this.handleDeleteButtonClick);
-        this.saveButton.click(this.handleSaveButtonClick);
-        this.cancelButton.click(this.handleCancelButtonClick);
-        this.scriptCheckbox.change(this.handleScriptCheckboxChange);
+        this.listBox.change(this.handleListBoxChange.bind(this));
+        this.newButton.click(this.handleNewButtonClick.bind(this));
+        this.deleteButton.click(this.handleDeleteButtonClick.bind(this));
+        this.saveButton.click(this.handleSaveButtonClick.bind(this));
+        this.cancelButton.click(this.handleCancelButtonClick.bind(this));
+        this.scriptCheckbox.change(this.handleScriptCheckboxChange.bind(this));
     };
 
     public show() {
