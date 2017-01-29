@@ -2,11 +2,12 @@ import * as io from "socket.io-client";
 import { Message, MsgDef } from "./message";
 import { Mxp } from "./mxp";
 import { OutputManager } from "./outputManager";
-import { EvtDef } from "../shared/ioevent";
+import { IoEvent } from "../shared/ioevent";
 import { TelnetClient } from "./telnetClient";
 
 export class Socket {
     private ioConn: SocketIOClient.Socket;
+    private ioEvt: IoEvent;
     private telnetClient: TelnetClient;
 
     constructor(private message: Message, private outputManager: OutputManager, private mxp: Mxp) {
@@ -21,6 +22,7 @@ export class Socket {
         let o = this;
 
         this.ioConn = io.connect("http://" + document.domain + ":" + location.port + "/telnet");
+        this.ioEvt = new IoEvent(this.ioConn);
 
         this.ioConn.on("connect", (msg: any) => {
             this.message.wsConnect.publish(null);
@@ -30,20 +32,21 @@ export class Socket {
             this.message.wsDisconnect.publish(null);
         });
 
-        this.ioConn.on("telnetOpened", (msg: any) => {
+        //this.ioConn.on("telnetOpened", (msg: any) => {
+        this.ioEvt.SrvTelnetOpened.handle(() => {
             this.message.telnetConnect.publish(null);
         });
 
-        this.ioConn.on("telnetDisconnect", (msg: any) => {
+        this.ioEvt.SrvTelnetClosed.handle(() => {
             this.message.telnetDisconnect.publish(null);
         });
 
-        this.ioConn.on("telnetError", (msg: any) => {
-            this.message.telnetError.publish({value: msg.data});
+        this.ioEvt.SrvTelnetError.handle((data) => {
+            this.message.telnetError.publish({value: data});
         });
 
-        this.ioConn.on("telnetData", (data: EvtDef.TelnetData) => {
-            this.telnetClient.handleData(data.value);
+        this.ioEvt.SrvTelnetData.handle((data) => {
+            this.telnetClient.handleData(data);
         });
 
         this.ioConn.on("error", (msg: any) => {
@@ -51,7 +54,7 @@ export class Socket {
         });
 
         this.telnetClient = new TelnetClient((data) => {
-            this.ioConn.emit("reqTelnetWrite", {data: data} as EvtDef.ReqTelnetWrite);
+            this.ioEvt.ClReqTelnetWrite.fire(data);
         });
 
         this.telnetClient.EvtData.handle((data) => {
@@ -60,30 +63,35 @@ export class Socket {
     };
 
     public openTelnet() {
-        this.ioConn.emit("reqTelnetOpen", {});
+        this.ioEvt.ClReqTelnetOpen.fire(null);
     };
 
     public closeTelnet() {
-        this.ioConn.emit("reqTelnetClose", {});
+        this.ioEvt.ClReqTelnetClose.fire(null);
     };
 
+    private sendCmd(cmd: string) {
+        cmd += "\n";
+        let arr = new Uint8Array(cmd.length);
+        for (let i = 0; i < cmd.length; i++) {
+            arr[i] = cmd.charCodeAt(i);
+        }
+        this.ioEvt.ClReqTelnetWrite.fire(arr.buffer);
+    }
+
     private handleSendCommand(data: MsgDef.SendCommandMsg) {
-        console.time("send_command");
-        console.time("command_resp");
-        this.ioConn.emit("reqSendCommand", data, () => {
-            console.timeEnd("send_command");
-        });
+        this.sendCmd(data.value);
     };
 
     private handleTriggerSendCommands(data: MsgDef.TriggerSendCommandsMsg) {
         for (let i = 0; i < data.commands.length; i++) {
-            this.ioConn.emit("reqSendCommand", {data: data.commands[i]});
+            this.sendCmd(data.commands[i]);
         }
     };
 
     private handleAliasSendCommands(data: MsgDef.AliasSendCommandsMsg) {
         for (let i = 0; i < data.commands.length; i++) {
-            this.ioConn.emit("reqSendCommand", {data: data.commands[i]});
+            this.sendCmd(data.commands[i]);
         }
     };
 
@@ -212,10 +220,4 @@ export class Socket {
 //        });
     };
 
-    private testSocketResponse() {
-        console.time("test_socket_response");
-        this.ioConn.emit("request_test_socket_response", {}, () => {
-            console.timeEnd("test_socket_response");
-        });
-    };
 }

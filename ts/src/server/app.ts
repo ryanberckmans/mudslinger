@@ -3,7 +3,7 @@ import * as socketio from 'socket.io';
 import * as net from 'net';
 import * as http from 'http';
 
-import { EvtDef } from '../shared/ioevent';
+import { IoEvent } from '../shared/ioevent';
 
 
 let cwd = process.cwd();
@@ -16,31 +16,28 @@ let io = socketio(server);
 var telnetNs = io.of("/telnet");
 telnetNs.on('connection', (client: SocketIO.Socket) => {
     let telnet: net.Socket;
+    let ioEvt = new IoEvent(client);
 
-    client.on('reqTelnetOpen', () => {
+    ioEvt.ClReqTelnetOpen.handle(() => {
         telnet = new net.Socket();
         telnet.on('data', (data: Buffer) => {
-            client.emit('telnetData', {value: data.buffer} as EvtDef.TelnetData);
+            ioEvt.SrvTelnetData.fire(data.buffer);
         });
         telnet.on('close', (had_error: boolean) => {
-            client.emit('telnetClosed', {had_error: had_error} as EvtDef.TelnetClosed);
+            ioEvt.SrvTelnetClosed.fire(had_error);
         });
 
         telnet.connect(7000, "aarchonmud.com", () => {
-            client.emit("telnetOpened", {} as EvtDef.TelnetOpened);
+            ioEvt.SrvTelnetOpened.fire(null);
         });
     });
 
-    client.on('reqTelnetClose', () => {
+    ioEvt.ClReqTelnetClose.handle(() => {
         telnet.end();
     });
 
-    client.on('reqTelnetWrite', (data: EvtDef.ReqTelnetWrite) => {
-        telnet.write(data.data);
-    });
-
-    client.on('reqSendCommand', (data: EvtDef.ReqSendCommand) => {
-        telnet.write(data.value + '\n');
+    ioEvt.ClReqTelnetWrite.handle((data) => {
+        telnet.write(data);
     });
 });
 
