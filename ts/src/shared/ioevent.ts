@@ -16,12 +16,12 @@ export class IoEvent {
     constructor(private ioOobj: any) {
     }
 
-    public SrvTelnetData = new IoEventHook<ArrayBuffer>(this.ioOobj, "SrvTelnetData");
-    public SrvTelnetClosed = new IoEventHook<boolean>(this.ioOobj, "SrvTelnetClosed");
-    public SrvTelnetOpened = new IoEventHook<void>(this.ioOobj, "SrvTelnetOpened");
-    public SrvTelnetError = new IoEventHook<string>(this.ioOobj, "SrvTelnetError");
+    public srvTelnetData = new IoEventHook<ArrayBuffer>(this.ioOobj, "srvTelnetData");
+    public srvTelnetClosed = new IoEventHook<boolean>(this.ioOobj, "srvTelnetClosed");
+    public srvTelnetOpened = new IoEventHook<void>(this.ioOobj, "srvTelnetOpened");
+    public srvTelnetError = new IoEventHook<string>(this.ioOobj, "srvTelnetError");
 
-    public ClReqTelnetOpen = new IoEventHook<void>(this.ioOobj, "ClReqTelnetOpen");
-    public ClReqTelnetClose = new IoEventHook<void>(this.ioOobj, "ClReqTelnetClose");
-    public ClReqTelnetWrite = new IoEventHook<ArrayBuffer>(this.ioOobj, "ClReqTelnetWrite");
+    public clReqTelnetOpen = new IoEventHook<void>(this.ioOobj, "clReqTelnetOpen");
+    public clReqTelnetClose = new IoEventHook<void>(this.ioOobj, "clReqTelnetClose");
+    public clReqTelnetWrite = new IoEventHook<ArrayBuffer>(this.ioOobj, "clReqTelnetWrite");
 }

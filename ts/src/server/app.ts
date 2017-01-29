@@ -18,25 +18,25 @@ telnetNs.on('connection', (client: SocketIO.Socket) => {
     let telnet: net.Socket;
     let ioEvt = new IoEvent(client);
 
-    ioEvt.ClReqTelnetOpen.handle(() => {
+    ioEvt.clReqTelnetOpen.handle(() => {
         telnet = new net.Socket();
         telnet.on('data', (data: Buffer) => {
-            ioEvt.SrvTelnetData.fire(data.buffer);
+            ioEvt.srvTelnetData.fire(data.buffer);
         });
         telnet.on('close', (had_error: boolean) => {
-            ioEvt.SrvTelnetClosed.fire(had_error);
+            ioEvt.srvTelnetClosed.fire(had_error);
         });
 
         telnet.connect(7000, "aarchonmud.com", () => {
-            ioEvt.SrvTelnetOpened.fire(null);
+            ioEvt.srvTelnetOpened.fire(null);
         });
     });
 
-    ioEvt.ClReqTelnetClose.handle(() => {
+    ioEvt.clReqTelnetClose.handle(() => {
         telnet.end();
     });
 
-    ioEvt.ClReqTelnetWrite.handle((data) => {
+    ioEvt.clReqTelnetWrite.handle((data) => {
         telnet.write(data);
     });
 });

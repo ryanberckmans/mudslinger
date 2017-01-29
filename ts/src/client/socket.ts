@@ -32,20 +32,19 @@ export class Socket {
             this.message.wsDisconnect.publish(null);
         });
 
-        //this.ioConn.on("telnetOpened", (msg: any) => {
-        this.ioEvt.SrvTelnetOpened.handle(() => {
+        this.ioEvt.srvTelnetOpened.handle(() => {
             this.message.telnetConnect.publish(null);
         });
 
-        this.ioEvt.SrvTelnetClosed.handle(() => {
+        this.ioEvt.srvTelnetClosed.handle(() => {
             this.message.telnetDisconnect.publish(null);
         });
 
-        this.ioEvt.SrvTelnetError.handle((data) => {
+        this.ioEvt.srvTelnetError.handle((data) => {
             this.message.telnetError.publish({value: data});
         });
 
-        this.ioEvt.SrvTelnetData.handle((data) => {
+        this.ioEvt.srvTelnetData.handle((data) => {
             this.telnetClient.handleData(data);
         });
 
@@ -54,20 +53,24 @@ export class Socket {
         });
 
         this.telnetClient = new TelnetClient((data) => {
-            this.ioEvt.ClReqTelnetWrite.fire(data);
+            this.ioEvt.clReqTelnetWrite.fire(data);
         });
 
         this.telnetClient.EvtData.handle((data) => {
             this.handleTelnetData(data);
         });
+
+        this.telnetClient.EvtServerEcho.handle((data) => {
+            this.message.setEcho.publish({value: !data});
+        });
     };
 
     public openTelnet() {
-        this.ioEvt.ClReqTelnetOpen.fire(null);
+        this.ioEvt.clReqTelnetOpen.fire(null);
     };
 
     public closeTelnet() {
-        this.ioEvt.ClReqTelnetClose.fire(null);
+        this.ioEvt.clReqTelnetClose.fire(null);
     };
 
     private sendCmd(cmd: string) {
@@ -76,7 +79,7 @@ export class Socket {
         for (let i = 0; i < cmd.length; i++) {
             arr[i] = cmd.charCodeAt(i);
         }
-        this.ioEvt.ClReqTelnetWrite.fire(arr.buffer);
+        this.ioEvt.clReqTelnetWrite.fire(arr.buffer);
     }
 
     private handleSendCommand(data: MsgDef.SendCommandMsg) {
