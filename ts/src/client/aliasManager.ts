@@ -1,13 +1,13 @@
-import {JsScript} from "./jsScript";
-import {Message, MsgDef} from "./message";
-import {TrigAlItem} from "./trigAlEditBase";
+import { JsScript } from "./jsScript";
+import { GlEvent } from "./event";
+import { TrigAlItem } from "./trigAlEditBase";
 
 export class AliasManager {
     private enabled: boolean = true;
     public aliases: Array<TrigAlItem> = null;
 
-    constructor(private message: Message, private jsScript: JsScript) {
-        this.message.setAliasesEnabled.subscribe(this.handleSetAliasesEnabled, this);
+    constructor(private jsScript: JsScript) {
+        GlEvent.setAliasesEnabled.handle(this.handleSetAliasesEnabled, this);
 
         $(document).ready(() => {
             let saved_aliases: string = localStorage.getItem("aliases");
@@ -23,8 +23,8 @@ export class AliasManager {
         localStorage.setItem("aliases", JSON.stringify(this.aliases));
     };
 
-    private handleSetAliasesEnabled(data: MsgDef.SetAliasesEnabledMsg) {
-        this.enabled = data.value;
+    private handleSetAliasesEnabled(value: boolean) {
+        this.enabled = value;
     };
 
     // return the result of the alias if any (string with embedded lines)

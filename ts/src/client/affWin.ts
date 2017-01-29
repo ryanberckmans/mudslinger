@@ -1,12 +1,12 @@
-import {Message, MsgDef} from "./message";
+import { GlEvent, GlDef } from "./event";
 
 export class AffWin {
     private output: string;
 
-    constructor(private message: Message) {
-        this.message.msdpVar.subscribe(this.handleMsdpVar, this);
-        this.message.prepareReloadLayout.subscribe(this.prepareReloadLayout, this);
-        this.message.loadLayout.subscribe(this.loadLayout, this);
+    constructor() {
+        GlEvent.msdpVar.handle(this.handleMsdpVar, this);
+        GlEvent.prepareReloadLayout.handle(this.prepareReloadLayout, this);
+        GlEvent.loadLayout.handle(this.loadLayout, this);
     }
 
     private prepareReloadLayout() {
@@ -33,7 +33,7 @@ export class AffWin {
         $("#win_aff").html(this.output);
     };
 
-    private handleMsdpVar(data: MsgDef.MsdpVarMsg) {
+    private handleMsdpVar(data: GlDef.MsdpVarData) {
         if (data.varName !== "AFFECTS") {
             return;
         }

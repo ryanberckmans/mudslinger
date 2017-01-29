@@ -1,10 +1,10 @@
-import {Message, MsgDef} from "./message";
+import { GlEvent, GlDef } from "./event";
 
 export class StatWin {
-    constructor(private message: Message) {
-        this.message.prepareReloadLayout.subscribe(this.prepareReloadLayout, this);
-        this.message.loadLayout.subscribe(this.loadLayout, this);
-        this.message.msdpVar.subscribe(this.handleMsdpVar, this);
+    constructor() {
+        GlEvent.prepareReloadLayout.handle(this.prepareReloadLayout, this);
+        GlEvent.loadLayout.handle(this.loadLayout, this);
+        GlEvent.msdpVar.handle(this.handleMsdpVar, this);
     }
 
     private msdpVals: {[k: string]: string} = {
@@ -91,7 +91,7 @@ export class StatWin {
         $("#win_stat").html("<pre>" + output + "</pre>");
     };
 
-    private handleMsdpVar(data: MsgDef.MsdpVarMsg) {
+    private handleMsdpVar(data: GlDef.MsdpVarData) {
         if (!(data.varName in this.msdpVals)) {
             return;
         }

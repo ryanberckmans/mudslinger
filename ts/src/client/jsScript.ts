@@ -1,14 +1,14 @@
-import {Message, MsgDef} from "./message";
+import { GlEvent, GlDef } from "./event";
 
-function makeScript(text: string, _message_: Message) {
+function makeScript(text: string) {
     let _scriptFunc_: (match: any) => void;
     /* Scripting API section */
     let send = function(cmd: string) {
-        _message_.scriptSendCommand.publish({value: cmd});
+        GlEvent.scriptSendCommand.fire({value: cmd});
     };
 
     let print = function(message: string) {
-        _message_.scriptPrint.publish({value: message});
+       GlEvent.scriptPrint.fire(message);
     };
     /* end Scripting API section */
 
@@ -16,7 +16,7 @@ function makeScript(text: string, _message_: Message) {
         eval("_scriptFunc_ = function(match) {\"use strict\";" + text + "}");
     }
     catch (err) {
-        _message_.scriptEvalError.publish({value: err});
+        GlEvent.scriptEvalError.fire({value: err});
         return null;
     }
 
@@ -28,11 +28,7 @@ function makeScript(text: string, _message_: Message) {
 export class JsScript {
     private scriptThis = {}; /* this used for all scripts */
 
-    constructor(private message: Message) {
-        this.message = message;
-    }
-
     public makeScript(text: string) {
-        return makeScript.call(this.scriptThis, text, this.message);
+        return makeScript.call(this.scriptThis, text);
     }
 }

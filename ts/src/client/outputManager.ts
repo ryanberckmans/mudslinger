@@ -1,4 +1,5 @@
-import {Message, MsgDef} from "./message";
+import { GlEvent, GlDef } from "./event";
+
 import {OutputWin} from "./outputWin";
 import {OutWinBase} from "./outWinBase";
 
@@ -383,9 +384,9 @@ export class OutputManager {
     private defaultAnsiFg: ansiColorTuple = ["green", "low"];
     private defaultAnsiBg: ansiColorTuple = ["black", "low"];
 
-    constructor(private message: Message, private outputWin: OutputWin) {
-        this.message.loadLayout.subscribe(this.handleLoadLayout, this);
-        this.message.changeDefaultColor.subscribe(this.handleChangeDefaultColor, this);
+    constructor(private outputWin: OutputWin) {
+        GlEvent.loadLayout.handle(this.handleLoadLayout, this);
+        GlEvent.changeDefaultColor.handle(this.handleChangeDefaultColor, this);
 
         $(document).ready(() => {
             let saved_color_cfg = localStorage.getItem("color_cfg");
@@ -588,10 +589,10 @@ export class OutputManager {
         $(".output_text").css("color", ansiColors[colorName][level]);
     }
 
-    private handleChangeDefaultColor(data: MsgDef.ChangeDefaultColorMsg) {
+    private handleChangeDefaultColor(data: GlDef.ChangeDefaultColorData) {
         let level: ansiLevel = "low";
 
-        this.setDefaultAnsiFg(<ansiName>data.value, level);
+        this.setDefaultAnsiFg(<ansiName>data, level);
         this.saveColorCfg();
     };
 

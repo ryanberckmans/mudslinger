@@ -1,4 +1,4 @@
-import {Message, MsgDef} from "./message";
+import { GlEvent, GlDef } from "./event";
 import * as Util from "./util";
 
 const GAUGE_HEIGHT = "18%";
@@ -23,14 +23,12 @@ export class GaugeWin {
     private msdpVals: MsdpVals = new MsdpVals();
     private updateFuncs: {[k: string]: () => void} = {};
 
-    constructor(private message: Message) {
-        this.message = message;
-
+    constructor() {
         this.createUpdateFuncs();
 
-        this.message.msdpVar.subscribe(this.handleMsdpVar, this);
-        this.message.prepareReloadLayout.subscribe(this.prepareReloadLayout, this);
-        this.message.loadLayout.subscribe(this.loadLayout, this);
+        GlEvent.msdpVar.handle(this.handleMsdpVar, this);
+        GlEvent.prepareReloadLayout.handle(this.prepareReloadLayout, this);
+        GlEvent.loadLayout.handle(this.loadLayout, this);
     }
 
     private renderGaugeText(curr: number, max: number, tag: string) {
@@ -49,7 +47,7 @@ export class GaugeWin {
     };
 
     private loadLayout() {
-        $("#hp_bar").jqxProgressBar({
+        (<any>$("#hp_bar")).jqxProgressBar({
             width: GAUGE_WIDTH,
             height: GAUGE_HEIGHT,
             value: 50,
@@ -63,7 +61,7 @@ export class GaugeWin {
         $("#hp_bar .jqx-progressbar-value").css(
             "background-color", "#DF0101");
 
-        $("#mana_bar").jqxProgressBar({
+        (<any>$("#mana_bar")).jqxProgressBar({
             width: GAUGE_WIDTH,
             height: GAUGE_HEIGHT,
             value: 50,
@@ -76,7 +74,7 @@ export class GaugeWin {
         $("#mana_bar .jqx-progressbar-value").css(
                 "background-color", "#2E64FE");
 
-        $("#move_bar").jqxProgressBar({
+        (<any>$("#move_bar")).jqxProgressBar({
             width: GAUGE_WIDTH,
             height: GAUGE_HEIGHT,
             value: 50,
@@ -89,7 +87,7 @@ export class GaugeWin {
         $("#move_bar .jqx-progressbar-value").css(
                 "background-color", "#04B4AE");
 
-        $("#enemy_bar").jqxProgressBar({
+        (<any>$("#enemy_bar")).jqxProgressBar({
             width: GAUGE_WIDTH,
             height: GAUGE_HEIGHT,
             value: 0,
@@ -102,7 +100,7 @@ export class GaugeWin {
         $("#enemy_bar .jqx-progressbar-value").css(
                 "background-color", "purple");
 
-        $("#tnl_bar").jqxProgressBar({
+        (<any>$("#tnl_bar")).jqxProgressBar({
             width: GAUGE_WIDTH,
             height: GAUGE_HEIGHT,
             value: 50,
@@ -127,7 +125,7 @@ export class GaugeWin {
             let val = this.msdpVals["HEALTH"] || 0;
             let max = this.msdpVals["HEALTH_MAX"] || 0;
             if ( !max || max === 0) { return; }
-            $("#hp_bar").jqxProgressBar({value: 100 * val / max });
+            (<any>$("#hp_bar")).jqxProgressBar({value: 100 * val / max });
         };
         this.updateFuncs["HEALTH_MAX"] = this.updateFuncs["HEALTH"];
 
@@ -135,7 +133,7 @@ export class GaugeWin {
             let val = this.msdpVals["MANA"] || 0;
             let max = this.msdpVals["MANA_MAX"] || 0;
             if ( !max || max === 0) { return; }
-            $("#mana_bar").jqxProgressBar({value: 100 * val / max});
+            (<any>$("#mana_bar")).jqxProgressBar({value: 100 * val / max});
         };
         this.updateFuncs["MANA_MAX"] = this.updateFuncs["MANA"];
 
@@ -143,7 +141,7 @@ export class GaugeWin {
             let val = this.msdpVals["MOVEMENT"] || 0;
             let max = this.msdpVals["MOVEMENT_MAX"] || 0;
             if ( !max || max === 0) { return; }
-            $("#move_bar").jqxProgressBar({value: 100 * val / max});
+            (<any>$("#move_bar")).jqxProgressBar({value: 100 * val / max});
         };
         this.updateFuncs["MOVEMENT_MAX"] = this.updateFuncs["MOVEMENT"];
 
@@ -151,7 +149,7 @@ export class GaugeWin {
             let val = this.msdpVals["OPPONENT_HEALTH"] || 0;
             let max = this.msdpVals["OPPONENT_HEALTH_MAX"] || 0;
             if ( !max || max === 0) { return; }
-            $("#enemy_bar").jqxProgressBar({value: 100 * val / max});
+            (<any>$("#enemy_bar")).jqxProgressBar({value: 100 * val / max});
         };
         this.updateFuncs["OPPONENT_HEALTH_MAX"] = this.updateFuncs["OPPONENT_HEALTH"];
         this.updateFuncs["OPPONENT_NAME"] = this.updateFuncs["OPPONENT_HEALTH"];
@@ -160,12 +158,12 @@ export class GaugeWin {
             let val = this.msdpVals["EXPERIENCE_TNL"] || 0;
             let max = this.msdpVals["EXPERIENCE_MAX"] || 0;
             if ( !max || max === 0) { return; }
-            $("#tnl_bar").jqxProgressBar({value: 100 * (max - val) / max});
+            (<any>$("#tnl_bar")).jqxProgressBar({value: 100 * (max - val) / max});
         };
         this.updateFuncs["EXPERIENCE_MAX"] = this.updateFuncs["EXPERIENCE_TNL"];
     }
 
-    private handleMsdpVar(data: MsgDef.MsdpVarMsg) {
+    private handleMsdpVar(data: GlDef.MsdpVarData) {
         if (data.varName in this.updateFuncs) {
             let dict: {[k: string]: any} = this.msdpVals;
             dict[data.varName] = data.value;

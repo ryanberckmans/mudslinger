@@ -1,5 +1,5 @@
-import {AliasManager} from "./aliasManager";
-import {TrigAlEditBase} from "./trigAlEditBase";
+import { AliasManager } from "./aliasManager";
+import { TrigAlEditBase } from "./trigAlEditBase";
 
 export class AliasEditor extends TrigAlEditBase {
     constructor(private aliasManager: AliasManager) {
@@ -30,18 +30,18 @@ export class AliasEditor extends TrigAlEditBase {
             + "indices according to match groups.\n";
 
     protected getElements(): void {
-        this.win = $("#win_alias_edit");
-        this.listBox = $("#alias_list_box");
-        this.pattern = $("#alias_pattern");
-        this.regexCheckbox = $("#alias_regex_checkbox");
-        this.scriptCheckbox = $("#alias_script_checkbox");
-        this.textArea = $("#alias_text_area");
-        this.scriptArea = $("#alias_script_area");
-        this.newButton = $("#alias_new_button");
-        this.deleteButton = $("#alias_delete_button");
-        this.saveButton = $("#alias_save_button");
-        this.cancelButton = $("#alias_cancel_button");
-        this.mainSplit = $("#alias_main_split");
+        this.$win = $("#win_alias_edit");
+        this.$listBox = $("#alias_list_box");
+        this.$pattern = $("#alias_pattern");
+        this.$regexCheckbox = $("#alias_regex_checkbox");
+        this.$scriptCheckbox = $("#alias_script_checkbox");
+        this.$textArea = $("#alias_text_area");
+        this.$scriptArea = $("#alias_script_area");
+        this.$newButton = $("#alias_new_button");
+        this.$deleteButton = $("#alias_delete_button");
+        this.$saveButton = $("#alias_save_button");
+        this.$cancelButton = $("#alias_cancel_button");
+        this.$mainSplit = $("#alias_main_split");
     };
 
     protected getList() {

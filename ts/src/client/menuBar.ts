@@ -1,13 +1,13 @@
-import {Client} from "./client";
-import {Message, MsgDef} from "./message";
-import {Socket} from "./socket";
-import {AliasEditor} from "./aliasEditor";
-import {TriggerEditor} from "./triggerEditor";
-import {JsScriptWin} from "./jsScriptWin";
+import { GlEvent, GlDef } from "./event";
+
+import { Client } from "./client";
+import { Socket } from "./socket";
+import { AliasEditor } from "./aliasEditor";
+import { TriggerEditor } from "./triggerEditor";
+import { JsScriptWin } from "./jsScriptWin";
 
 export class MenuBar {
     constructor(
-        private message: Message,
         private client: Client,
         private socket: Socket,
         private aliasEditor: AliasEditor,
@@ -16,8 +16,8 @@ export class MenuBar {
         ) {
         this.makeClickFuncs();
 
-        this.message.prepareReloadLayout.subscribe(this.prepareReloadLayout, this);
-        this.message.loadLayout.subscribe(this.loadLayout, this);
+        GlEvent.prepareReloadLayout.handle(this.prepareReloadLayout, this);
+        GlEvent.loadLayout.handle(this.loadLayout, this);
     }
 
     private prepareReloadLayout() {
@@ -25,16 +25,16 @@ export class MenuBar {
     }
 
     private loadLayout() {
-        $("#menu_bar").jqxMenu({ width: "100%", height: "4%"});
-        $("#menu_bar").on("itemclick", (e: any) => this.handleClick(e));
+        (<any>$("#menu_bar")).jqxMenu({ width: "100%", height: "4%"});
+        $("#menu_bar").on("itemclick", this.handleClick.bind(this));
 
         let o = this;
         $("#chk_enable_trig").change(function() {
-            o.message.setTriggersEnabled.publish({value: this.checked});
+            GlEvent.setTriggersEnabled.fire(this.checked);
         });
 
         $("#chk_enable_alias").change(function() {
-            o.message.setAliasesEnabled.publish({value: this.checked});
+            GlEvent.setAliasesEnabled.fire(this.checked);
         });
     };
 
@@ -61,11 +61,11 @@ export class MenuBar {
         };
 
         this.clickFuncs["Green"] = () => {
-            this.message.changeDefaultColor.publish({value: "green"});
+            GlEvent.changeDefaultColor.fire("green");
         };
 
         this.clickFuncs["White"] = () => {
-            this.message.changeDefaultColor.publish({value: "white"});
+            GlEvent.changeDefaultColor.fire("white");
         };
 
         this.clickFuncs["Script"] = () => {

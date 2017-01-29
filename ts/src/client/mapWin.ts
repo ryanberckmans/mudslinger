@@ -1,4 +1,4 @@
-import {Message, MsgDef} from "./message";
+import { GlEvent, GlDef } from "./event";
 import * as Util from "./util";
 
 const exits: {[k: string]: string} = {
@@ -30,10 +30,10 @@ const doors: {[k: string]: string} = {
 };
 
 export class MapWin {
-    constructor(private message: Message) {
-        this.message.msdpVar.subscribe(this.handleMsdpVar, this);
-        this.message.prepareReloadLayout.subscribe(this.prepareReloadLayout, this);
-        this.message.loadLayout.subscribe(this.loadLayout, this);
+    constructor() {
+        GlEvent.msdpVar.handle(this.handleMsdpVar, this);
+        GlEvent.prepareReloadLayout.handle(this.prepareReloadLayout, this);
+        GlEvent.loadLayout.handle(this.loadLayout, this);
     }
 
     private prepareReloadLayout() {
@@ -91,7 +91,7 @@ export class MapWin {
         $("#olc_status").html(this.editMode + " " + this.editVnum);
     };
 
-    private handleMsdpVar(data: MsgDef.MsdpVarMsg) {
+    private handleMsdpVar(data: GlDef.MsdpVarData) {
         switch (data.varName) {
             case "EDIT_MODE":
                 this.editMode = data.value;

@@ -1,5 +1,6 @@
-/// <reference path="../../definitions/jqwidgets.d.ts" />
 /// <reference path="../../definitions/polyfill.d.ts" />
+
+import { GlEvent } from "./event";
 
 import { AffWin } from "./affWin";
 import { AliasEditor } from "./aliasEditor";
@@ -11,7 +12,7 @@ import { JsScript } from "./jsScript";
 import { JsScriptWin } from "./jsScriptWin";
 import { MapWin } from "./mapWin";
 import { MenuBar } from "./menuBar";
-import { Message, MsgDef } from "./message";
+
 import { Mxp } from "./mxp";
 import { OutputManager } from "./outputManager";
 import { OutputWin } from "./outputWin";
@@ -31,7 +32,6 @@ export class Client {
     private jsScriptWin: JsScriptWin;
     private mapWin: MapWin;
     private menuBar: MenuBar;
-    private message: Message;
     private mxp: Mxp;
     private outputManager: OutputManager;
     private outputWin: OutputWin;
@@ -41,30 +41,29 @@ export class Client {
     private triggerManager: TriggerManager;
 
     constructor() {
-        this.message = new Message();
-        this.affWin = new AffWin(this.message);
-        this.jsScript = new JsScript(this.message);
-        this.chatWin = new ChatWin(this.message);
-        this.gaugeWin = new GaugeWin(this.message);
-        this.mapWin = new MapWin(this.message);
-        this.statWin = new StatWin(this.message);
+        this.affWin = new AffWin();
+        this.jsScript = new JsScript();
+        this.chatWin = new ChatWin();
+        this.gaugeWin = new GaugeWin();
+        this.mapWin = new MapWin();
+        this.statWin = new StatWin();
 
         this.jsScriptWin = new JsScriptWin(this.jsScript);
-        this.triggerManager = new TriggerManager(this.message, this.jsScript);
-        this.aliasManager = new AliasManager(this.message, this.jsScript);
+        this.triggerManager = new TriggerManager(this.jsScript);
+        this.aliasManager = new AliasManager(this.jsScript);
 
-        this.commandInput = new CommandInput(this.message, this.aliasManager);
+        this.commandInput = new CommandInput(this.aliasManager);
 
-        this.outputWin = new OutputWin(this.message, this.triggerManager);
+        this.outputWin = new OutputWin(this.triggerManager);
 
         this.aliasEditor = new AliasEditor(this.aliasManager);
         this.triggerEditor = new TriggerEditor(this.triggerManager);
 
-        this.outputManager = new OutputManager(this.message, this.outputWin);
+        this.outputManager = new OutputManager(this.outputWin);
 
-        this.mxp = new Mxp(this.message, this.outputManager, this.chatWin);
-        this.socket = new Socket(this.message, this.outputManager, this.mxp);
-        this.menuBar = new MenuBar(this.message, this, this.socket, this.aliasEditor, this.triggerEditor, this.jsScriptWin);
+        this.mxp = new Mxp(this.outputManager, this.chatWin);
+        this.socket = new Socket(this.outputManager, this.mxp);
+        this.menuBar = new MenuBar(this, this.socket, this.aliasEditor, this.triggerEditor, this.jsScriptWin);
 
         $(document).ready(() => {
             this.socket.open();
@@ -94,7 +93,7 @@ export class Client {
         };
 
         // do the high level layout
-        $("#main_vert_split").jqxSplitter({
+        (<any>$("#main_vert_split")).jqxSplitter({
             width: "100%",
             height: "100%",
             orientation: "vertical",
@@ -103,13 +102,13 @@ export class Client {
         console.log("Turkey");
 
         // let the other guys do their thing
-        this.message.loadLayout.publish(null);
+        GlEvent.loadLayout.fire(null);
 
     }
 
     public reloadLayout(): void {
         // Let the other guys prepare
-        this.message.prepareReloadLayout.publish(null);
+        GlEvent.prepareReloadLayout.fire(null);
         this.loadLayout();
     }
 }

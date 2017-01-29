@@ -1,15 +1,16 @@
+import { GlEvent, GlDef } from "./event";
+
 import {AliasManager} from "./aliasManager";
-import {Message, MsgDef} from "./message";
 
 export class CommandInput {
     private cmd_history: string[] = [];
     private cmd_index: number = -1;
 
-    constructor(private message: Message, private aliasManager: AliasManager) {
-        this.message.prepareReloadLayout.subscribe(this.prepareReloadLayout, this);
-        this.message.loadLayout.subscribe(this.loadLayout, this);
-        this.message.setEcho.subscribe(this.handleSetEcho, this);
-        this.message.telnetConnect.subscribe(this.handleTelnetConnect, this);
+    constructor(private aliasManager: AliasManager) {
+        GlEvent.prepareReloadLayout.handle(this.prepareReloadLayout, this);
+        GlEvent.loadLayout.handle(this.loadLayout, this);
+        GlEvent.setEcho.handle(this.handleSetEcho, this);
+        GlEvent.telnetConnect.handle(this.handleTelnetConnect, this);
 
         $(document).ready(() => { this.loadHistory(); });
     }
@@ -25,8 +26,8 @@ export class CommandInput {
     };
 
     private echo: boolean = true;
-    private handleSetEcho(data: MsgDef.SetEchoMsg): void {
-        this.echo = data.value;
+    private handleSetEcho(value: GlDef.SetEchoData): void {
+        this.echo = value;
 
         if (this.echo) {
             $("#cmd_input_pw").hide();
@@ -43,7 +44,7 @@ export class CommandInput {
                 && current !== this.cmd_history[this.cmd_history.length - 1]) {
                 /* If they already started typing password before getting echo command*/
                 $("#cmd_input_pw").val(current);
-                $("#cmd_input_pw")[0].setSelectionRange(current.length, current.length);
+                (<HTMLInputElement>$("#cmd_input_pw")[0]).setSelectionRange(current.length, current.length);
             } else {
                 $("#cmd_input_pw").val("");
             }
@@ -51,12 +52,12 @@ export class CommandInput {
     };
 
     private handleTelnetConnect(): void {
-        this.handleSetEcho({value: true});
+        this.handleSetEcho(true);
     };
 
     private sendPw(): void {
         let pw = $("#cmd_input_pw").val();
-        this.message.sendPw.publish({value: pw});
+        GlEvent.sendPw.fire(pw);
     }
 
     private sendCmd(): void {
@@ -65,7 +66,7 @@ export class CommandInput {
         if (!result) {
             let cmds = cmd.split(";");
             for (let i = 0; i < cmds.length; i++) {
-                this.message.sendCommand.publish({value: cmds[i]});
+                GlEvent.sendCommand.fire({value: cmds[i]});
             }
         } else if (result !== true) {
             let cmds: string[] = [];
@@ -73,7 +74,7 @@ export class CommandInput {
             for (let i = 0; i < lines.length; i++) {
                 cmds = cmds.concat(lines[i].split(";"));
             }
-            this.message.aliasSendCommands.publish({orig: cmd, commands: cmds});
+            GlEvent.aliasSendCommands.fire({orig: cmd, commands: cmds});
         } /* else the script ran already */
 
         $("#cmd_input").select();

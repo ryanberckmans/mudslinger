@@ -1,15 +1,16 @@
-import {ChatWin} from "./chatWin";
-import {Message, MsgDef} from "./message";
-import {OutputManager} from "./outputManager";
+import { GlEvent, GlDef } from "./event";
+
+import { ChatWin } from "./chatWin";
+import { OutputManager } from "./outputManager";
 
 export class Mxp {
     private openTags: Array<string> = [];
     private tagHandlers: Array<(tag: string) => void> = [];
 
-    constructor(private message: Message, private outputManager: OutputManager, private chatWin: ChatWin) {
+    constructor(private outputManager: OutputManager, private chatWin: ChatWin) {
         this.makeTagHandlers();
 
-        this.message.mxpTag.subscribe(this.handleMxpTag, this);
+        GlEvent.mxpTag.handle(this.handleMxpTag, this);
     }
 
     private makeTagHandlers() {
@@ -17,7 +18,7 @@ export class Mxp {
             let re = /^<version>$/i;
             let match = re.exec(tag);
             if (match) {
-                this.message.sendCommand.publish({
+                GlEvent.sendCommand.fire({
                     value: "\x1b[1z<VERSION CLIENT=ArcWeb MXP=0.01>", // using closing line tag makes it print twice...
                     noPrint: true});
                 return true;
@@ -131,7 +132,7 @@ export class Mxp {
                     let color = this.outputManager.getFgColor() || elem.css("color");
                     elem.css("border-bottom", "1px solid " + color);
                     elem.click(() => {
-                        this.message.sendCommand.publish({value: tag_m[1]});
+                        GlEvent.sendCommand.fire({value: tag_m[1]});
                     });
                     this.openTags.push("send");
                     this.outputManager.pushMxpElem(elem);
@@ -165,7 +166,7 @@ export class Mxp {
                         let txt = elem.text();
                         elem[0].setAttribute("title", txt);
                         elem.click(() => {
-                            this.message.sendCommand.publish({value: txt});
+                            GlEvent.sendCommand.fire({value: txt});
                         });
                     }
                 }
@@ -176,18 +177,18 @@ export class Mxp {
         });
     }
 
-    private handleMxpTag(data: MsgDef.MxpTagMsg) {
+    private handleMxpTag(data: GlDef.MxpTagData) {
         let handled = false;
         for (let i = 0; i < this.tagHandlers.length; i++) {
             /* tag handlers will return true if it"s a match */
-            if (this.tagHandlers[i](data.value)) {
+            if (this.tagHandlers[i](data)) {
                 handled = true;
                 break;
             }
         }
 
         if (!handled) {
-            console.log("Unsupported MXP tag: " + data.value);
+            console.log("Unsupported MXP tag: " + data);
         }
     };
 

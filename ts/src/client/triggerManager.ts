@@ -1,12 +1,13 @@
-import {JsScript} from "./jsScript";
-import {Message, MsgDef} from "./message";
-import {TrigAlItem} from "./trigAlEditBase";
+import { GlEvent, GlDef } from "./event";
+
+import { JsScript } from "./jsScript";
+import { TrigAlItem } from "./trigAlEditBase";
 
 export class TriggerManager {
     private enabled: boolean = true;
     public triggers: Array<TrigAlItem> = null;
 
-    constructor(private message: Message, private jsScript: JsScript) {
+    constructor(private jsScript: JsScript) {
         $(document).ready(() => {
             let saved_triggers = localStorage.getItem("triggers");
             if (!saved_triggers) {
@@ -16,15 +17,15 @@ export class TriggerManager {
             }
         });
 
-        this.message.setTriggersEnabled.subscribe(this.handleSetTriggersEnabled, this);
+        GlEvent.setTriggersEnabled.handle(this.handleSetTriggersEnabled, this);
     }
 
     public saveTriggers() {
         localStorage.setItem("triggers", JSON.stringify(this.triggers));
     }
 
-    private handleSetTriggersEnabled(data: MsgDef.SetTriggersEnabledMsg) {
-        this.enabled = data.value;
+    private handleSetTriggersEnabled(data: GlDef.SetTriggersEnabledData) {
+        this.enabled = data;
     }
 
     public handleLine(line: string) {
@@ -49,7 +50,7 @@ export class TriggerManager {
                     });
 
                     let cmds = value.replace("\r", "").split("\n");
-                    this.message.triggerSendCommands.publish({commands: cmds});
+                    GlEvent.triggerSendCommands.fire(cmds);
                 }
             } else {
                 if (line.includes(trig.pattern)) {
@@ -58,7 +59,7 @@ export class TriggerManager {
                         if (script) { script(); };
                     } else {
                         let cmds = trig.value.replace("\r", "").split("\n");
-                        this.message.triggerSendCommands.publish({commands: cmds});
+                        GlEvent.triggerSendCommands.fire(cmds);
                     }
                 }
             }

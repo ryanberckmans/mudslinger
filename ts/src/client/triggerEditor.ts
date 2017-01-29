@@ -1,5 +1,5 @@
-import {TrigAlEditBase} from "./trigAlEditBase";
-import {TriggerManager} from "./triggerManager";
+import { TrigAlEditBase } from "./trigAlEditBase";
+import { TriggerManager } from "./triggerManager";
 
 export class TriggerEditor extends TrigAlEditBase {
     constructor(private triggerManager: TriggerManager) {
@@ -29,18 +29,18 @@ export class TriggerEditor extends TrigAlEditBase {
     protected defaultPattern: string = null;
 
     protected getElements() {
-        this.win = $("#win_trig_edit");
-        this.listBox = $("#trig_list_box");
-        this.pattern = $("#trig_pattern");
-        this.regexCheckbox = $("#trig_regex_checkbox");
-        this.scriptCheckbox = $("#trig_script_checkbox");
-        this.textArea = $("#trig_text_area");
-        this.scriptArea = $("#trig_script_area");
-        this.newButton = $("#trig_new_button");
-        this.deleteButton = $("#trig_delete_button");
-        this.saveButton = $("#trig_save_button");
-        this.cancelButton = $("#trig_cancel_button");
-        this.mainSplit = $("#trig_main_split");
+        this.$win = $("#win_trig_edit");
+        this.$listBox = $("#trig_list_box");
+        this.$pattern = $("#trig_pattern");
+        this.$regexCheckbox = $("#trig_regex_checkbox");
+        this.$scriptCheckbox = $("#trig_script_checkbox");
+        this.$textArea = $("#trig_text_area");
+        this.$scriptArea = $("#trig_script_area");
+        this.$newButton = $("#trig_new_button");
+        this.$deleteButton = $("#trig_delete_button");
+        this.$saveButton = $("#trig_save_button");
+        this.$cancelButton = $("#trig_cancel_button");
+        this.$mainSplit = $("#trig_main_split");
     };
 
     protected getList() {

@@ -1,5 +1,6 @@
+import { GlEvent, GlDef } from "./event";
+
 import * as io from "socket.io-client";
-import { Message, MsgDef } from "./message";
 import { Mxp } from "./mxp";
 import { OutputManager } from "./outputManager";
 import { IoEvent } from "../shared/ioevent";
@@ -10,12 +11,12 @@ export class Socket {
     private ioEvt: IoEvent;
     private telnetClient: TelnetClient;
 
-    constructor(private message: Message, private outputManager: OutputManager, private mxp: Mxp) {
-        this.message.sendCommand.subscribe(this.handleSendCommand, this);
-        this.message.scriptSendCommand.subscribe(this.handleSendCommand, this);
-        this.message.sendPw.subscribe(this.handleSendCommand, this);
-        this.message.triggerSendCommands.subscribe(this.handleTriggerSendCommands, this);
-        this.message.aliasSendCommands.subscribe(this.handleAliasSendCommands, this);
+    constructor(private outputManager: OutputManager, private mxp: Mxp) {
+        GlEvent.sendCommand.handle(this.handleSendCommand, this);
+        GlEvent.scriptSendCommand.handle(this.handleSendCommand, this);
+        GlEvent.sendPw.handle(this.handleSendPw, this);
+        GlEvent.triggerSendCommands.handle(this.handleTriggerSendCommands, this);
+        GlEvent.aliasSendCommands.handle(this.handleAliasSendCommands, this);
     }
 
     public open() {
@@ -25,23 +26,23 @@ export class Socket {
         this.ioEvt = new IoEvent(this.ioConn);
 
         this.ioConn.on("connect", (msg: any) => {
-            this.message.wsConnect.publish(null);
+            GlEvent.wsConnect.fire(null);
         });
 
         this.ioConn.on("disconnect", (msg: any) => {
-            this.message.wsDisconnect.publish(null);
+            GlEvent.wsDisconnect.fire(null);
         });
 
         this.ioEvt.srvTelnetOpened.handle(() => {
-            this.message.telnetConnect.publish(null);
+            GlEvent.telnetConnect.fire(null);
         });
 
         this.ioEvt.srvTelnetClosed.handle(() => {
-            this.message.telnetDisconnect.publish(null);
+            GlEvent.telnetDisconnect.fire(null);
         });
 
         this.ioEvt.srvTelnetError.handle((data) => {
-            this.message.telnetError.publish({value: data});
+            GlEvent.telnetError.fire(data);
         });
 
         this.ioEvt.srvTelnetData.handle((data) => {
@@ -49,7 +50,7 @@ export class Socket {
         });
 
         this.ioConn.on("error", (msg: any) => {
-            this.message.wsError.publish(msg);
+            GlEvent.wsError.fire(msg);
         });
 
         this.telnetClient = new TelnetClient((data) => {
@@ -61,7 +62,7 @@ export class Socket {
         });
 
         this.telnetClient.EvtServerEcho.handle((data) => {
-            this.message.setEcho.publish({value: !data});
+            GlEvent.setEcho.fire(!data);
         });
     };
 
@@ -82,17 +83,21 @@ export class Socket {
         this.ioEvt.clReqTelnetWrite.fire(arr.buffer);
     }
 
-    private handleSendCommand(data: MsgDef.SendCommandMsg) {
+    private handleSendCommand(data: GlDef.SendCommandData) {
         this.sendCmd(data.value);
-    };
+    }
 
-    private handleTriggerSendCommands(data: MsgDef.TriggerSendCommandsMsg) {
-        for (let i = 0; i < data.commands.length; i++) {
-            this.sendCmd(data.commands[i]);
+    private handleSendPw(data: GlDef.SendPwData) {
+        this.sendCmd(data);
+    }
+
+    private handleTriggerSendCommands(data: GlDef.TriggerSendCommandsData) {
+        for (let i = 0; i < data.length; i++) {
+            this.sendCmd(data[i]);
         }
     };
 
-    private handleAliasSendCommands(data: MsgDef.AliasSendCommandsMsg) {
+    private handleAliasSendCommands(data: GlDef.AliasSendCommandsData) {
         for (let i = 0; i < data.commands.length; i++) {
             this.sendCmd(data.commands[i]);
         }
@@ -178,7 +183,7 @@ export class Socket {
                 i += match[0].length;
                 this.outputManager.handleText(output);
                 output = "";
-                this.message.mxpTag.publish({value: match[1]});
+                GlEvent.mxpTag.fire(match[1]);
                 continue;
             }
 

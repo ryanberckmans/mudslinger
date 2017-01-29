@@ -6,7 +6,7 @@
 */
 
 declare var generatedata: any;
-declare var $: any;
+// declare var $: any;
 
 declare module jqwidgets {
     export function createInstance(selector: string, widgetName: string, params?: any): any;

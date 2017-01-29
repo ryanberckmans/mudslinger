@@ -1,30 +1,31 @@
-import {Message, MsgDef} from "./message";
-import {OutWinBase} from "./outWinBase";
-import {TriggerManager} from "./triggerManager";
+import { GlEvent, GlDef } from "./event";
+
+import { OutWinBase } from "./outWinBase";
+import { TriggerManager } from "./triggerManager";
 import * as Util from "./util";
 
 export class OutputWin extends OutWinBase {
     private html: string;
 
-    constructor(private message: Message, private triggerManager: TriggerManager) {
+    constructor(private triggerManager: TriggerManager) {
         super();
 
-        this.message.prepareReloadLayout.subscribe(this.prepareReloadLayout, this);
-        this.message.loadLayout.subscribe(this.loadLayout, this);
-        this.message.telnetConnect.subscribe(this.handleTelnetConnect, this);
-        this.message.telnetDisconnect.subscribe(this.handleTelnetDisconnect, this);
-        this.message.telnetError.subscribe(this.handleTelnetError, this);
-        this.message.wsError.subscribe(this.handleWsError, this);
-        this.message.wsConnect.subscribe(this.handleWsConnect, this);
-        this.message.wsDisconnect.subscribe(this.handleWsDisconnect, this);
-        this.message.sendCommand.subscribe(this.handleSendCommand, this);
-        this.message.scriptSendCommand.subscribe(this.handleScriptSendCommand, this);
-        this.message.sendPw.subscribe(this.handleSendPw, this);
-        this.message.triggerSendCommands.subscribe(this.handleTriggerSendCommands, this);
-        this.message.aliasSendCommands.subscribe(this.handleAliasSendCommands, this);
-        this.message.scriptPrint.subscribe(this.handleScriptPrint, this);
-        this.message.scriptEvalError.subscribe(this.handleScriptEvalError, this);
-        this.message.scriptExecError.subscribe(this.handleScriptExecError, this);
+        GlEvent.prepareReloadLayout.handle(this.prepareReloadLayout, this);
+        GlEvent.loadLayout.handle(this.loadLayout, this);
+        GlEvent.telnetConnect.handle(this.handleTelnetConnect, this);
+        GlEvent.telnetDisconnect.handle(this.handleTelnetDisconnect, this);
+        GlEvent.telnetError.handle(this.handleTelnetError, this);
+        GlEvent.wsError.handle(this.handleWsError, this);
+        GlEvent.wsConnect.handle(this.handleWsConnect, this);
+        GlEvent.wsDisconnect.handle(this.handleWsDisconnect, this);
+        GlEvent.sendCommand.handle(this.handleSendCommand, this);
+        GlEvent.scriptSendCommand.handle(this.handleScriptSendCommand, this);
+        GlEvent.sendPw.handle(this.handleSendPw, this);
+        GlEvent.triggerSendCommands.handle(this.handleTriggerSendCommands, this);
+        GlEvent.aliasSendCommands.handle(this.handleAliasSendCommands, this);
+        GlEvent.scriptPrint.handle(this.handleScriptPrint, this);
+        GlEvent.scriptEvalError.handle(this.handleScriptEvalError, this);
+        GlEvent.scriptExecError.handle(this.handleScriptExecError, this);
 
         $(document).ready(() => {
             window.onerror = this.handleWindowError.bind(this);
@@ -45,8 +46,8 @@ export class OutputWin extends OutWinBase {
         }
     }
 
-    private handleScriptPrint(data: MsgDef.ScriptPrintMsg) {
-        let message = data.value;
+    private handleScriptPrint(data: GlDef.ScriptPrintData) {
+        let message = data;
         let output = JSON.stringify(message);
         this.target.append(
             "<span style=\"color:orange\">"
@@ -56,9 +57,9 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     };
 
-    private handleSendPw(data: MsgDef.SendPwMsg) {
+    private handleSendPw(data: GlDef.SendPwData) {
         // let stars = ("*".repeat(msg.data.length);
-        let stars = Array(data.value.length + 1).join("*");
+        let stars = Array(data.length + 1).join("*");
 
         this.target.append(
             "<span style=\"color:yellow\">"
@@ -68,7 +69,7 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     };
 
-    private handleSendCommand(data: MsgDef.SendCommandMsg) {
+    private handleSendCommand(data: GlDef.SendCommandData) {
         if (data.noPrint) {
             return;
         }
@@ -81,7 +82,7 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     };
 
-    private handleScriptSendCommand(data: MsgDef.ScriptSendCommandMsg) {
+    private handleScriptSendCommand(data: GlDef.ScriptSendCommandData) {
         if (data.noPrint) {
             return;
         }
@@ -94,22 +95,22 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     };
 
-    private handleTriggerSendCommands(data: MsgDef.TriggerSendCommandsMsg) {
+    private handleTriggerSendCommands(data: GlDef.TriggerSendCommandsData) {
         let html = "<span style=\"color:cyan\">";
 
-        for (let i = 0; i < data.commands.length; i++) {
+        for (let i = 0; i < data.length; i++) {
             if (i >= 5) {
                 html += "...<br>";
                 break;
             } else {
-                html += Util.rawToHtml(data.commands[i]) + "<br>";
+                html += Util.rawToHtml(data[i]) + "<br>";
             }
         }
         this.target.append(html);
         this.scrollBottom(false);
     };
 
-    private handleAliasSendCommands(data: MsgDef.AliasSendCommandsMsg) {
+    private handleAliasSendCommands(data: GlDef.AliasSendCommandsData) {
         let html = "<span style=\"color:yellow\">";
         html += Util.rawToHtml(data.orig);
         html += "</span><span style=\"color:cyan\"> --> ";
@@ -161,11 +162,11 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(false);
     };
 
-    private handleTelnetError(data: MsgDef.TelnetErrorMsg) {
+    private handleTelnetError(data: GlDef.TelnetErrorData) {
         this.target.append(
             "<span style=\"color:red\">"
             + "[[Telnet error" + "<br>"
-            + data.value + "<br>"
+            + data + "<br>"
             + "]]"
             + "<br>"
             + "</span>");
@@ -196,8 +197,8 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     };
 
-    private handleScriptEvalError(data: MsgDef.ScriptEvalErrorMsg) {
-        let err: any = data.value;
+    private handleScriptEvalError(data: GlDef.ScriptEvalErrorData) {
+        let err: any = data;
         let stack = Util.rawToHtml(err.stack);
 
         this.target.append(
@@ -211,8 +212,8 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     };
 
-    private handleScriptExecError(data: MsgDef.ScriptExecErrorMsg) {
-        let err: any = data.value;
+    private handleScriptExecError(data: GlDef.ScriptExecErrorData) {
+        let err: any = data;
         let stack = Util.rawToHtml(err.stack);
 
         this.target.append(

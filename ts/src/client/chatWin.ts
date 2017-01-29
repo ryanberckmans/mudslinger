@@ -1,14 +1,14 @@
-import {Message} from "./message";
-import {OutWinBase} from "./outWinBase";
+import { GlEvent } from "./event";
+import { OutWinBase } from "./outWinBase";
 
 export class ChatWin extends OutWinBase {
     private html: string;
 
-    constructor(private message: Message) {
+    constructor() {
         super();
 
-        this.message.prepareReloadLayout.subscribe(this.prepareReloadLayout, this);
-        this.message.loadLayout.subscribe(this.loadLayout, this);
+        GlEvent.prepareReloadLayout.handle(this.prepareReloadLayout, this);
+        GlEvent.loadLayout.handle(this.loadLayout, this);
     }
 
     private prepareReloadLayout(): void {
