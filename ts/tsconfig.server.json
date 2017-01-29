@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "outDir": "./build/build_server",
+        "noImplicitAny": true,
+        "noImplicitReturns": true
+    },
+    "include": [
+        "./src/server/*"
+    ]
+}

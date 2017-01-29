@@ -1,194 +1,209 @@
-var MXP = new (function(){
-    var o = this;
+import {ChatWin} from "./chatWin";
+import {Message, MsgDef} from "./message";
+import {OutputManager} from "./outputManager";
 
-    var open_tags = [];
-    var tag_handlers = [];
+export class Mxp {
+    private openTags: Array<string> = [];
+    private tagHandlers: Array<(tag: string) => void> = [];
 
-    tag_handlers.push(function(tag) {
-        var re = /^<version>$/i;
-        var match = re.exec(tag);
-        if (match) {
-            Message.pub('send_command', {
-               data: '\x1b[1z<VERSION CLIENT=ArcWeb MXP=0.01>', // using closing line tag makes it print twice...
-               no_print: true
-            });
-            return true;
-        }
-        return false;
-    });
+    constructor(private message: Message, private outputManager: OutputManager, private chatWin: ChatWin) {
+        this.makeTagHandlers();
 
-    tag_handlers.push(function(tag) {
-        /* hande image tags */
-        var re = /^<image\s*(\S+)\s*url="(.*)">$/i;
-        var match = re.exec(tag);
-        if (match) {
-            /* push and pop is dirty way to do this, clean it up later */
-            var elem = $('<img src="' + match[2] + match[1] + '">');
-            OutputManager.push_mxp_elem(elem);
-            OutputManager.pop_mxp_elem();
-            return true;
-        }
-    });
+        this.message.mxpTag.subscribe(this.handleMxpTag, this);
+    }
 
-    tag_handlers.push(function(tag) {
-        /* handle dest tags */
-        var re = /^<dest comm>$/i;
-        var match = re.exec(tag);
-        if (match) {
-            open_tags.push('dest');
-            OutputManager.push_target(ChatWin);
-            return true;
-        }
-
-        re = /^<\/dest>$/i;
-        match = re.exec(tag);
-        if (match) {
-            if (open_tags[open_tags.length - 1] != 'dest') {
-                /* We actually expect this to happen because the mud sends newlines inside DEST tags right now... */
-                //console.log("Got closing dest tag with no opening tag.");
-            } else {
-                open_tags.pop();
-                OutputManager.pop_target();
+    private makeTagHandlers() {
+        this.tagHandlers.push((tag) => {
+            let re = /^<version>$/i;
+            let match = re.exec(tag);
+            if (match) {
+                this.message.sendCommand.publish({
+                    value: "\x1b[1z<VERSION CLIENT=ArcWeb MXP=0.01>", // using closing line tag makes it print twice...
+                    noPrint: true});
+                return true;
             }
-            return true;
-        }
-    });
-    tag_handlers.push(function(tag) {
-        var re = /^<a /i;
-        var match = re.exec(tag);
-        if (match) {
-            open_tags.push('a');
-            var elem = $(tag);
-            elem.attr('target', '_blank');
-            var color = OutputManager.get_fg_color();
-            elem.css('border-bottom', '1px solid ' + color);
-            OutputManager.push_mxp_elem(elem);
-            return true;
-        }
+            return false;
+        });
 
-        re = /^<\/a>/i;
-        match = re.exec(tag);
-        if (match) {
-            if (open_tags[open_tags.length - 1] != 'a') {
-                /* We actually expect this to happen because the mud sends newlines inside DEST tags right now... */
-                console.log("Got closing a tag with no opening tag.");
-            } else {
-                open_tags.pop();
-                OutputManager.pop_mxp_elem();
-            }
-            return true;
-        }
-    });
-    tag_handlers.push(function(tag) {
-        var re = /^<([bius])>/i;
-        var match = re.exec(tag);
-        if (match) {
-            open_tags.push(match[1]);
-            var elem = $(tag);
-            OutputManager.push_mxp_elem(elem);
-            return true;
-        }
-
-        re = /^<\/([bius])>/i;
-        match = re.exec(tag);
-        if (match) {
-            if (open_tags[open_tags.length - 1] != match[1]) {
-                console.log("Got closing " + match[1] + " tag with no opening tag.");
-            } else {
-                open_tags.pop();
-                OutputManager.pop_mxp_elem();
-            }
-            return true;
-        }
-    });
-    tag_handlers.push(function(tag) {
-        var re = /^<send/i;
-        var match = re.exec(tag);
-        if (match) {
-            /* match with explicit href */
-            var tag_re = /^<send (?:href=)?['"](.*)['"]>$/i;
-            var tag_m = tag_re.exec(tag);
-            if (tag_m) {
-                var cmd = tag_m[1];
-                var html_tag = '<a href="#" title="' + cmd + '">';
-                var elem = $(html_tag);
-                var color = OutputManager.get_fg_color() || elem.css('color');
-                elem.css('border-bottom', '1px solid ' + color);
-                elem.click(function() {
-                    Message.pub('send_command', {data: tag_m[1]});
-                });
-                open_tags.push('send');
-                OutputManager.push_mxp_elem(elem);
+        this.tagHandlers.push((tag) => {
+            /* hande image tags */
+            let re = /^<image\s*(\S+)\s*url="(.*)">$/i;
+            let match = re.exec(tag);
+            if (match) {
+                /* push and pop is dirty way to do this, clean it up later */
+                let elem = $("<img src=\"" + match[2] + match[1] + "\">");
+                this.outputManager.pushMxpElem(elem);
+                this.outputManager.popMxpElem();
                 return true;
             }
 
-            /* just the tag */
-            tag_re = /^<send>$/i;
-            tag_m = tag_re.exec(tag);
-            if (tag_m) {
-                open_tags.push('send');
-                var html_tag = '<a href="#">';
-                var elem = $(html_tag);
-                var color = OutputManager.get_fg_color() || elem.css('color');
-                elem.css('border-bottom', '1px solid ' + color);
-                OutputManager.push_mxp_elem(elem);
+            return false;
+        });
+
+        this.tagHandlers.push((tag) => {
+            /* handle dest tags */
+            let re = /^<dest comm>$/i;
+            let match = re.exec(tag);
+            if (match) {
+                this.openTags.push("dest");
+                this.outputManager.pushTarget(this.chatWin);
                 return true;
             }
-        }
 
-        re = /^<\/send>/i;
-        match = re.exec(tag);
-        if (match) {
-            if (open_tags[open_tags.length - 1] != 'send') {
-                console.log("Got closing send tag with no opening tag.");
-            } else {
-                open_tags.pop();
-                var elem = OutputManager.pop_mxp_elem();
-                if (!elem[0].hasAttribute('title')) {
-                    /* didn't have explicit href so we need to do it here */
-                    var txt = elem.text();
-                    elem[0].setAttribute('title', txt);
-                    elem.click(function() {
-                        Message.pub('send_command', {data: txt});
-                    })
+            re = /^<\/dest>$/i;
+            match = re.exec(tag);
+            if (match) {
+                if (this.openTags[this.openTags.length - 1] !== "dest") {
+                    /* We actually expect this to happen because the mud sends newlines inside DEST tags right now... */
+                    // console.log("Got closing dest tag with no opening tag.");
+                } else {
+                    this.openTags.pop();
+                    this.outputManager.popTarget();
+                }
+                return true;
+            }
+
+            return false;
+        });
+        this.tagHandlers.push((tag) => {
+            let re = /^<a /i;
+            let match = re.exec(tag);
+            if (match) {
+                this.openTags.push("a");
+                let elem = $(tag);
+                elem.attr("target", "_blank");
+                let color = this.outputManager.getFgColor();
+                elem.css("border-bottom", "1px solid " + color);
+                this.outputManager.pushMxpElem(elem);
+                return true;
+            }
+
+            re = /^<\/a>/i;
+            match = re.exec(tag);
+            if (match) {
+                if (this.openTags[this.openTags.length - 1] !== "a") {
+                    /* We actually expect this to happen because the mud sends newlines inside DEST tags right now... */
+                    console.log("Got closing a tag with no opening tag.");
+                } else {
+                    this.openTags.pop();
+                    this.outputManager.popMxpElem();
+                }
+                return true;
+            }
+
+            return false;
+        });
+        this.tagHandlers.push((tag) => {
+            let re = /^<([bius])>/i;
+            let match = re.exec(tag);
+            if (match) {
+                this.openTags.push(match[1]);
+                let elem = $(tag);
+                this.outputManager.pushMxpElem(elem);
+                return true;
+            }
+
+            re = /^<\/([bius])>/i;
+            match = re.exec(tag);
+            if (match) {
+                if (this.openTags[this.openTags.length - 1] !== match[1]) {
+                    console.log("Got closing " + match[1] + " tag with no opening tag.");
+                } else {
+                    this.openTags.pop();
+                    this.outputManager.popMxpElem();
+                }
+                return true;
+            }
+
+            return false;
+        });
+        this.tagHandlers.push((tag) => {
+            let re = /^<send/i;
+            let match = re.exec(tag);
+            if (match) {
+                /* match with explicit href */
+                let tag_re = /^<send (?:href=)?[""](.*)[""]>$/i;
+                let tag_m = tag_re.exec(tag);
+                if (tag_m) {
+                    let cmd = tag_m[1];
+                    let html_tag = "<a href=\"#\" title=\"" + cmd + "\">";
+                    let elem = $(html_tag);
+                    let color = this.outputManager.getFgColor() || elem.css("color");
+                    elem.css("border-bottom", "1px solid " + color);
+                    elem.click(() => {
+                        this.message.sendCommand.publish({value: tag_m[1]});
+                    });
+                    this.openTags.push("send");
+                    this.outputManager.pushMxpElem(elem);
+                    return true;
+                }
+
+                /* just the tag */
+                tag_re = /^<send>$/i;
+                tag_m = tag_re.exec(tag);
+                if (tag_m) {
+                    this.openTags.push("send");
+                    let html_tag = "<a href=\"#\">";
+                    let elem = $(html_tag);
+                    let color = this.outputManager.getFgColor() || elem.css("color");
+                    elem.css("border-bottom", "1px solid " + color);
+                    this.outputManager.pushMxpElem(elem);
+                    return true;
                 }
             }
-            return true;
-        }
-    });
 
-    o.handle_mxp_tag = function(msg) {
-        var handled = false;
-        for (var i=0; i < tag_handlers.length; i++) {
-            /* tag handlers will return true if it's a match */
-            if (tag_handlers[i](msg.data)) {
+            re = /^<\/send>/i;
+            match = re.exec(tag);
+            if (match) {
+                if (this.openTags[this.openTags.length - 1] !== "send") {
+                    console.log("Got closing send tag with no opening tag.");
+                } else {
+                    this.openTags.pop();
+                    let elem = this.outputManager.popMxpElem();
+                    if (!elem[0].hasAttribute("title")) {
+                        /* didn"t have explicit href so we need to do it here */
+                        let txt = elem.text();
+                        elem[0].setAttribute("title", txt);
+                        elem.click(() => {
+                            this.message.sendCommand.publish({value: txt});
+                        });
+                    }
+                }
+                return true;
+            }
+
+            return false;
+        });
+    }
+
+    private handleMxpTag(data: MsgDef.MxpTagMsg) {
+        let handled = false;
+        for (let i = 0; i < this.tagHandlers.length; i++) {
+            /* tag handlers will return true if it"s a match */
+            if (this.tagHandlers[i](data.value)) {
                 handled = true;
                 break;
             }
         }
 
         if (!handled) {
-            console.log("Unsupported MXP tag: " + msg.data);
+            console.log("Unsupported MXP tag: " + data.value);
         }
     };
 
     // Need to close any remaining open tags whe we get newlines
-    o.handle_newline = function() {
-        if (open_tags.length<1) {
+    public handleNewline() {
+        if (this.openTags.length < 1) {
             return;
         }
 
-        for (var i=open_tags.length-1; i >= 0; i--) {
-            if (open_tags[i] == 'dest') {
-                OutputManager.pop_target();
+        for (let i = this.openTags.length - 1; i >= 0; i--) {
+            if (this.openTags[i] === "dest") {
+                this.outputManager.popTarget();
             } else {
-                OutputManager.pop_mxp_elem();
+                this.outputManager.popMxpElem();
             }
         }
-        open_tags = [];
+        this.openTags = [];
     };
-
-    return o;
-})();
-
-Message.sub('mxp_tag', MXP.handle_mxp_tag);
+}

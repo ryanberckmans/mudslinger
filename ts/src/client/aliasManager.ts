@@ -1,79 +1,77 @@
-var AliasManager = new (function(){
-    var o = this;
+import {JsScript} from "./jsScript";
+import {Message, MsgDef} from "./message";
+import {TrigAlItem} from "./trigAlEditBase";
 
-    var enabled = true;
-    o._get_enabled = function() {return enabled;};
+export class AliasManager {
+    private enabled: boolean = true;
+    public aliases: Array<TrigAlItem> = null;
 
-    o.aliases = null;
+    constructor(private message: Message, private jsScript: JsScript) {
+        this.message.setAliasesEnabled.subscribe(this.handleSetAliasesEnabled, this);
 
-    o.save_aliases = function() {
-        localStorage.setItem('aliases', JSON.stringify(o.aliases));
+        $(document).ready(() => {
+            let saved_aliases: string = localStorage.getItem("aliases");
+            if (!saved_aliases) {
+                this.aliases = [];
+            } else {
+                this.aliases = JSON.parse(saved_aliases);
+            }
+        });
+    }
+
+    public saveAliases() {
+        localStorage.setItem("aliases", JSON.stringify(this.aliases));
     };
 
-    o.handle_set_aliases_enabled = function(value) {
-        enabled = value;
+    private handleSetAliasesEnabled(data: MsgDef.SetAliasesEnabledMsg) {
+        this.enabled = data.value;
     };
 
     // return the result of the alias if any (string with embedded lines)
     // return true if matched and script ran
     // return null if no match
-    o.check_alias = function(cmd) {
-        if (!enabled) return;
+    public checkAlias(cmd: string): boolean | string {
+        if (!this.enabled) return null;
 
-        for (var i=0; i < o.aliases.length; i++) {
-            var alias = o.aliases[i];
+        for (let i = 0; i < this.aliases.length; i++) {
+            let alias = this.aliases[i];
 
             if (alias.regex) {
-                var re = alias.pattern;
-                var match = cmd.match(re);
+                let re = alias.pattern;
+                let match = cmd.match(re);
                 if (!match) {
                     continue;
                 }
 
                 if (alias.is_script) {
-                    var script = new JsScript(alias.value);
-                    if (script) {script.RunScript(match)};
+                    let script = this.jsScript.makeScript(alias.value);
+                    if (script) { script.RunScript(match); };
                     return true;
                 } else {
-                    var value = alias.value;
+                    let value = alias.value;
 
                     value = value.replace(/\$(\d+)/g, function(m, d) {
-                        return match[parseInt(d)] || '';
+                        return match[parseInt(d)] || "";
                     });
                     return value;
                 }
             } else {
-                var re = '^' + alias.pattern + '\\s*(.*)$';
-                var match = cmd.match(re);
+                let re = "^" + alias.pattern + "\\s*(.*)$";
+                let match = cmd.match(re);
                 if (!match) {
                     continue;
                 }
 
                 if (alias.is_script) {
-                    var script = new JsScript(alias.value);
-                    if (script) {script.RunScript(null)};
+                    let script = this.jsScript.makeScript(alias.value);
+                    if (script) { script(); };
                     return true;
                 } else {
-                    var value = alias.value;
-
-                    var value = alias.value.replace("$1", match[1] || '');
+                    let value = alias.value.replace("$1", match[1] || "");
                     return value;
                 }
             }
         }
         return null;
     };
-
-    return o;
-})();
-
-$(document).ready(function() {
-    var saved_aliases = localStorage.getItem("aliases");
-    if (!saved_aliases) {
-        AliasManager.aliases = [];
-    } else {
-        AliasManager.aliases = JSON.parse(saved_aliases);
-    }
-});
-
-Message.sub('set_aliases_enabled', AliasManager.handle_set_aliases_enabled);
+}

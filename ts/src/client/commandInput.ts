@@ -1,165 +1,165 @@
-var CommandInput = new (function() {
-    var o = this;
+import {AliasManager} from "./aliasManager";
+import {Message, MsgDef} from "./message";
 
-    var cmd_history = [];
-    var cmd_index = -1;
+export class CommandInput {
+    private cmd_history: string[] = [];
+    private cmd_index: number = -1;
 
-    o.prepare_reload_layout = function() {
-        // nada
-    };
+    constructor(private message: Message, private aliasManager: AliasManager) {
+        this.message.prepareReloadLayout.subscribe(this.prepareReloadLayout, this);
+        this.message.loadLayout.subscribe(this.loadLayout, this);
+        this.message.setEcho.subscribe(this.handleSetEcho, this);
+        this.message.telnetConnect.subscribe(this.handleTelnetConnect, this);
 
-    o.load_layout = function() {
-        $('#cmd_input').keydown(o.keydown);
-//        $('#cmd_input').change(o.input_change);
-        $('#cmd_input').bind('input propertychange', o.input_change);
-        $('#cmd_input_pw').keydown(o.pw_keydown);
-    };
-
-    var echo = true;
-    o.handle_set_echo = function(msg) {
-        echo = msg.data;
-
-        if (echo) {
-            $('#cmd_input_pw').hide();
-            $('#cmd_input').show();
-            $('#cmd_input').val('');
-            $('#cmd_input').focus();
-        } else {
-            $('#cmd_input').hide();
-            $('#cmd_input_pw').show();
-            $('#cmd_input_pw').focus();
-
-            var current = $('#cmd_input').val();
-            if (cmd_history.length > 0
-                && current != cmd_history[cmd_history.length-1]) {
-                /* If they already started typing password before getting echo command*/
-                $('#cmd_input_pw').val(current);
-                $('#cmd_input_pw')[0].setSelectionRange(current.length, current.length);
-            } else {
-                $('#cmd_input_pw').val('');
-            }
-        }
-    };
-
-    o.handle_telnet_connect = function() {
-        o.handle_set_echo({data: true});
-    };
-
-    o.send_pw = function() {
-        var pw = $('#cmd_input_pw').val();
-        Message.pub('send_pw', {data: pw});
+        $(document).ready(() => { this.loadHistory(); });
     }
 
-    o.send_cmd = function() {
-        var cmd = $("#cmd_input").val();
-        var alias = AliasManager.check_alias(cmd);
-        if (!alias) {
-            var cmds = cmd.split(';');
-            for (var i=0; i < cmds.length; i++) {
-                Message.pub('send_command', {data: cmds[i]});
-            }
-        } else if (alias !== true) {
-            var cmds = [];
-            var lines = alias.replace('\r', '').split('\n');
-            for (var i=0; i < lines.length; i++) {
-                cmds = cmds.concat(lines[i].split(';'));
-            }
-            Message.pub('alias_send_commands', {orig: cmd, cmds: cmds});
-        } /* else the script ran already */
+    private prepareReloadLayout(): void {
+        // nada
+    }
 
-        $('#cmd_input').select();
-
-        if (cmd.trim() == '') {
-            return;
-        }
-        if (cmd_history.length > 0
-            && cmd == cmd_history[cmd_history.length-1]) {
-            return;
-        }
-
-        if (echo) {
-            cmd_history.push(cmd);
-            cmd_history = cmd_history.slice(-20);
-            o.save_history();
-        }
-        else {
-            $('#cmd_input').val('');
-        }
-        cmd_index = -1;
+    private loadLayout(): void {
+        $("#cmd_input").keydown((event: any) => { return this.keydown(event); });
+        $("#cmd_input").bind("input propertychange", () => { return this.inputChange(); });
+        $("#cmd_input_pw").keydown((event: any) => { return this.pwKeydown(event); });
     };
 
-    o.pw_keydown = function(event) {
+    private echo: boolean = true;
+    private handleSetEcho(data: MsgDef.SetEchoMsg): void {
+        this.echo = data.value;
+
+        if (this.echo) {
+            $("#cmd_input_pw").hide();
+            $("#cmd_input").show();
+            $("#cmd_input").val("");
+            $("#cmd_input").focus();
+        } else {
+            $("#cmd_input").hide();
+            $("#cmd_input_pw").show();
+            $("#cmd_input_pw").focus();
+
+            let current = $("#cmd_input").val();
+            if (this.cmd_history.length > 0
+                && current !== this.cmd_history[this.cmd_history.length - 1]) {
+                /* If they already started typing password before getting echo command*/
+                $("#cmd_input_pw").val(current);
+                $("#cmd_input_pw")[0].setSelectionRange(current.length, current.length);
+            } else {
+                $("#cmd_input_pw").val("");
+            }
+        }
+    };
+
+    private handleTelnetConnect(): void {
+        this.handleSetEcho({value: true});
+    };
+
+    private sendPw(): void {
+        let pw = $("#cmd_input_pw").val();
+        this.message.sendPw.publish({value: pw});
+    }
+
+    private sendCmd(): void {
+        let cmd: string = $("#cmd_input").val();
+        let result = this.aliasManager.checkAlias(cmd);
+        if (!result) {
+            let cmds = cmd.split(";");
+            for (let i = 0; i < cmds.length; i++) {
+                this.message.sendCommand.publish({value: cmds[i]});
+            }
+        } else if (result !== true) {
+            let cmds: string[] = [];
+            let lines: string[] = (<string>result).replace("\r", "").split("\n");
+            for (let i = 0; i < lines.length; i++) {
+                cmds = cmds.concat(lines[i].split(";"));
+            }
+            this.message.aliasSendCommands.publish({orig: cmd, commands: cmds});
+        } /* else the script ran already */
+
+        $("#cmd_input").select();
+
+        if (cmd.trim() === "") {
+            return;
+        }
+        if (this.cmd_history.length > 0
+            && cmd === this.cmd_history[this.cmd_history.length - 1]) {
+            return;
+        }
+
+        if (this.echo) {
+            this.cmd_history.push(cmd);
+            this.cmd_history = this.cmd_history.slice(-20);
+            this.saveHistory();
+        }
+        else {
+            $("#cmd_input").val("");
+        }
+        this.cmd_index = -1;
+    };
+
+    private pwKeydown(event: KeyboardEvent): boolean {
         switch (event.which) {
             case 13: // enter
-                o.send_pw();
-                $('#cmd_input_pw').val('');
+                this.sendPw();
+                $("#cmd_input_pw").val("");
                 return false;
             default:
                 return true;
         }
-    };
+    }
 
-    o.keydown = function(event) {
+    private keydown(event: KeyboardEvent): boolean {
         switch (event.which) {
             case 13: // enter
                 if (event.shiftKey) {
                     return true;
                 } else {
-                    o.send_cmd();
+                    this.sendCmd();
                     return false;
                 }
             case 38: // up
-                if (cmd_index == -1) {
-                    cmd_index = cmd_history.length-1;
+                if (this.cmd_index === -1) {
+                    this.cmd_index = this.cmd_history.length - 1;
                 } else {
-                    cmd_index -= 1;
-                    cmd_index = Math.max(cmd_index, 0);
+                    this.cmd_index -= 1;
+                    this.cmd_index = Math.max(this.cmd_index, 0);
                 }
-                $('#cmd_input').val(cmd_history[cmd_index]);
-                $('#cmd_input').select();
+                $("#cmd_input").val(this.cmd_history[this.cmd_index]);
+                $("#cmd_input").select();
                 return false;
-            case 40: //down
-                if (cmd_index == -1) {
+            case 40: // down
+                if (this.cmd_index === -1) {
                     break;
                 }
-                cmd_index += 1;
-                cmd_index = Math.min(cmd_index, cmd_history.length-1);
-                $('#cmd_input').val(cmd_history[cmd_index]);
-                $('#cmd_input').select();
+                this.cmd_index += 1;
+                this.cmd_index = Math.min(this.cmd_index, this.cmd_history.length - 1);
+                $("#cmd_input").val(this.cmd_history[this.cmd_index]);
+                $("#cmd_input").select();
                 return false;
             default:
-                cmd_index = -1;
+                this.cmd_index = -1;
                 return true;
         }
-    };
+        return false;
+    }
 
-    o.input_change = function() {
-        var input = $('#cmd_input');
-        input.height('1px');
-        var scrollHeight = input[0].scrollHeight;
-        var new_height = 10 + scrollHeight;
+    private inputChange(): void {
+        let input = $("#cmd_input");
+        input.height("1px");
+        let scrollHeight = input[0].scrollHeight;
+        let new_height = 10 + scrollHeight;
         input.height(new_height + "px");
+    }
+
+    private saveHistory(): void {
+        localStorage.setItem("cmd_history", JSON.stringify(this.cmd_history));
     };
 
-    o.save_history = function() {
-        localStorage.setItem('cmd_history', JSON.stringify(cmd_history));
-    };
-
-    o.load_history = function() {
-        var cmds = localStorage.getItem('cmd_history');
+    private loadHistory(): void {
+        let cmds = localStorage.getItem("cmd_history");
         if (cmds) {
-            cmd_history = JSON.parse(cmds);
+            this.cmd_history = JSON.parse(cmds);
         }
     };
 
-    return o;
-})();
-
-Message.sub('prepare_reload_layout', CommandInput.prepare_reload_layout);
-Message.sub('load_layout', CommandInput.load_layout);
-Message.sub('set_echo', CommandInput.handle_set_echo);
-Message.sub('telnet_connect', CommandInput.handle_telnet_connect);
-
-$(document).ready(function() {
-    CommandInput.load_history();
-});
+}

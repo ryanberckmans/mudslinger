@@ -1,227 +1,233 @@
-var OutputWin = new (function(){
+import {Message, MsgDef} from "./message";
+import {OutWinBase} from "./outWinBase";
+import {TriggerManager} from "./triggerManager";
+import * as Util from "./util";
 
-    var o = new OutWinBase();
+export class OutputWin extends OutWinBase {
+    private html: string;
 
-    var html;
+    constructor(private message: Message, private triggerManager: TriggerManager) {
+        super();
 
-    o.prepare_reload_layout = function() {
-        html = $("#win_output").html();
+        this.message.prepareReloadLayout.subscribe(this.prepareReloadLayout, this);
+        this.message.loadLayout.subscribe(this.loadLayout, this);
+        this.message.telnetConnect.subscribe(this.handleTelnetConnect, this);
+        this.message.telnetDisconnect.subscribe(this.handleTelnetDisconnect, this);
+        this.message.telnetError.subscribe(this.handleTelnetError, this);
+        this.message.wsError.subscribe(this.handleWsError, this);
+        this.message.wsConnect.subscribe(this.handleWsConnect, this);
+        this.message.wsDisconnect.subscribe(this.handleWsDisconnect, this);
+        this.message.sendCommand.subscribe(this.handleSendCommand, this);
+        this.message.scriptSendCommand.subscribe(this.handleScriptSendCommand, this);
+        this.message.sendPw.subscribe(this.handleSendPw, this);
+        this.message.triggerSendCommands.subscribe(this.handleTriggerSendCommands, this);
+        this.message.aliasSendCommands.subscribe(this.handleAliasSendCommands, this);
+        this.message.scriptPrint.subscribe(this.handleScriptPrint, this);
+        this.message.scriptEvalError.subscribe(this.handleScriptEvalError, this);
+        this.message.scriptExecError.subscribe(this.handleScriptExecError, this);
+
+        $(document).ready(() => {
+            window.onerror = this.handleWindowError;
+        });
     }
 
-    o.load_layout = function() {
-        o.set_root_elem($('#win_output'));
-        if (html) {
-            // it's a reload
-            $('#win_output').html(html);
-            o.scroll_bottom(true);
-            html = null;
+    private prepareReloadLayout() {
+        this.html = $("#win_output").html();
+    }
+
+    private loadLayout() {
+        this.setRootElem($("#win_output"));
+        if (this.html) {
+            // it"s a reload
+            $("#win_output").html(this.html);
+            this.scrollBottom(true);
+            this.html = null;
         }
     }
 
-    o.handle_script_print = function(msg) {
-        var message = msg.data;
-        var output = JSON.stringify(message);
-        o.target.append(
-            '<span style="color:orange">'
-            + Util.raw_to_html(output)
+    private handleScriptPrint(data: MsgDef.ScriptPrintMsg) {
+        let message = data.value;
+        let output = JSON.stringify(message);
+        this.target.append(
+            "<span style=\"color:orange\">"
+            + Util.rawToHtml(output)
             + "<br>"
-            + '</span>');
-        o.scroll_bottom(true);
+            + "</span>");
+        this.scrollBottom(true);
     };
 
-    o.handle_send_pw = function(msg) {
-        var stars = '*'.repeat(msg.data.length);
+    private handleSendPw(data: MsgDef.SendPwMsg) {
+        // let stars = ("*".repeat(msg.data.length);
+        let stars = Array(data.value.length + 1).join("*");
 
-        o.target.append(
-            '<span style="color:yellow">'
+        this.target.append(
+            "<span style=\"color:yellow\">"
             + stars
             + "<br>"
-            + '</span>');
-        o.scroll_bottom(true);
+            + "</span>");
+        this.scrollBottom(true);
     };
 
-    o.handle_send_command = function(msg) {
-        if (msg.no_print) {
+    private handleSendCommand(data: MsgDef.SendCommandMsg) {
+        if (data.noPrint) {
             return;
         }
-        var cmd = msg.data;
-        o.target.append(
-            '<span style="color:yellow">'
-            + Util.raw_to_html(cmd)
+        let cmd = data.value;
+        this.target.append(
+            "<span style=\"color:yellow\">"
+            + Util.rawToHtml(cmd)
             + "<br>"
-            + '</span>');
-        o.scroll_bottom(true);
+            + "</span>");
+        this.scrollBottom(true);
     };
 
-    o.handle_script_send_command = function(msg) {
-        if (msg.no_print) {
+    private handleScriptSendCommand(data: MsgDef.ScriptSendCommandMsg) {
+        if (data.noPrint) {
             return;
         }
-        var cmd = msg.data;
-        o.target.append(
-            '<span style="color:cyan">'
-            + Util.raw_to_html(cmd)
+        let cmd = data.value;
+        this.target.append(
+            "<span style=\"color:cyan\">"
+            + Util.rawToHtml(cmd)
             + "<br>"
-            + '</span>');
-        o.scroll_bottom(true);
+            + "</span>");
+        this.scrollBottom(true);
     };
 
-    o.handle_trigger_send_commands = function(msg) {
-        var html = '<span style="color:cyan">';
+    private handleTriggerSendCommands(data: MsgDef.TriggerSendCommandsMsg) {
+        let html = "<span style=\"color:cyan\">";
 
-        for (var i=0; i < msg.cmds.length; i++) {
+        for (let i = 0; i < data.commands.length; i++) {
             if (i >= 5) {
-                html += '...<br>';
+                html += "...<br>";
                 break;
             } else {
-                html += Util.raw_to_html(msg.cmds[i]) + "<br>";
+                html += Util.rawToHtml(data.commands[i]) + "<br>";
             }
         }
-        o.target.append(html);
-        o.scroll_bottom();
+        this.target.append(html);
+        this.scrollBottom(false);
     };
 
-    o.handle_alias_send_commands = function(msg) {
-        var html = '<span style="color:yellow">'
-        html += Util.raw_to_html(msg.orig);
-        html += '</span><span style="color:cyan"> --> ';
+    private handleAliasSendCommands(data: MsgDef.AliasSendCommandsMsg) {
+        let html = "<span style=\"color:yellow\">";
+        html += Util.rawToHtml(data.orig);
+        html += "</span><span style=\"color:cyan\"> --> ";
 
-        for (var i=0; i < msg.cmds.length; i++) {
+        for (let i = 0; i < data.commands.length; i++) {
             if (i >= 5) {
-                html += '...<br>';
+                html += "...<br>";
                 break;
             } else {
-                html += Util.raw_to_html(msg.cmds[i]) + "<br>";
+                html += Util.rawToHtml(data.commands[i]) + "<br>";
             }
         }
 
-        o.target.append(html);
-        o.scroll_bottom(true);
+        this.target.append(html);
+        this.scrollBottom(true);
     };
 
-    o.handle_telnet_connect = function(msg) {
-        o.target.append(
-            '<span style="color:cyan">'
-            + '[[Telnet connected]]'
+    private handleTelnetConnect(): void {
+        this.target.append(
+            "<span style=\"color:cyan\">"
+            + "[[Telnet connected]]"
             + "<br>"
-            + '</span>');
-        o.scroll_bottom(true);
+            + "</span>");
+        this.scrollBottom(true);
     };
-    o.handle_telnet_disconnect = function(msg) {
-        o.target.append(
-            '<span style="color:cyan">'
-            + '[[Telnet disconnected]]'
+    private handleTelnetDisconnect() {
+        this.target.append(
+            "<span style=\"color:cyan\">"
+            + "[[Telnet disconnected]]"
             + "<br>"
-            + '</span>');
-        o.scroll_bottom(true);
+            + "</span>");
+        this.scrollBottom(true);
     };
-    o.handle_ws_connect = function(msg) {
-        o.target.append(
-            '<span style="color:cyan">'
-            + '[[Websocket connected]]'
+    private handleWsConnect() {
+        this.target.append(
+            "<span style=\"color:cyan\">"
+            + "[[Websocket connected]]"
             + "<br>"
-            + '</span>');
-        o.scroll_bottom();
+            + "</span>");
+        this.scrollBottom(false);
     };
 
-    o.handle_ws_disconnect = function(msg) {
-        o.target.append(
-            '<span style="color:cyan">'
+    private handleWsDisconnect() {
+        this.target.append(
+            "<span style=\"color:cyan\">"
             + "[[Websocket disconnected]]"
             + "<br>"
             + "</span>");
-        o.scroll_bottom();
+        this.scrollBottom(false);
     };
 
-    o.handle_telnet_error= function(msg) {
-        o.target.append(
-            '<span style="color:red">'
+    private handleTelnetError(data: MsgDef.TelnetErrorMsg) {
+        this.target.append(
+            "<span style=\"color:red\">"
             + "[[Telnet error" + "<br>"
-            + msg.data + "<br>"
+            + data.value + "<br>"
             + "]]"
             + "<br>"
             + "</span>");
-        o.scroll_bottom(true);
+        this.scrollBottom(true);
     };
 
-    o.handle_ws_error = function(msg) {
-        o.target.append(
-            '<span style="color:red">'
+    private handleWsError() {
+        this.target.append(
+            "<span style=\"color:red\">"
             + "[[Websocket error]]"
             + "<br>"
             + "</span>");
-        o.scroll_bottom(true);
+        this.scrollBottom(true);
     };
 
-    o.handle_window_error = function(message, source, lineno, colno, error) {
-        o.target.append(
-            '<span style="color:red">'
+    private handleWindowError(message: any, source: any, lineno: any, colno: any, error: any) {
+        this.target.append(
+            "<span style=\"color:red\">"
             + "[[Web Client Error<br>"
             + message + "<br>"
             + source + "<br>"
             + lineno + "<br>"
             + colno + "<br>"
-            + ']]'
-            + '<br>'
-            + '</span>'
+            + "]]"
+            + "<br>"
+            + "</span>"
         );
-        o.scroll_bottom(true);
+        this.scrollBottom(true);
     };
 
-    o.handle_script_eval_error = function(msg) {
-        var err = msg.data;
-        var stack = Util.raw_to_html(err.stack);
+    private handleScriptEvalError(data: MsgDef.ScriptEvalErrorMsg) {
+        let err: any = data.value;
+        let stack = Util.rawToHtml(err.stack);
 
-        o.target.append(
-            '<span style="color:red">'
+        this.target.append(
+            "<span style=\"color:red\">"
             + "[[Script eval error<br>"
             + stack + "<br>"
-            + ']]'
-            + '<br>'
-            + '</span>'
+            + "]]"
+            + "<br>"
+            + "</span>"
         );
-        o.scroll_bottom(true);
+        this.scrollBottom(true);
     };
 
-    o.handle_script_exec_error = function(msg) {
-        var err = msg.data;
-        var stack = Util.raw_to_html(err.stack);
+    private handleScriptExecError(data: MsgDef.ScriptExecErrorMsg) {
+        let err: any = data.value;
+        let stack = Util.rawToHtml(err.stack);
 
-        o.target.append(
-            '<span style="color:red">'
+        this.target.append(
+            "<span style=\"color:red\">"
             + "[[Script execution error<br>"
             + stack + "<br>"
-            + ']]'
-            + '<br>'
-            + '</span>'
+            + "]]"
+            + "<br>"
+            + "</span>"
         );
-        o.scroll_bottom(true);
+        this.scrollBottom(true);
     };
 
-    o.handle_line = function(line) {
-        TriggerManager.handle_line(line);
+    protected handleLine(line: string) {
+        this.triggerManager.handleLine(line);
     };
 
-    return o;
-})();
-
-Message.sub('prepare_reload_layout', OutputWin.prepare_reload_layout);
-Message.sub('load_layout', OutputWin.load_layout);
-Message.sub('telnet_connect', OutputWin.handle_telnet_connect);
-Message.sub('telnet_disconnect', OutputWin.handle_telnet_disconnect);
-Message.sub('telnet_error', OutputWin.handle_telnet_error);
-Message.sub('ws_error', OutputWin.handle_ws_error);
-Message.sub('ws_connect', OutputWin.handle_ws_connect);
-Message.sub('ws_disconnect', OutputWin.handle_ws_disconnect);
-Message.sub('send_command', OutputWin.handle_send_command);
-Message.sub('script_send_command', OutputWin.handle_script_send_command);
-Message.sub('send_pw', OutputWin.handle_send_pw);
-Message.sub('trigger_send_commands', OutputWin.handle_trigger_send_commands);
-Message.sub('alias_send_commands', OutputWin.handle_alias_send_commands);
-Message.sub('script_print', OutputWin.handle_script_print);
-Message.sub('script_eval_error', OutputWin.handle_script_eval_error);
-Message.sub('script_exec_error', OutputWin.handle_script_exec_error);
-
-$(document).ready(function() {
-    window.onerror = OutputWin.handle_window_error;
-});
+}

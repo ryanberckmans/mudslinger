@@ -1,156 +1,175 @@
-var GaugeWin = new (function() {
-    var GAUGE_HEIGHT = '18%';
-    var GAUGE_WIDTH = '100%';
+import {Message, MsgDef} from "./message";
+import * as Util from "./util";
 
-    var o = self;
+const GAUGE_HEIGHT = "18%";
+const GAUGE_WIDTH = "100%";
 
-    var msdp_vals = {};
-    var update_funcs = {};
+class MsdpVals {
+    HEALTH: number;
+    HEALTH_MAX: number;
+    MANA: number;
+    MANA_MAX: number;
+    MOVEMENT: number;
+    MOVEMENT_MAX: number;
+    EXPERIENCE_TNL: number;
+    EXPERIENCE_MAX: number;
+    OPPONENT_HEALTH: number;
+    OPPONENT_HEALTH_MAX: number;
+    OPPONENT_NAME: string;
+}
 
-    var render_gauge_text = function(curr, max, tag) {
-        var rtn = "<pre class='gauge_text'>"+("     " + curr).slice(-5) + " / " + ("     " + max).slice(-5) + " " + tag+"</pre>";
+
+export class GaugeWin {
+    private msdpVals: MsdpVals = new MsdpVals();
+    private updateFuncs: {[k: string]: () => void} = {};
+
+    constructor(private message: Message) {
+        this.message = message;
+
+        this.createUpdateFuncs();
+
+        this.message.msdpVar.subscribe(this.handleMsdpVar, this);
+        this.message.prepareReloadLayout.subscribe(this.prepareReloadLayout, this);
+        this.message.loadLayout.subscribe(this.loadLayout, this);
+    }
+
+    private renderGaugeText(curr: number, max: number, tag: string) {
+        let rtn = "<pre class=\"gauge_text\">"
+            + ("     " + curr).slice(-5)
+            + " / "
+            + ("     " + max).slice(-5)
+            + " "
+            + tag
+            + "</pre>";
         return rtn;
-    };
+    }
 
-    o.prepare_reload_layout = function() {
+    private prepareReloadLayout() {
         // nada
     };
 
-    o.load_layout = function() {
-        $('#hp_bar').jqxProgressBar({
+    private loadLayout() {
+        $("#hp_bar").jqxProgressBar({
             width: GAUGE_WIDTH,
             height: GAUGE_HEIGHT,
             value: 50,
             showText: true,
             animationDuration: 0,
-            renderText: function(text) {
-                return render_gauge_text( msdp_vals.HEALTH || 0, msdp_vals.HEALTH_MAX || 0, "hp ");
+            renderText: (text: string) => {
+                return this.renderGaugeText( this.msdpVals["HEALTH"] || 0, this.msdpVals["HEALTH_MAX"] || 0, "hp ");
             }
         });
 
-        $('#hp_bar .jqx-progressbar-value').css(
+        $("#hp_bar .jqx-progressbar-value").css(
             "background-color", "#DF0101");
 
-        $('#mana_bar').jqxProgressBar({
+        $("#mana_bar").jqxProgressBar({
             width: GAUGE_WIDTH,
             height: GAUGE_HEIGHT,
             value: 50,
             showText: true,
             animationDuration: 0,
-            renderText: function(text) {
-                //return (msdp_vals.MANA || 0) + " / " + (msdp_vals.MANA_MAX || 0) + " mn";
-                return render_gauge_text( msdp_vals.MANA || 0, msdp_vals.MANA_MAX || 0, "mn ");
+            renderText: (text: string) => {
+                return this.renderGaugeText( this.msdpVals["MANA"] || 0, this.msdpVals["MANA_MAX"] || 0, "mn ");
             }
         });
-        $('#mana_bar .jqx-progressbar-value').css(
+        $("#mana_bar .jqx-progressbar-value").css(
                 "background-color", "#2E64FE");
 
-        $('#move_bar').jqxProgressBar({
+        $("#move_bar").jqxProgressBar({
             width: GAUGE_WIDTH,
             height: GAUGE_HEIGHT,
             value: 50,
             showText: true,
             animationDuration: 0,
-            renderText: function(text) {
-                //return (msdp_vals.MOVEMENT || 0) + " / " + (msdp_vals.MOVEMENT_MAX || 0) + " mv";
-                return render_gauge_text( msdp_vals.MOVEMENT || 0, msdp_vals.MOVEMENT_MAX || 0, "mv ");
+            renderText: (text: string) => {
+                return this.renderGaugeText( this.msdpVals["MOVEMENT"] || 0, this.msdpVals["MOVEMENT_MAX"] || 0, "mv ");
             }
         });
-        $('#move_bar .jqx-progressbar-value').css(
+        $("#move_bar .jqx-progressbar-value").css(
                 "background-color", "#04B4AE");
 
-        $('#enemy_bar').jqxProgressBar({
+        $("#enemy_bar").jqxProgressBar({
             width: GAUGE_WIDTH,
             height: GAUGE_HEIGHT,
             value: 0,
             showText: true,
             animationDuration: 0,
-            renderText: function(text) {
-                return Util.strip_color_tags(msdp_vals.OPPONENT_NAME || '');
+            renderText: (tex: string) => {
+                return Util.stripColorTags(this.msdpVals.OPPONENT_NAME || "");
             }
         });
-        $('#enemy_bar .jqx-progressbar-value').css(
+        $("#enemy_bar .jqx-progressbar-value").css(
                 "background-color", "purple");
 
-        $('#tnl_bar').jqxProgressBar({
+        $("#tnl_bar").jqxProgressBar({
             width: GAUGE_WIDTH,
             height: GAUGE_HEIGHT,
             value: 50,
             showText: true,
             animationDuration: 0,
-            renderText: function(text) {
-                var tnl=msdp_vals.EXPERIENCE_TNL || 0;
-                var max=msdp_vals.EXPERIENCE_MAX || 0;
-                return render_gauge_text( max-tnl, max, "etl");
+            renderText: (text: string) => {
+                let tnl = this.msdpVals.EXPERIENCE_TNL || 0;
+                let max = this.msdpVals.EXPERIENCE_MAX || 0;
+                return this.renderGaugeText(max - tnl, max, "etl");
             }
         });
-        $('#tnl_bar .jqx-progressbar-value').css(
+        $("#tnl_bar .jqx-progressbar-value").css(
                 "background-color", "#04B404");
 
-        for (var k in update_funcs) {
-            update_funcs[k]();
+        for (let k in this.updateFuncs) {
+            this.updateFuncs[k]();
         }
-    };
-
-
-    update_funcs.HEALTH = function() {
-        var val = msdp_vals.HEALTH || 0;
-        var max = msdp_vals.HEALTH_MAX || 0;
-        if ( !max || max == 0) { return; }
-        $('#hp_bar').jqxProgressBar({ value: 100*val/max });
-    };
-    update_funcs.HEALTH_MAX = update_funcs.HEALTH;
-
-    update_funcs.MANA = function() {
-        var val = msdp_vals.MANA || 0;
-        var max = msdp_vals.MANA_MAX || 0;
-        if ( !max || max == 0) { return; }
-        $('#mana_bar').jqxProgressBar({ value: 100*val/max });
     }
-    update_funcs.MANA_MAX = update_funcs.MANA;
 
-    update_funcs.MOVEMENT = function() {
-        var val = msdp_vals.MOVEMENT || 0;
-        var max = msdp_vals.MOVEMENT_MAX || 0;
-        if ( !max || max == 0) { return; }
-        $('#move_bar').jqxProgressBar({ value: 100*val/max });
+    private createUpdateFuncs() {
+        this.updateFuncs["HEALTH"] = () => {
+            let val = this.msdpVals["HEALTH"] || 0;
+            let max = this.msdpVals["HEALTH_MAX"] || 0;
+            if ( !max || max === 0) { return; }
+            $("#hp_bar").jqxProgressBar({value: 100 * val / max });
+        };
+        this.updateFuncs["HEALTH_MAX"] = this.updateFuncs["HEALTH"];
+
+        this.updateFuncs["MANA"] = () => {
+            let val = this.msdpVals["MANA"] || 0;
+            let max = this.msdpVals["MANA_MAX"] || 0;
+            if ( !max || max === 0) { return; }
+            $("#mana_bar").jqxProgressBar({value: 100 * val / max});
+        };
+        this.updateFuncs["MANA_MAX"] = this.updateFuncs["MANA"];
+
+        this.updateFuncs["MOVEMENT"] = () => {
+            let val = this.msdpVals["MOVEMENT"] || 0;
+            let max = this.msdpVals["MOVEMENT_MAX"] || 0;
+            if ( !max || max === 0) { return; }
+            $("#move_bar").jqxProgressBar({value: 100 * val / max});
+        };
+        this.updateFuncs["MOVEMENT_MAX"] = this.updateFuncs["MOVEMENT"];
+
+        this.updateFuncs["OPPONENT_HEALTH"] = () => {
+            let val = this.msdpVals["OPPONENT_HEALTH"] || 0;
+            let max = this.msdpVals["OPPONENT_HEALTH_MAX"] || 0;
+            if ( !max || max === 0) { return; }
+            $("#enemy_bar").jqxProgressBar({value: 100 * val / max});
+        };
+        this.updateFuncs["OPPONENT_HEALTH_MAX"] = this.updateFuncs["OPPONENT_HEALTH"];
+        this.updateFuncs["OPPONENT_NAME"] = this.updateFuncs["OPPONENT_HEALTH"];
+
+        this.updateFuncs["EXPERIENCE_TNL"] = () => {
+            let val = this.msdpVals["EXPERIENCE_TNL"] || 0;
+            let max = this.msdpVals["EXPERIENCE_MAX"] || 0;
+            if ( !max || max === 0) { return; }
+            $("#tnl_bar").jqxProgressBar({value: 100 * (max - val) / max});
+        };
+        this.updateFuncs["EXPERIENCE_MAX"] = this.updateFuncs["EXPERIENCE_TNL"];
     }
-    update_funcs.MOVEMENT_MAX = update_funcs.MOVEMENT;
 
-    update_funcs.OPPONENT_HEALTH = function() {
-        var val = msdp_vals.OPPONENT_HEALTH || 0;
-        var max = msdp_vals.OPPONENT_HEALTH_MAX || 0;
-        if ( !max || max == 0) { return; }
-        $('#enemy_bar').jqxProgressBar({ value: 100*val/max });
-    }
-    update_funcs.OPPONENT_HEALTH_MAX = update_funcs.OPPONENT_HEALTH;
-    update_funcs.OPPONENT_NAME = update_funcs.OPPONENT_HEALTH;
-
-    update_funcs.EXPERIENCE_TNL = function() {
-        var val = msdp_vals.EXPERIENCE_TNL || 0;
-        var max = msdp_vals.EXPERIENCE_MAX || 0;
-        if ( !max || max == 0) { return; }
-        $('#tnl_bar').jqxProgressBar({ value: 100*(max - val)/max });
-    }
-    update_funcs.EXPERIENCE_MAX = update_funcs.EXPERIENCE_TNL;
-
-
-    o.handle_msdp_var = function(msg) {
-        if (msg.var in update_funcs) {
-            msdp_vals[msg.var] = msg.val;
-            update_funcs[msg.var]();
+    private handleMsdpVar(data: MsgDef.MsdpVarMsg) {
+        if (data.varName in this.updateFuncs) {
+            let dict: {[k: string]: any} = this.msdpVals;
+            dict[data.varName] = data.value;
+            this.updateFuncs[data.varName]();
         }
-    };
-
-    return o;
-
-})();
-
-//$(document).ready(function() {
-//    GaugeWin.load_layout();
-//});
-
-
-Message.sub('msdp_var', GaugeWin.handle_msdp_var);
-Message.sub('prepare_reload_layout', GaugeWin.prepare_reload_layout);
-Message.sub('load_layout', GaugeWin.load_layout);
+    }
+}

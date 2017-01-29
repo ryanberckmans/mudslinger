@@ -1,0 +1,36 @@
+{
+  "name": "dev1",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "node tools/postinstall.js",
+    "clean": "rimraf ts/build && rimraf static/arcWebClient.js",
+    "build": "npm run build-client && npm run build-server",
+    "build-client": "tsc -p ts/tsconfig.client.json && rollup -c ts/rollup.config.js",
+    "build-server": "tsc -p ts/tsconfig.server.json",
+    "test-client": "tsc -p ts/tsconfig.client.test.json && mocha --recursive ts/build/build_client_test",
+    "test-server": "tsc -p ts/tsconfig.server.test.json && mocha --recursive ts/build/build_server_test",
+    "test": "npm run test-client && npm run test-server"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/chai": "^3.4.34",
+    "@types/express": "^4.0.35",
+    "@types/mocha": "^2.2.38",
+    "@types/socket.io": "^1.4.27",
+    "@types/socket.io-client": "^1.4.29",
+    "chai": "^3.5.0",
+    "express": "^4.14.0",
+    "mocha": "^3.2.0",
+    "rimraf": "^2.5.4",
+    "socket.io": "^1.7.2",
+    "socket.io-client": "^1.7.2",
+    "typescript": "^2.1.5"
+  },
+  "dependencies": {
+    "express": "^4.14.0"
+  }
+}

@@ -4,47 +4,32 @@
   <meta charset="utf-8">
   <title>Aarchon Web Client V0.7.7</title>
 
-  <link rel="stylesheet" href="{{url_for('static', filename='jqwidgets/styles/jqx.base.css')}}">
+  <link rel="stylesheet" href="jqwidgets/styles/jqx.base.css">
 
   <script src="//code.jquery.com/jquery-2.1.3.js"></script>
-  <script src="{{url_for('static', filename='jqwidgets/jqxcore.js')}}"></script>
-  <script src="{{url_for('static', filename='jqwidgets/jqxcheckbox.js')}}"></script>
-  <script src="{{url_for('static', filename='jqwidgets/jqxmenu.js')}}"></script>
-  <script src="{{url_for('static', filename='jqwidgets/jqxwindow.js')}}"></script>
-  <script src="{{url_for('static', filename='jqwidgets/jqxsplitter.js')}}"></script>
-  <script src="{{url_for('static', filename='jqwidgets/jqxprogressbar.js')}}"></script>
-  <script src="{{url_for('static', filename='jqwidgets/jqxribbon.js')}}"></script>
-  <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+  <script src="jqwidgets/jqxcore.js"></script>
+  <script src="jqwidgets/jqxcheckbox.js"></script>
+  <script src="jqwidgets/jqxmenu.js"></script>
+  <script src="jqwidgets/jqxwindow.js"></script>
+  <script src="jqwidgets/jqxsplitter.js"></script>
+  <script src="jqwidgets/jqxprogressbar.js"></script>
+  <script src="jqwidgets/jqxribbon.js"></script>
+  <script src="socket.io.min.js"></script>
 
-  <link rel="stylesheet" href="{{url_for('static', filename='codemirror-5.21.0/lib/codemirror.css')}}">
-  <link rel="stylesheet" href="{{url_for('static', filename='codemirror-5.21.0/theme/neat.css')}}">
-  <script src="{{url_for('static', filename='codemirror-5.21.0/lib/codemirror.js')}}"></script>
-  <script src="{{url_for('static', filename='codemirror-5.21.0/addon/display/autorefresh.js')}}"></script>
-  <script src="{{url_for('static', filename='codemirror-5.21.0/mode/javascript/javascript.js')}}"></script>
+  <link rel="stylesheet" href="codemirror-5.21.0/lib/codemirror.css">
+  <link rel="stylesheet" href="codemirror-5.21.0/theme/neat.css">
+  <script src="codemirror-5.21.0/lib/codemirror.js"></script>
+  <script src="codemirror-5.21.0/addon/display/autorefresh.js"></script>
+  <script src="codemirror-5.21.0/mode/javascript/javascript.js"></script>
 
-  <link rel="stylesheet" href="{{url_for('static', filename='css/client.css')}}">
+  <link rel="stylesheet" href="css/client.css">
 
-  <script src="{{url_for('static', filename='modules/Polyfill.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/Message.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/Util.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/JsScript.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/JsScriptWin.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/TrigAlEditBase.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/AliasEditor.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/TriggerEditor.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/AliasManager.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/TriggerManager.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/OutputManager.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/OutWinBase.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/OutputWin.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/ChatWin.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/MapWin.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/GaugeWin.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/CommandInput.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/MenuBar.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/MXP.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/Socket.js')}}"></script>
-  <script src="{{url_for('static', filename='modules/Client.js')}}"></script>
+  <script src="polyfill.js"></script>
+  <script src="arcWebClient.js"></script>
+
+  <script>
+    var myClient = new ArcWebClient.Client();
+  </script>
 </head>
 <body>
 <div id="client">

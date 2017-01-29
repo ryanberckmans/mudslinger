@@ -1,67 +1,68 @@
-var TriggerManager = new (function(){
-    var o = this;
+import {JsScript} from "./jsScript";
+import {Message, MsgDef} from "./message";
+import {TrigAlItem} from "./trigAlEditBase";
 
-    var enabled = true;
-    o._get_enabled = function() {return enabled;};
+export class TriggerManager {
+    private enabled: boolean = true;
+    public triggers: Array<TrigAlItem> = null;
 
-    o.triggers = null;
+    constructor(private message: Message, private jsScript: JsScript) {
+        $(document).ready(() => {
+            let saved_triggers = localStorage.getItem("triggers");
+            if (!saved_triggers) {
+                this.triggers = [];
+            } else {
+                this.triggers = JSON.parse(saved_triggers);
+            }
+        });
 
-    o.save_triggers = function() {
-        localStorage.setItem('triggers', JSON.stringify(o.triggers));
-    };
+        this.message.setTriggersEnabled.subscribe(this.handleSetTriggersEnabled, this);
+    }
 
-    o.handle_set_triggers_enabled = function(value) {
-        enabled = value;
-    };
+    public saveTriggers() {
+        localStorage.setItem("triggers", JSON.stringify(this.triggers));
+    }
 
-    o.handle_line = function(line) {
-        if (!enabled) return;
+    private handleSetTriggersEnabled(data: MsgDef.SetTriggersEnabledMsg) {
+        this.enabled = data.value;
+    }
+
+    public handleLine(line: string) {
+        if (!this.enabled) return;
 //        console.log("TRIGGER: " + line);
-        for (var i=0; i < o.triggers.length; i++) {
-            var trig = o.triggers[i];
+        for (let i = 0; i < this.triggers.length; i++) {
+            let trig = this.triggers[i];
             if (trig.regex) {
-                var match = line.match(trig.pattern);
+                let match = line.match(trig.pattern);
                 if (!match) {
                     continue;
                 }
 
                 if (trig.is_script) {
-                    var script = new JsScript(trig.value);
-                    if (script) {script.RunScript(match)};
+                    let script = this.jsScript.makeScript(trig.value);
+                    if (script) { script(); };
                 } else {
-                    var value = trig.value;
+                    let value = trig.value;
 
                     value = value.replace(/\$(\d+)/g, function(m, d) {
-                        return match[parseInt(d)] || '';
+                        return match[parseInt(d)] || "";
                     });
 
-                    var cmds = value.replace('\r', '').split('\n');
-                    Message.pub('trigger_send_commands', {cmds: cmds});
+                    let cmds = value.replace("\r", "").split("\n");
+                    this.message.triggerSendCommands.publish({commands: cmds});
                 }
             } else {
                 if (line.includes(trig.pattern)) {
                     if (trig.is_script) {
-                        var script = new JsScript(trig.value);
-                        if (script) {script.RunScript(null)};
+                        let script = this.jsScript.makeScript(trig.value);
+                        if (script) { script(); };
                     } else {
-                        var cmds = trig.value.replace('\r', '').split('\n');
-                        Message.pub('trigger_send_commands', {cmds: cmds});
+                        let cmds = trig.value.replace("\r", "").split("\n");
+                        this.message.triggerSendCommands.publish({commands: cmds});
                     }
                 }
             }
         }
     };
+}
 
-    return o;
-})();
-
-$(document).ready(function() {
-    var saved_triggers = localStorage.getItem("triggers");
-    if (!saved_triggers) {
-        TriggerManager.triggers = [];
-    } else {
-        TriggerManager.triggers = JSON.parse(saved_triggers);
-    }
-});
-
-Message.sub('set_triggers_enabled', TriggerManager.handle_set_triggers_enabled);

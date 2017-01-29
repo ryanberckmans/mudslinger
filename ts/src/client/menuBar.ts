@@ -1,71 +1,83 @@
-var MenuBar = new (function() {
-    var o = this;
+import {Client} from "./client";
+import {Message, MsgDef} from "./message";
+import {Socket} from "./socket";
+import {AliasEditor} from "./aliasEditor";
+import {TriggerEditor} from "./triggerEditor";
+import {JsScriptWin} from "./jsScriptWin";
 
-    o.prepare_reload_layout = function() {
+export class MenuBar {
+    constructor(
+        private message: Message,
+        private client: Client,
+        private socket: Socket,
+        private aliasEditor: AliasEditor,
+        private triggerEditor: TriggerEditor,
+        private jsScriptWin: JsScriptWin
+        ) {
+        this.makeClickFuncs();
+
+        this.message.prepareReloadLayout.subscribe(this.prepareReloadLayout, this);
+        this.message.loadLayout.subscribe(this.loadLayout, this);
+    }
+
+    private prepareReloadLayout() {
         // nada
-    };
+    }
 
-    o.load_layout = function() {
-        $('#menu_bar').jqxMenu({ width: '100%', height: '4%'});
-        $('#menu_bar').on('itemclick', o.handle_click);
+    private loadLayout() {
+        $("#menu_bar").jqxMenu({ width: "100%", height: "4%"});
+        $("#menu_bar").on("itemclick", (e: any) => this.handleClick(e));
 
-        $('#chk_enable_trig').change(function() {
-            Message.pub('set_triggers_enabled', this.checked);
+        let o = this;
+        $("#chk_enable_trig").change(function() {
+            o.message.setTriggersEnabled.publish({value: this.checked});
         });
 
-        $('#chk_enable_alias').change(function() {
-            Message.pub('set_aliases_enabled', this.checked);
+        $("#chk_enable_alias").change(function() {
+            o.message.setAliasesEnabled.publish({value: this.checked});
         });
     };
 
-    var click_funcs = {};
-    click_funcs['Reload Layout'] = function() {
-        console.log("OMG reload");
-        Client.reload_layout();
-    };
+    private clickFuncs: {[k: string]: () => void} = {};
+    private makeClickFuncs() {
+        this.clickFuncs["Reload Layout"] = () => {
+            this.client.reloadLayout();
+        };
 
-    click_funcs['Connect'] = function() {
-        Socket.open_telnet();
-    };
+        this.clickFuncs["Connect"] = () => {
+            this.socket.openTelnet();
+        };
 
-    click_funcs['Disconnect'] = function() {
-        Socket.close_telnet();
-    };
+        this.clickFuncs["Disconnect"] = () => {
+            this.socket.closeTelnet();
+        };
 
-    click_funcs['Aliases'] = function() {
-        AliasEditor.show();
-    };
+        this.clickFuncs["Aliases"] = () => {
+            this.aliasEditor.show();
+        };
 
-    click_funcs['Triggers'] = function() {
-        TriggerEditor.show();
-    };
+        this.clickFuncs["Triggers"] = () => {
+            this.triggerEditor.show();
+        };
 
-    click_funcs['Test socket response'] = function() {
-        Socket.test_socket_response();
-    };
+        this.clickFuncs["Green"] = () => {
+            this.message.changeDefaultColor.publish({value: "green"});
+        };
 
-    click_funcs['Green'] = function() {
-        Message.pub('change_default_color', 'green');
-    };
+        this.clickFuncs["White"] = () => {
+            this.message.changeDefaultColor.publish({value: "white"});
+        };
 
-    click_funcs['White'] = function() {
-        Message.pub('change_default_color', 'white');
-    };
+        this.clickFuncs["Script"] = () => {
+            this.jsScriptWin.show();
+        };
+    }
 
-    click_funcs['Script'] = function() {
-        JsScriptWin.show();
-    };
-
-    o.handle_click = function(event) {
-        var item = event.args;
-        var text = $(item).text();
-        if (text in click_funcs) {
-            click_funcs[text]();
+    private handleClick(event: any) {
+        let item = event.args;
+        let text = $(item).text();
+        if (text in this.clickFuncs) {
+            this.clickFuncs[text]();
         }
     };
-
-    return o;
-})();
-
-Message.sub('prepare_reload_layout', MenuBar.prepare_reload_layout);
-Message.sub('load_layout', MenuBar.load_layout);
+}

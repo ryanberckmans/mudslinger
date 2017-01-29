@@ -1,169 +1,154 @@
-function OutWinBase() {
-    var o = this;
+import * as Util from "./util";
 
-    var line_count=0;
-    var max_lines = 5000;
-    o.set_max_lines = function(count) {
-        max_lines = count;
+export class OutWinBase {
+    private lineCount: number = 0;
+    private maxLines: number = 5000;
+    public setMaxLines(count: number) {
+        this.maxLines = count;
     }
 
-    o.fg_color = null;
-    o.bg_color = null;
+    private fgColor: any = null;
+    private bgColor: any = null;
 
-    o.set_fg_color = function(color) {
-        o.fg_color = color;
-    };
+    public setFgColor(color: any) {
+        this.fgColor = color;
+    }
 
-    o.set_bg_color = function(color) {
-        o.bg_color = color;
+    public setBgColor(color: any) {
+        this.bgColor = color;
     };
 
     // handling nested elements, always output to last one
-    o.target_elems = null;
-    o.target = null;
-    o.root_elem = null;
+    private targetElems: any[] = null;
+    protected target: any = null;
+    private rootElem: any = null;
 
-    var scroll_lock = false; // true when we should not scroll to bottom
-    var handle_scroll = function(e) {
-        var scrollHeight = o.root_elem.prop('scrollHeight');
-        var scrollTop = o.root_elem.scrollTop();
-        var outerHeight = o.root_elem.outerHeight();
-        var is_at_bottom = outerHeight + scrollTop >= scrollHeight;
+    private scrollLock = false; // true when we should not scroll to bottom
+    private handleScroll(e: any) {
+        let scrollHeight = this.rootElem.prop("scrollHeight");
+        let scrollTop = this.rootElem.scrollTop();
+        let outerHeight = this.rootElem.outerHeight();
+        let is_at_bottom = outerHeight + scrollTop >= scrollHeight;
 
-//        console.log("Bottom:" + is_at_bottom);
-//        console.log(scrollHeight);
-//        console.log(scrollTop);
-//        console.log(outerHeight);
-
-        scroll_lock = !is_at_bottom;
-    };
+        this.scrollLock = !is_at_bottom;
+    }
 
     // must set root elem before actually using it
-    o.set_root_elem = function(elem) {
+    protected setRootElem(elem: any) {
         // this may be called upon layout reload
-        o.root_elem = elem;
-        o.target_elems = [elem];
-        o.target =  elem;
+        this.rootElem = elem;
+        this.targetElems = [elem];
+        this.target =  elem;
 
-        // direct children of the root will be line containers, let's push the first one.
-        o.push_elem($('<span>').appendTo(elem));
+        // direct children of the root will be line containers, let"s push the first one.
+        this.pushElem($("<span>").appendTo(elem));
 
-        o.root_elem.bind('scroll', handle_scroll);
+        this.rootElem.bind("scroll", (e: any) => { this.handleScroll(e); });
     };
 
     // elem is the actual jquery element
-    o.push_elem = function(elem) {
+    public pushElem(elem: any) {
 //        console.log(o);
 //        console.log("elem pushed");
 //        console.log(elem);
-        o.write_buffer();
+        this.writeBuffer();
 
-        o.target.append(elem);
-        o.target_elems.push(elem);
-        o.target = elem;
-    };
+        this.target.append(elem);
+        this.targetElems.push(elem);
+        this.target = elem;
+    }
 
-    o.pop_elem = function() {
-        o.write_buffer();
+    public popElem() {
+        this.writeBuffer();
 
-        var popped = o.target_elems.pop();
+        let popped = this.targetElems.pop();
 //        console.log(o);
 //        console.log("elem popped");
 //        console.log(popped);
-        o.target = o.target_elems[o.target_elems.length-1];
+        this.target = this.targetElems[this.targetElems.length - 1];
         return popped;
-    };
+    }
 
-    o.handle_line = function(line) {
+    protected handleLine(line: string) {
         // default to nothing, main output window will send it to trigger manager
-    };
+    }
 
-    var append_buffer = '';
-    var line_text = ''; // track full text of the line with no escape sequences or tags
-    o.add_text = function(txt) {
-//        console.log("add text");
-//        console.log(txt);
-//        console.log(o.target);
-        line_text += txt;
-        var html = Util.raw_to_html(txt);
-//        var span = $(document.createElement('span'));
-        var span_text = '<span'
-        var style = ''
-        if (o.fg_color || o.bg_color) {
-            style = ' style="'
-            if (o.fg_color) {
-                style += 'color:' + o.fg_color + ';';
+    private appendBuffer = "";
+    private lineText = ""; // track full text of the line with no escape sequences or tags
+    public addText(txt: string) {
+        this.lineText += txt;
+        let html = Util.rawToHtml(txt);
+//        let span = $(document.createElement("span"));
+        let span_text = "<span";
+        let style = "";
+        if (this.fgColor || this.bgColor) {
+            style = " style=\"";
+            if (this.fgColor) {
+                style += "color:" + this.fgColor + ";";
             }
-            if (o.bg_color) {
-                style += 'background-color:' + o.bg_color + ';';
+            if (this.bgColor) {
+                style += "background-color:" + this.bgColor + ";";
             }
-            style += '"';
+            style += "\"";
         }
-        span_text += style + '>';
+        span_text += style + ">";
         span_text += html;
-        span_text += '</span>';
-        append_buffer += span_text;
+        span_text += "</span>";
+        this.appendBuffer += span_text;
 
-        if (txt.endsWith('\n')) {
-            o.target.append(append_buffer);
-            append_buffer = '';
-            o.new_line();
+        if (txt.endsWith("\n")) {
+            this.target.append(this.appendBuffer);
+            this.appendBuffer = "";
+            this.newLine();
         }
     };
 
-    o.new_line = function() {
-        o.pop_elem(); // pop the old line
-        o.push_elem($('<span>').appendTo(o.target));
+    private newLine() {
+        this.popElem(); // pop the old line
+        this.pushElem($("<span>").appendTo(this.target));
 
-        o.handle_line(line_text);
-        line_text = '';
+        this.handleLine(this.lineText);
+        this.lineText = "";
 
-        line_count += 1;
-        if (line_count > max_lines) {
-            o.root_elem.children(":lt(" +
-                (max_lines/2) +
+        this.lineCount += 1;
+        if (this.lineCount > this.maxLines) {
+            this.rootElem.children(":lt(" +
+                (this.maxLines / 2) +
                 ")"
             ).remove();
-            line_count = (max_lines/2);
+            this.lineCount = (this.maxLines / 2);
         }
     }
 
-    o.write_buffer = function() {
-        o.target.append(append_buffer);
-        append_buffer = '';
+    private writeBuffer() {
+        this.target.append(this.appendBuffer);
+        this.appendBuffer = "";
     };
 
-    o.output_done = function() {
-        o.write_buffer();
-        o.scroll_bottom();
+    public outputDone() {
+        this.writeBuffer();
+        this.scrollBottom();
     };
 
-    var scroll_requested = false;
-    var _scroll_bottom = function() {
+    private scrollRequested = false;
+    private privScrolBottom() {
         console.time("_scroll_bottom");
-        var elem = o.root_elem;
-        elem.scrollTop(elem.prop('scrollHeight'));
-        scroll_lock = false;
-        scroll_requested = false;
+        let elem = this.rootElem;
+        elem.scrollTop(elem.prop("scrollHeight"));
+        this.scrollLock = false;
+        this.scrollRequested = false;
         console.timeEnd("_scroll_bottom");
     };
 
-    o.scroll_bottom = function(force) {
-        if (scroll_lock && !(force == true)) {
+    protected scrollBottom(force: boolean = false) {
+        if (this.scrollLock && force !== true) {
             return;
         }
-        if (scroll_requested) {
+        if (this.scrollRequested) {
             return;
         }
-        requestAnimationFrame(_scroll_bottom);
-        scroll_requested = true;
-//        //if (true) {return;}
-//        var elem = o.root_elem;
-//        //var scrollHeight = elem.prop('scrollHeight');
-//        console.log("scroll calt");
-////        var scrollHeight = elem[0].scrollHeight;
-//        elem.scrollTop(line_count * 20);
-    };
 
-    return o;
-};
+        requestAnimationFrame(() => this.privScrolBottom());
+        this.scrollRequested = true;
+    }
+}

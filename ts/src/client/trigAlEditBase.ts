@@ -1,186 +1,200 @@
-var TrigAlEditBase = function() {
-    var o = this;
+import * as Util from "./util";
 
-    o.win = null;
+declare let CodeMirror: any;
 
-    /* these need to be set it get_elements*/
-    o.list_box = null;
-    o.pattern = null;
-    o.regex_checkbox = null;
-    o.script_checkbox = null;
-    o.text_area = null;
-    o.script_area = null;
-    o.code_mirror = null;
-    o.code_mirror_wrapper = null;
-    o.new_button = null;
-    o.delete_button = null;
-    o.main_split = null;
+export interface TrigAlItem {
+    pattern: string;
+    value: string;
+    regex: boolean;
+    is_script: boolean;
+}
+
+export abstract class TrigAlEditBase {
+    protected win: any = null;
+
+    /* these need to be set in get_elements*/
+    protected listBox: any;
+    protected pattern: any;
+    protected regexCheckbox: any;
+    protected scriptCheckbox: any;
+    protected textArea: any;
+    protected scriptArea: any;
+    protected codeMirror: any;
+    protected codeMirrorWrapper: any;
+    protected newButton: any;
+    protected deleteButton: any;
+    protected mainSplit: any;
+    protected saveButton: any;
+    protected cancelButton: any;
 
     /* these need to be overridden */
-    o.get_elements = null;
-    o.get_list = null;
-    o.get_item = null;
-    o.save_item = null;
-    o.delete_item = null;
+    protected abstract getElements(): void;
+    protected abstract getList(): Array<string>;
+    protected abstract getItem(ind: number): TrigAlItem;
+    protected abstract saveItem(ind: number, pattern: string, value: string, checked: boolean, is_script: boolean): void;
+    protected abstract deleteItem(ind: number): void;
 
-    o.set_editor_disabled = function(state) {
-        o.pattern.prop('disabled', state);
-        o.regex_checkbox.prop('disabled', state);
-        o.script_checkbox.prop('disabled', state);
-        o.text_area.prop('disabled', state);
-        o.code_mirror_wrapper.prop('disabled', state);
-        o.save_button.prop('disabled', state);
-        o.cancel_button.prop('disabled', state);
-    };
+    protected abstract get defaultPattern(): string;
+    protected abstract get defaultValue(): string;
+    protected abstract get defaultScript(): string;
 
-    o.select_none = function() {
-        o.list_box.prop('selectedItem', 0);
-        o.list_box.val([]);
-    };
+    private setEditorDisabled(state: boolean): void {
+        this.pattern.prop("disabled", state);
+        this.regexCheckbox.prop("disabled", state);
+        this.scriptCheckbox.prop("disabled", state);
+        this.textArea.prop("disabled", state);
+        this.codeMirrorWrapper.prop("disabled", state);
+        this.saveButton.prop("disabled", state);
+        this.cancelButton.prop("disabled", state);
+    }
 
-    o.clear_editor = function() {
-        o.pattern.val('');
-        o.text_area.val('');
-        o.regex_checkbox.prop('checked', false);
-        o.script_checkbox.prop('checked', false);
-    };
+    private selectNone(): void {
+        this.listBox.prop("selectedItem", 0);
+        this.listBox.val([]);
+    }
 
-    o.update_list_box = function() {
-        var lst = o.get_list();
-        var html = '';
-        for (var i=0; i < lst.length; i++) {
-            html += '<option>' + Util.raw_to_html(lst[i]) + '</option>';
+    private clearEditor(): void {
+        this.pattern.val("");
+        this.textArea.val("");
+        this.regexCheckbox.prop("checked", false);
+        this.scriptCheckbox.prop("checked", false);
+    }
+
+    private updateListBox() {
+        let lst = this.getList();
+        let html = "";
+        for (let i = 0; i < lst.length; i++) {
+            html += "<option>" + Util.rawToHtml(lst[i]) + "</option>";
         }
-        o.list_box.html(html);
+        this.listBox.html(html);
     };
 
-    var handle_save_button_click = function() {
-        var ind = o.list_box.prop('selectedIndex');
-        var is_script = o.script_checkbox.is(':checked');
+    private handleSaveButtonClick() {
+        let ind = this.listBox.prop("selectedIndex");
+        let is_script = this.scriptCheckbox.is(":checked");
 
-        o.save_item(
+        this.saveItem(
             ind,
-            o.pattern.val(),
-            is_script ? o.code_mirror.getValue() : o.text_area.val(),
-            o.regex_checkbox.is(':checked'),
+            this.pattern.val(),
+            is_script ? this.codeMirror.getValue() : this.textArea.val(),
+            this.regexCheckbox.is(":checked"),
             is_script
         );
 
-        o.select_none();
-        o.clear_editor();
-        o.set_editor_disabled(true);
-        o.update_list_box();
+        this.selectNone();
+        this.clearEditor();
+        this.setEditorDisabled(true);
+        this.updateListBox();
+    }
+
+    private handleCancelButtonClick() {
+        this.clearEditor();
+        this.selectNone();
+        this.setEditorDisabled(true);
+    }
+
+    private handleNewButtonClick() {
+        this.setEditorDisabled(false);
+        this.selectNone();
+        this.pattern.val(this.defaultPattern || "INPUT PATTERN HERE");
+        this.textArea.val(this.defaultValue || "INPUT VALUE HERE");
+        this.codeMirror.setValue(this.defaultScript || "// INPUT SCRIPT HERE");
+    }
+
+    private handleDeleteButtonClick() {
+        let ind = this.listBox.prop("selectedIndex");
+
+        this.deleteItem(ind);
+
+        this.clearEditor();
+        this.selectNone();
+        this.setEditorDisabled(true);
+        this.updateListBox();
+    }
+
+    private showScriptInput() {
+        this.textArea.hide();
+        this.codeMirrorWrapper.show();
+        this.codeMirror.refresh();
     };
 
-    var handle_cancel_button_click = function() {
-        o.clear_editor();
-        o.select_none();
-        o.set_editor_disabled(true);
+    private showTextInput() {
+        this.codeMirrorWrapper.hide();
+        this.textArea.show();
     };
 
-    var handle_new_button_click = function() {
-        o.set_editor_disabled(false);
-        o.select_none();
-        o.pattern.val(o.default_pattern || "INPUT PATTERN HERE");
-        o.text_area.val(o.default_value || "INPUT VALUE HERE");
-        o.code_mirror.setValue(o.default_script || "// INPUT SCRIPT HERE");
-    };
-
-    var handle_delete_button_click = function() {
-        var ind = o.list_box.prop('selectedIndex');
-
-        o.delete_item(ind);
-
-        o.clear_editor();
-        o.select_none();
-        o.set_editor_disabled(true);
-        o.update_list_box();
-    };
-
-    var show_script_input = function() {
-        o.text_area.hide();
-        o.code_mirror_wrapper.show();
-        o.code_mirror.refresh();
-    };
-
-    var show_text_input = function() {
-        o.code_mirror_wrapper.hide();
-        o.text_area.show();
-    };
-
-    var handle_list_box_change = function() {
-        var ind = o.list_box.prop('selectedIndex');
-        var item = o.get_item(ind);
+    private handleListBoxChange() {
+        let ind = this.listBox.prop("selectedIndex");
+        let item = this.getItem(ind);
 
         if (!item) {
             return;
         }
-        o.set_editor_disabled(false);
-        o.pattern.val(item.pattern);
+        this.setEditorDisabled(false);
+        this.pattern.val(item.pattern);
         if (item.is_script) {
-            show_script_input();
-            o.code_mirror.setValue(item.value);
-            o.text_area.val('');
+            this.showScriptInput();
+            this.codeMirror.setValue(item.value);
+            this.textArea.val("");
         } else {
-            show_text_input();
-            o.text_area.val(item.value);
-            o.code_mirror.setValue('');
+            this.showTextInput();
+            this.textArea.val(item.value);
+            this.codeMirror.setValue("");
         }
-        o.regex_checkbox.prop('checked', item.regex ? true : false);
-        o.script_checkbox.prop('checked', item.is_script ? true : false);
+        this.regexCheckbox.prop("checked", item.regex ? true : false);
+        this.scriptCheckbox.prop("checked", item.is_script ? true : false);
     };
 
-    var handle_script_checkbox_change = function() {
-        var checked = o.script_checkbox.prop('checked');
+    private handleScriptCheckboxChange() {
+        let checked = this.scriptCheckbox.prop("checked");
         if (checked) {
-            show_script_input();
+            this.showScriptInput();
         } else {
-            show_text_input();
+            this.showTextInput();
         }
     };
 
-    o.create_window = function() {
-        o.get_elements();
+    private createWindow() {
+        this.getElements();
 
-        o.win.jqxWindow({width: 600, height: 400});
+        this.win.jqxWindow({width: 600, height: 400});
 
-        o.main_split.jqxSplitter({
-            width: '100%',
-            height: '100%',
-            orientation: 'vertical',
-            panels: [{size:'25%'},{size:'75%'}]
+        this.mainSplit.jqxSplitter({
+            width: "100%",
+            height: "100%",
+            orientation: "vertical",
+            panels: [{size: "25%"}, {size: "75%"}]
         });
 
-        o.code_mirror = CodeMirror.fromTextArea(
-            o.script_area[0], {
-                mode: 'javascript',
-                theme: 'neat',
+        this.codeMirror = CodeMirror.fromTextArea(
+            this.scriptArea[0], {
+                mode: "javascript",
+                theme: "neat",
                 autoRefresh: true, // https://github.com/codemirror/CodeMirror/issues/3098
                 matchBrackets: true,
                 lineNumbers: true
             }
         );
-        o.code_mirror_wrapper = $(o.code_mirror.getWrapperElement());
-        o.code_mirror_wrapper.height('100%');
-        o.code_mirror_wrapper.hide();
+        this.codeMirrorWrapper = $(this.codeMirror.getWrapperElement());
+        this.codeMirrorWrapper.height("100%");
+        this.codeMirrorWrapper.hide();
 
-        o.list_box.change(handle_list_box_change);
-        o.new_button.click(handle_new_button_click);
-        o.delete_button.click(handle_delete_button_click);
-        o.save_button.click(handle_save_button_click);
-        o.cancel_button.click(handle_cancel_button_click);
-        o.script_checkbox.change(handle_script_checkbox_change);
+        this.listBox.change(this.handleListBoxChange);
+        this.newButton.click(this.handleNewButtonClick);
+        this.deleteButton.click(this.handleDeleteButtonClick);
+        this.saveButton.click(this.handleSaveButtonClick);
+        this.cancelButton.click(this.handleCancelButtonClick);
+        this.scriptCheckbox.change(this.handleScriptCheckboxChange);
     };
 
-    o.show = function() {
-        if (!o.win) {
-            o.create_window();
+    public show() {
+        if (!this.win) {
+            this.createWindow();
         }
 
-        o.update_list_box();
+        this.updateListBox();
 
-        o.win.jqxWindow('open');
+        this.win.jqxWindow("open");
     };
 
-    return o;
-};
+}

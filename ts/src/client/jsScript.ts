@@ -1,36 +1,38 @@
-var JsScript = new function() {
-    var _script_this = {}; /* this used for all scripts */
+import {Message, MsgDef} from "./message";
 
-    return function(text) {
+function makeScript(text: string, _message_: Message) {
+    let _scriptFunc_: (match: any) => void;
+    /* Scripting API section */
+    let send = function(cmd: string) {
+        _message_.scriptSendCommand.publish({value: cmd});
+    };
 
-        /* Scripting API section */
-        var send = function(cmd) {
-            Message.pub('script_send_command', {data: cmd});
-        };
+    let print = function(message: string) {
+        _message_.scriptPrint.publish({value: message});
+    };
+    /* end Scripting API section */
 
-        var print = function(message) {
-            Message.pub('script_print', {data: message});
-        };
-        /* end Scripting API section */
-
-        try {
-            eval('var script_func = function(match) {"use strict";' + text + '}');
-        }
-        catch (err) {
-            Message.pub('script_eval_error', {data: err});
-            return null;
-        }
-
-        this.RunScript = function(match) {
-            try {
-                script_func.call(_script_this, match);
-            }
-            catch (err) {
-                Message.pub('script_exec_error', {data: err});
-                return;
-            }
-        };
-
-        return this;
+    try {
+        eval("_scriptFunc_ = function(match) {\"use strict\";" + text + "}");
     }
-}();
+    catch (err) {
+        _message_.scriptEvalError.publish({value: err});
+        return null;
+    }
+
+    _scriptFunc_.bind(this);
+
+    return _scriptFunc_;
+}
+
+export class JsScript {
+    private scriptThis = {}; /* this used for all scripts */
+
+    constructor(private message: Message) {
+        this.message = message;
+    }
+
+    public makeScript(text: string) {
+        return makeScript.call(this.scriptThis, text, this.message);
+    }
+}

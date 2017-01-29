@@ -1,42 +1,48 @@
-var StatWin = new (function(){
-    var o = this;
+import {Message, MsgDef} from "./message";
 
-    var msdp_vals = {
-        'STR': null, 'STR_PERM': null,
-        'INT': null, 'INT_PERM': null,
-        'CON': null, 'CON_PERM': null,
-        'WIS': null, 'WIS_PERM': null,
-        'VIT': null, 'VIT_PERM': null,
-        'DIS': null, 'DIS_PERM': null,
-        'AGI': null, 'AGI_PERM': null,
-        'CHA': null, 'CHA_PERM': null,
-        'DEX': null, 'DEX_PERM': null,
-        'LUC': null, 'LUC_PERM': null
+export class StatWin {
+    constructor(private message: Message) {
+        this.message.prepareReloadLayout.subscribe(this.prepareReloadLayout, this);
+        this.message.loadLayout.subscribe(this.loadLayout, this);
+        this.message.msdpVar.subscribe(this.handleMsdpVar, this);
+    }
+
+    private msdpVals: {[k: string]: string} = {
+        "STR": null, "STR_PERM": null,
+        "INT": null, "INT_PERM": null,
+        "CON": null, "CON_PERM": null,
+        "WIS": null, "WIS_PERM": null,
+        "VIT": null, "VIT_PERM": null,
+        "DIS": null, "DIS_PERM": null,
+        "AGI": null, "AGI_PERM": null,
+        "CHA": null, "CHA_PERM": null,
+        "DEX": null, "DEX_PERM": null,
+        "LUC": null, "LUC_PERM": null
     };
 
-    var html;
+    private html: string;
 
-    o.prepare_reload_layout = function() {
-        html = $('#win_stat').html();
+    private prepareReloadLayout() {
+        this.html = $("#win_stat").html();
     };
 
-    o.load_layout = function() {
-        if (html) {
-            // it's a reload
-            $('#win_stat').html(html);
-            html = null;
+    private loadLayout() {
+        if (this.html) {
+            // it"s a reload
+            $("#win_stat").html(this.html);
+            this.html = null;
         }
     };
 
-    o.update_stat_win = function() {
-        var output = '';
+    private updateStatWin() {
+        let output = "";
         output +=
-        output += '<h2>STATS</h2>';
+        output += "<h2>STATS</h2>";
 
-        var left = false;
+        let left = false;
 
-        function print_stat( label, val, perm) {
-            var color;
+        let print_stat = (label: string, val: string, perm: string) => {
+            let color;
             left = !left;
             if (left) {
                 color = "red";
@@ -44,60 +50,54 @@ var StatWin = new (function(){
                 color = "cyan";
             }
 
-            output += '<span style="color: '+color+';">';
+            output += "<span style=\"color: " + color + ";\">";
 
             output += label + ": ";
-            output += ("   " + (msdp_vals[perm] || '???')).slice(-3);
-            output += "("+(("   " + (msdp_vals[val] || '???')).slice(-3))+")";
+            output += ("   " + (this.msdpVals[perm] || "???")).slice(-3);
+            output += "(" + (("   " + (this.msdpVals[val] || "???")).slice(-3)) + ")";
 
-            output += "</span>"
-        }
+            output += "</span>";
+        };
 
-        output += '<center>';
+        output += "<center>";
 
         print_stat( "Str", "STR", "STR_PERM");
-        output += '   ';
+        output += "   ";
         print_stat( "Int", "INT", "INT_PERM");
         output += "<br>";
 
         print_stat( "Con", "CON", "CON_PERM");
-        output += '   ';
+        output += "   ";
         print_stat( "Wis", "WIS", "WIS_PERM");
         output += "<br>";
 
         print_stat( "Vit", "VIT", "VIT_PERM");
-        output += '   ';
+        output += "   ";
         print_stat( "Dis", "DIS", "DIS_PERM");
         output += "<br>";
 
         print_stat( "Agi", "AGI", "AGI_PERM");
-        output += '   ';
+        output += "   ";
         print_stat( "Cha", "CHA", "CHA_PERM");
         output += "<br>";
 
         print_stat( "Dex", "DEX", "DEX_PERM");
-        output += '   ';
+        output += "   ";
         print_stat( "Luc", "LUC", "LUC_PERM");
         output += "<br>";
 
-        output += '</center>';
+        output += "</center>";
 
-        $('#win_stat').html("<pre>"+output+"</pre>");
+        $("#win_stat").html("<pre>" + output + "</pre>");
     };
 
-    o.handle_msdp_var = function(msg) {
-        if (!msg.var in msdp_vals) {
+    private handleMsdpVar(data: MsgDef.MsdpVarMsg) {
+        if (!(data.varName in this.msdpVals)) {
             return;
         }
 
-        msdp_vals[msg.var] = msg.val;
+        this.msdpVals[data.varName] = data.value;
 
-        o.update_stat_win();
+        this.updateStatWin();
     };
-
-    return o;
-})();
-
-Message.sub('prepare_reload_layout', StatWin.prepare_reload_layout);
-Message.sub('load_layout', StatWin.load_layout);
-Message.sub('msdp_var', StatWin.handle_msdp_var);
+}

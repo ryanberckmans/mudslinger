@@ -1,47 +1,49 @@
-var AffWin = new (function(){
-    var o = this;
+import {Message, MsgDef} from "./message";
 
-    var output;
+export class AffWin {
+    private output: string;
 
-    o.prepare_reload_layout = function() {
+    constructor(private message: Message) {
+        this.message.msdpVar.subscribe(this.handleMsdpVar, this);
+        this.message.prepareReloadLayout.subscribe(this.prepareReloadLayout, this);
+        this.message.loadLayout.subscribe(this.loadLayout, this);
+    }
+
+    private prepareReloadLayout() {
         // nada
-    };
+    }
 
-    o.load_layout = function() {
-        if (output) {
-            // it's a reload
-            $('#win_aff').html(output);
+    private loadLayout(): void {
+        console.log(this);
+        if (this.output) {
+            // it"s a reload
+            $("#win_aff").html(this.output);
         } else {
-            o.show_affects([]);
+            this.showAffects({});
         }
+    }
+
+    private showAffects(affects: {[k: string]: string}) {
+        this.output = "<h2>AFFECTS</h2>";
+
+        for (let key in affects) {
+            this.output += ("   " + affects[key]).slice(-3) + " : " + key + "<br>";
+        }
+
+        $("#win_aff").html(this.output);
     };
 
-    o.show_affects = function(affects) {
-        output = "<h2>AFFECTS</h2>";
-
-        for (var key in affects) {
-            output += ("   "+affects[key]).slice(-3) + ' : ' + key + "<br>";
-        }
-
-        $('#win_aff').html(output);
-    };
-
-    o.handle_msdp_var = function(msg) {
-        if (msg.var != "AFFECTS") {
+    private handleMsdpVar(data: MsgDef.MsdpVarMsg) {
+        if (data.varName !== "AFFECTS") {
             return;
         }
-        var val;
-        if (msg.val == '') {
-            val = [];
+        let val: {[k: string]: string};
+        if (data.value === "") {
+            val = {};
         } else {
-            val = msg.val;
+            val = data.value;
         }
-        o.show_affects(val);
+        this.showAffects(val);
     };
 
-    return o;
-})();
-
-Message.sub('msdp_var', AffWin.handle_msdp_var);
-Message.sub('prepare_reload_layout', AffWin.prepare_reload_layout);
-Message.sub('load_layout', AffWin.load_layout);
+}
