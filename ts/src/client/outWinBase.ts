@@ -7,65 +7,65 @@ export class OutWinBase {
         this.maxLines = count;
     }
 
-    private fgColor: any = null;
-    private bgColor: any = null;
+    private fgColor: string;
+    private bgColor: string;
 
-    public setFgColor(color: any) {
+    public setFgColor(color: string) {
         this.fgColor = color;
     }
 
-    public setBgColor(color: any) {
+    public setBgColor(color: string) {
         this.bgColor = color;
     };
 
     // handling nested elements, always output to last one
-    private targetElems: any[] = null;
-    protected target: any = null;
-    private rootElem: any = null;
+    private $targetElems: JQuery[];
+    protected $target: JQuery;
+    private $rootElem: JQuery;
 
     private scrollLock = false; // true when we should not scroll to bottom
     private handleScroll(e: any) {
-        let scrollHeight = this.rootElem.prop("scrollHeight");
-        let scrollTop = this.rootElem.scrollTop();
-        let outerHeight = this.rootElem.outerHeight();
+        let scrollHeight = this.$rootElem.prop("scrollHeight");
+        let scrollTop = this.$rootElem.scrollTop();
+        let outerHeight = this.$rootElem.outerHeight();
         let is_at_bottom = outerHeight + scrollTop >= scrollHeight;
 
         this.scrollLock = !is_at_bottom;
     }
 
     // must set root elem before actually using it
-    protected setRootElem(elem: any) {
+    protected setRootElem(elem: JQuery) {
         // this may be called upon layout reload
-        this.rootElem = elem;
-        this.targetElems = [elem];
-        this.target =  elem;
+        this.$rootElem = elem;
+        this.$targetElems = [elem];
+        this.$target =  elem;
 
         // direct children of the root will be line containers, let"s push the first one.
         this.pushElem($("<span>").appendTo(elem));
 
-        this.rootElem.bind("scroll", (e: any) => { this.handleScroll(e); });
+        this.$rootElem.bind("scroll", (e: any) => { this.handleScroll(e); });
     };
 
     // elem is the actual jquery element
-    public pushElem(elem: any) {
+    public pushElem(elem: JQuery) {
 //        console.log(o);
 //        console.log("elem pushed");
 //        console.log(elem);
         this.writeBuffer();
 
-        this.target.append(elem);
-        this.targetElems.push(elem);
-        this.target = elem;
+        this.$target.append(elem);
+        this.$targetElems.push(elem);
+        this.$target = elem;
     }
 
     public popElem() {
         this.writeBuffer();
 
-        let popped = this.targetElems.pop();
+        let popped = this.$targetElems.pop();
 //        console.log(o);
 //        console.log("elem popped");
 //        console.log(popped);
-        this.target = this.targetElems[this.targetElems.length - 1];
+        this.$target = this.$targetElems[this.$targetElems.length - 1];
         return popped;
     }
 
@@ -97,7 +97,7 @@ export class OutWinBase {
         this.appendBuffer += span_text;
 
         if (txt.endsWith("\n")) {
-            this.target.append(this.appendBuffer);
+            this.$target.append(this.appendBuffer);
             this.appendBuffer = "";
             this.newLine();
         }
@@ -105,14 +105,14 @@ export class OutWinBase {
 
     private newLine() {
         this.popElem(); // pop the old line
-        this.pushElem($("<span>").appendTo(this.target));
+        this.pushElem($("<span>").appendTo(this.$target));
 
         this.handleLine(this.lineText);
         this.lineText = "";
 
         this.lineCount += 1;
         if (this.lineCount > this.maxLines) {
-            this.rootElem.children(":lt(" +
+            this.$rootElem.children(":lt(" +
                 (this.maxLines / 2) +
                 ")"
             ).remove();
@@ -121,7 +121,7 @@ export class OutWinBase {
     }
 
     private writeBuffer() {
-        this.target.append(this.appendBuffer);
+        this.$target.append(this.appendBuffer);
         this.appendBuffer = "";
     };
 
@@ -133,7 +133,7 @@ export class OutWinBase {
     private scrollRequested = false;
     private privScrolBottom() {
         console.time("_scroll_bottom");
-        let elem = this.rootElem;
+        let elem = this.$rootElem;
         elem.scrollTop(elem.prop("scrollHeight"));
         this.scrollLock = false;
         this.scrollRequested = false;

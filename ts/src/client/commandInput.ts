@@ -154,13 +154,12 @@ export class CommandInput {
 
     private saveHistory(): void {
         localStorage.setItem("cmd_history", JSON.stringify(this.cmd_history));
-    };
+    }
 
     private loadHistory(): void {
         let cmds = localStorage.getItem("cmd_history");
         if (cmds) {
             this.cmd_history = JSON.parse(cmds);
         }
-    };
-
+    }
 }

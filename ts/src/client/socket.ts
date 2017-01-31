@@ -25,11 +25,11 @@ export class Socket {
         this.ioConn = io.connect("http://" + document.domain + ":" + location.port + "/telnet");
         this.ioEvt = new IoEvent(this.ioConn);
 
-        this.ioConn.on("connect", (msg: any) => {
+        this.ioConn.on("connect", () => {
             GlEvent.wsConnect.fire(null);
         });
 
-        this.ioConn.on("disconnect", (msg: any) => {
+        this.ioConn.on("disconnect", () => {
             GlEvent.wsDisconnect.fire(null);
         });
 

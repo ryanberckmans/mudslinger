@@ -12,6 +12,240 @@ function copyAnsiColorTuple(color: ansiColorTuple): ansiColorTuple {
     return [color[0], color[1]];
 }
 
+export class OutputManager {
+    private target: OutWinBase;
+    private targetWindows: Array<OutWinBase>;
+
+    private ansiReverse = false;
+
+    private ansiFg: ansiColorTuple;
+    private ansiBg: ansiColorTuple;
+
+    private fgColor: string;
+    private bgColor: string;
+
+    private defaultAnsiFg: ansiColorTuple = ["green", "low"];
+    private defaultAnsiBg: ansiColorTuple = ["black", "low"];
+
+    constructor(private outputWin: OutputWin) {
+        GlEvent.loadLayout.handle(this.handleLoadLayout, this);
+        GlEvent.changeDefaultColor.handle(this.handleChangeDefaultColor, this);
+
+        $(document).ready(() => {
+            let saved_color_cfg = localStorage.getItem("color_cfg");
+            if (!saved_color_cfg) {
+                return;
+            } else {
+                let cfg = JSON.parse(saved_color_cfg);
+                let default_ansi_fg = cfg.default_ansi_fg;
+                this.setDefaultAnsiFg(this.defaultAnsiFg[0], this.defaultAnsiFg[1]);
+            }
+        });
+
+    }
+
+    private handleLoadLayout() {
+        // Default output to OutputWin
+        this.targetWindows = [this.outputWin];
+        this.target = this.outputWin;
+
+        this.initColor();
+    }
+
+    public outputDone () {
+        this.target.outputDone();
+    };
+
+    // Redirect output to another OutWinBase until it"s popped
+    public pushTarget(tgt: OutWinBase) {
+        this.targetWindows.push(tgt);
+        this.target = tgt;
+    }
+
+    public popTarget() {
+        this.target.outputDone();
+        this.targetWindows.pop();
+        this.target = this.targetWindows[this.targetWindows.length - 1];
+    }
+
+    // propagate MXP elements to target
+    public pushMxpElem(elem: JQuery) {
+        this.target.pushElem(elem);
+    }
+
+    public popMxpElem() {
+        return this.target.popElem();
+    }
+
+    public handleText(data: string) {
+        this.target.addText(data);
+    }
+
+    private setFgColor(color: string) {
+        this.fgColor = color;
+        this.target.setFgColor(color);
+    }
+
+    private setAnsiFg(color: ansiColorTuple) {
+        this.ansiFg = color;
+        this.setFgColor(this.ansiFg ? (ansiColors[this.ansiFg[0]][this.ansiFg[1]]) : null);
+    }
+
+    private setBgColor(color: string) {
+        this.bgColor = color;
+        this.target.setBgColor(color);
+    }
+
+    private setAnsiBg(color: ansiColorTuple) {
+        this.ansiBg = color;
+        this.setBgColor(this.ansiBg ? (ansiColors[this.ansiBg[0]][this.ansiBg[1]]) : null);
+    }
+
+    public getFgColor(): string {
+        return this.fgColor || ansiColors[this.defaultAnsiFg[0]][this.defaultAnsiFg[1]];
+    }
+
+    private getBgColor(): string {
+        return this.bgColor || ansiColors[this.defaultAnsiBg[0]][this.defaultAnsiBg[1]];
+    }
+
+    private initColor() {
+//        set_ansi_fg([colors.green, "low"]);
+    }
+
+    public handle_xterm_escape(data: string) {
+        let splt = data.split(";");
+        let color_code = splt[2].slice(0, -1); // kill the "m"
+        color_code = parseInt(color_code).toString();
+        let is_bg = (splt[0] === "\x1b[48"); // 38 is fg, 48 is bg
+
+        let html_color = xterm_cols[color_code];
+
+        if (is_bg) {
+            this.ansiBg = null;
+            this.setBgColor(html_color);
+        } else {
+            this.ansiFg = null;
+            this.setFgColor(html_color);
+        }
+    }
+
+    /* handles graphics mode codes http://ascii-table.com/ansi-escape-sequences.php*/
+    public handleAnsiGraphicCodes(codes: Array<string>) {
+        let new_fg: ansiColorTuple;
+        let new_bg: ansiColorTuple;
+
+        for (let i = 0; i < codes.length; i++) {
+
+            let code = parseInt(codes[i]);
+
+            /* all off */
+            if (code === 0) {
+                new_fg = null;
+                new_bg = null;
+                this.ansiReverse = false;
+                continue;
+            }
+
+            /* bold on */
+            if (code === 1) {
+                // On the chance that we have xterm colors, just ignore bold
+
+                if (this.ansiReverse) {
+                    if (new_bg || this.ansiBg || !this.bgColor) {
+                        new_bg = new_bg || this.ansiBg || copyAnsiColorTuple(this.defaultAnsiBg);
+                        new_bg[1] = "high";
+                    }
+                } else {
+                    if (new_fg || this.ansiFg || !this.fgColor) {
+                        new_fg = new_fg || this.ansiFg || copyAnsiColorTuple(this.defaultAnsiFg);
+                        new_fg[1] = "high";
+                    }
+                }
+                continue;
+            }
+
+            /* reverse */
+            if (code === 7) {
+                /* TODO: handle xterm reversing */
+                if (this.ansiReverse) {
+                    continue;
+                }
+                this.ansiReverse = true;
+                let fg = new_fg || this.ansiFg || <ansiColorTuple>((<Array<string>>this.defaultAnsiFg).slice());
+                let bg = new_bg || this.ansiBg || <ansiColorTuple>((<Array<string>>this.defaultAnsiBg).slice());
+                new_fg = bg;
+                new_bg = fg;
+
+                continue;
+            }
+
+            /* foreground colors */
+            if (code >= 30 && code <= 37) {
+                /* other clients seem to cancel reverse on any color change... */
+                if (this.ansiReverse) {
+                    this.ansiReverse = false;
+                    new_bg = null;
+                }
+
+                let color_name = ansiFgLookup[code];
+                new_fg = new_fg || <ansiColorTuple>((<Array<string>>this.defaultAnsiFg).slice());
+                new_fg[0] = color_name;
+                continue;
+            }
+
+            /* background colors */
+            if (code >= 40 && code <= 47) {
+                /* other clients seem to cancel reverse on any color change... */
+                if (this.ansiReverse) {
+                    this.ansiReverse = false;
+                    new_fg = null;
+                }
+
+                let color_name = ansiBgLookup[code];
+                new_bg = new_bg || copyAnsiColorTuple(this.defaultAnsiBg);
+                new_bg[0] = color_name;
+                continue;
+            }
+        }
+
+        if (new_fg !== undefined) {
+            this.setAnsiFg(new_fg);
+        }
+        if (new_bg !== undefined) {
+            this.setAnsiBg(new_bg);
+        }
+    };
+
+    private setDefaultAnsiFg(colorName: ansiName, level: ansiLevel) {
+        if ( !(colorName in ansiColors) ) {
+            console.log("Invalid color_name: " + colorName);
+            return;
+        }
+
+        if ( (["low", "high"]).indexOf(level) === -1) {
+            console.log("Invalid level: " + level);
+            return;
+        }
+
+        this.defaultAnsiFg = [colorName, level];
+        $(".output_text").css("color", ansiColors[colorName][level]);
+    }
+
+    private handleChangeDefaultColor(data: GlDef.ChangeDefaultColorData) {
+        let level: ansiLevel = "low";
+
+        this.setDefaultAnsiFg(<ansiName>data, level);
+        this.saveColorCfg();
+    };
+
+    private saveColorCfg() {
+        localStorage.setItem("color_cfg", JSON.stringify({
+            "default_ansi_fg": this.defaultAnsiFg
+        }));
+    }
+}
+
 const ansiFgLookup: {[k: number]: ansiName} = {
     30: "black",
     31: "red",
@@ -368,238 +602,3 @@ const xterm_cols: {[k: string]: string} = {
     "254": "#e4e4e4",
     "255": "#eeeeee"
 };
-
-export class OutputManager {
-    private target: OutWinBase;
-    private targetWindows: Array<OutWinBase>;
-
-    private ansiReverse = false;
-
-    private ansiFg: ansiColorTuple = null;
-    private ansiBg: ansiColorTuple = null;
-
-    private fgColor: any = null;
-    private bgColor: any = null;
-
-    private defaultAnsiFg: ansiColorTuple = ["green", "low"];
-    private defaultAnsiBg: ansiColorTuple = ["black", "low"];
-
-    constructor(private outputWin: OutputWin) {
-        GlEvent.loadLayout.handle(this.handleLoadLayout, this);
-        GlEvent.changeDefaultColor.handle(this.handleChangeDefaultColor, this);
-
-        $(document).ready(() => {
-            let saved_color_cfg = localStorage.getItem("color_cfg");
-            if (!saved_color_cfg) {
-                return;
-            } else {
-                let cfg = JSON.parse(saved_color_cfg);
-                let default_ansi_fg = cfg.default_ansi_fg;
-                this.setDefaultAnsiFg(this.defaultAnsiFg[0], this.defaultAnsiFg[1]);
-            }
-        });
-
-    }
-
-    private handleLoadLayout() {
-        // Default output to OutputWin
-        this.targetWindows = [this.outputWin];
-        this.target = this.outputWin;
-
-        this.initColor();
-    }
-
-    public outputDone () {
-        this.target.outputDone();
-    };
-
-    // Redirect output to another OutWinBase until it"s popped
-    public pushTarget(tgt: OutWinBase) {
-        this.targetWindows.push(tgt);
-        this.target = tgt;
-    }
-
-    public popTarget() {
-        this.target.outputDone();
-        this.targetWindows.pop();
-        this.target = this.targetWindows[this.targetWindows.length - 1];
-    }
-
-    // propagate MXP elements to target
-    public pushMxpElem(elem: any) {
-        this.target.pushElem(elem);
-    }
-
-    public popMxpElem() {
-        return this.target.popElem();
-    }
-
-    public handleText(data: string) {
-        this.target.addText(data);
-    }
-
-    private setFgColor(color: any) {
-        this.fgColor = color;
-        this.target.setFgColor(color);
-    }
-
-    private setAnsiFg(color: any) {
-        this.ansiFg = color;
-        this.setFgColor(this.ansiFg ? (ansiColors[this.ansiFg[0]][this.ansiFg[1]]) : null);
-    }
-
-    private setBgColor(color: string) {
-        this.bgColor = color;
-        this.target.setBgColor(color);
-    }
-
-    private setAnsiBg(color: ansiColorTuple) {
-        this.ansiBg = color;
-        this.setBgColor(this.ansiBg ? (ansiColors[this.ansiBg[0]][this.ansiBg[1]]) : null);
-    }
-
-    public getFgColor() {
-        return this.fgColor || ansiColors[this.defaultAnsiFg[0]][this.defaultAnsiFg[1]];
-    }
-
-    private getBgColor() {
-        return this.bgColor || ansiColors[this.defaultAnsiBg[0]][this.defaultAnsiBg[1]];
-    }
-
-    private initColor() {
-//        set_ansi_fg([colors.green, "low"]);
-    }
-
-    public handle_xterm_escape(data: string) {
-        let splt = data.split(";");
-        let color_code = splt[2].slice(0, -1); // kill the "m"
-        color_code = parseInt(color_code).toString();
-        let is_bg = (splt[0] === "\x1b[48"); // 38 is fg, 48 is bg
-
-        let html_color = xterm_cols[color_code];
-
-        if (is_bg) {
-            this.ansiBg = null;
-            this.setBgColor(html_color);
-        } else {
-            this.ansiFg = null;
-            this.setFgColor(html_color);
-        }
-    }
-
-    /* handles graphics mode codes http://ascii-table.com/ansi-escape-sequences.php*/
-    public handleAnsiGraphicCodes(codes: Array<string>) {
-        let new_fg: ansiColorTuple;
-        let new_bg: ansiColorTuple;
-
-        for (let i = 0; i < codes.length; i++) {
-
-            let code = parseInt(codes[i]);
-
-            /* all off */
-            if (code === 0) {
-                new_fg = null;
-                new_bg = null;
-                this.ansiReverse = false;
-                continue;
-            }
-
-            /* bold on */
-            if (code === 1) {
-                // On the chance that we have xterm colors, just ignore bold
-
-                if (this.ansiReverse) {
-                    if (new_bg || this.ansiBg || !this.bgColor) {
-                        new_bg = new_bg || this.ansiBg || copyAnsiColorTuple(this.defaultAnsiBg);
-                        new_bg[1] = "high";
-                    }
-                } else {
-                    if (new_fg || this.ansiFg || !this.fgColor) {
-                        new_fg = new_fg || this.ansiFg || copyAnsiColorTuple(this.defaultAnsiFg);
-                        new_fg[1] = "high";
-                    }
-                }
-                continue;
-            }
-
-            /* reverse */
-            if (code === 7) {
-                /* TODO: handle xterm reversing */
-                if (this.ansiReverse) {
-                    continue;
-                }
-                this.ansiReverse = true;
-                let fg = new_fg || this.ansiFg || <ansiColorTuple>((<Array<string>>this.defaultAnsiFg).slice());
-                let bg = new_bg || this.ansiBg || <ansiColorTuple>((<Array<string>>this.defaultAnsiBg).slice());
-                new_fg = bg;
-                new_bg = fg;
-
-                continue;
-            }
-
-            /* foreground colors */
-            if (code >= 30 && code <= 37) {
-                /* other clients seem to cancel reverse on any color change... */
-                if (this.ansiReverse) {
-                    this.ansiReverse = false;
-                    new_bg = null;
-                }
-
-                let color_name = ansiFgLookup[code];
-                new_fg = new_fg || <ansiColorTuple>((<Array<string>>this.defaultAnsiFg).slice());
-                new_fg[0] = color_name;
-                continue;
-            }
-
-            /* background colors */
-            if (code >= 40 && code <= 47) {
-                /* other clients seem to cancel reverse on any color change... */
-                if (this.ansiReverse) {
-                    this.ansiReverse = false;
-                    new_fg = null;
-                }
-
-                let color_name = ansiBgLookup[code];
-                new_bg = new_bg || copyAnsiColorTuple(this.defaultAnsiBg);
-                new_bg[0] = color_name;
-                continue;
-            }
-        }
-
-        if (new_fg !== undefined) {
-            this.setAnsiFg(new_fg);
-        }
-        if (new_bg !== undefined) {
-            this.setAnsiBg(new_bg);
-        }
-    };
-
-    private setDefaultAnsiFg (colorName: ansiName, level: ansiLevel) {
-        if ( !(colorName in ansiColors) ) {
-            console.log("Invalid color_name: " + colorName);
-            return;
-        }
-
-        if ( (["low", "high"]).indexOf(level) === -1) {
-            console.log("Invalid level: " + level);
-            return;
-        }
-
-        this.defaultAnsiFg = [colorName, level];
-        $(".output_text").css("color", ansiColors[colorName][level]);
-    }
-
-    private handleChangeDefaultColor(data: GlDef.ChangeDefaultColorData) {
-        let level: ansiLevel = "low";
-
-        this.setDefaultAnsiFg(<ansiName>data, level);
-        this.saveColorCfg();
-    };
-
-    private saveColorCfg() {
-        localStorage.setItem("color_cfg", JSON.stringify({
-            "default_ansi_fg": this.defaultAnsiFg
-        }));
-    }
-}
-

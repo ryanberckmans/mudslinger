@@ -49,7 +49,7 @@ export class OutputWin extends OutWinBase {
     private handleScriptPrint(data: GlDef.ScriptPrintData) {
         let message = data;
         let output = JSON.stringify(message);
-        this.target.append(
+        this.$target.append(
             "<span style=\"color:orange\">"
             + Util.rawToHtml(output)
             + "<br>"
@@ -61,7 +61,7 @@ export class OutputWin extends OutWinBase {
         // let stars = ("*".repeat(msg.data.length);
         let stars = Array(data.length + 1).join("*");
 
-        this.target.append(
+        this.$target.append(
             "<span style=\"color:yellow\">"
             + stars
             + "<br>"
@@ -74,7 +74,7 @@ export class OutputWin extends OutWinBase {
             return;
         }
         let cmd = data.value;
-        this.target.append(
+        this.$target.append(
             "<span style=\"color:yellow\">"
             + Util.rawToHtml(cmd)
             + "<br>"
@@ -87,7 +87,7 @@ export class OutputWin extends OutWinBase {
             return;
         }
         let cmd = data.value;
-        this.target.append(
+        this.$target.append(
             "<span style=\"color:cyan\">"
             + Util.rawToHtml(cmd)
             + "<br>"
@@ -106,7 +106,7 @@ export class OutputWin extends OutWinBase {
                 html += Util.rawToHtml(data[i]) + "<br>";
             }
         }
-        this.target.append(html);
+        this.$target.append(html);
         this.scrollBottom(false);
     };
 
@@ -124,12 +124,12 @@ export class OutputWin extends OutWinBase {
             }
         }
 
-        this.target.append(html);
+        this.$target.append(html);
         this.scrollBottom(true);
     };
 
     private handleTelnetConnect(): void {
-        this.target.append(
+        this.$target.append(
             "<span style=\"color:cyan\">"
             + "[[Telnet connected]]"
             + "<br>"
@@ -137,7 +137,7 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     };
     private handleTelnetDisconnect() {
-        this.target.append(
+        this.$target.append(
             "<span style=\"color:cyan\">"
             + "[[Telnet disconnected]]"
             + "<br>"
@@ -145,7 +145,7 @@ export class OutputWin extends OutWinBase {
         this.scrollBottom(true);
     };
     private handleWsConnect() {
-        this.target.append(
+        this.$target.append(
             "<span style=\"color:cyan\">"
             + "[[Websocket connected]]"
             + "<br>"
@@ -154,7 +154,7 @@ export class OutputWin extends OutWinBase {
     };
 
     private handleWsDisconnect() {
-        this.target.append(
+        this.$target.append(
             "<span style=\"color:cyan\">"
             + "[[Websocket disconnected]]"
             + "<br>"
@@ -163,7 +163,7 @@ export class OutputWin extends OutWinBase {
     };
 
     private handleTelnetError(data: GlDef.TelnetErrorData) {
-        this.target.append(
+        this.$target.append(
             "<span style=\"color:red\">"
             + "[[Telnet error" + "<br>"
             + data + "<br>"
@@ -174,7 +174,7 @@ export class OutputWin extends OutWinBase {
     };
 
     private handleWsError() {
-        this.target.append(
+        this.$target.append(
             "<span style=\"color:red\">"
             + "[[Websocket error]]"
             + "<br>"
@@ -183,7 +183,7 @@ export class OutputWin extends OutWinBase {
     };
 
     private handleWindowError(message: any, source: any, lineno: any, colno: any, error: any) {
-        this.target.append(
+        this.$target.append(
             "<span style=\"color:red\">"
             + "[[Web Client Error<br>"
             + message + "<br>"
@@ -201,7 +201,7 @@ export class OutputWin extends OutWinBase {
         let err: any = data;
         let stack = Util.rawToHtml(err.stack);
 
-        this.target.append(
+        this.$target.append(
             "<span style=\"color:red\">"
             + "[[Script eval error<br>"
             + stack + "<br>"
@@ -216,7 +216,7 @@ export class OutputWin extends OutWinBase {
         let err: any = data;
         let stack = Util.rawToHtml(err.stack);
 
-        this.target.append(
+        this.$target.append(
             "<span style=\"color:red\">"
             + "[[Script execution error<br>"
             + stack + "<br>"
