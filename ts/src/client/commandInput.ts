@@ -6,62 +6,74 @@ export class CommandInput {
     private cmd_history: string[] = [];
     private cmd_index: number = -1;
 
-    constructor(private aliasManager: AliasManager) {
-        GlEvent.prepareReloadLayout.handle(this.prepareReloadLayout, this);
-        GlEvent.loadLayout.handle(this.loadLayout, this);
+    private divMyCont: HTMLDivElement;
+    private $cmdInput: JQuery;
+    private $cmdInputPw: JQuery;
+
+    constructor(cont: HTMLDivElement, private aliasManager: AliasManager) {
+        this.divMyCont = cont;
+
+        cont.innerHTML = `
+        <textarea rows="1" class="cmdInput"></textarea>
+        <input class="cmdInputPw" type="password" style="display:none">
+        `;
+
+        let cmdInput = this.divMyCont.getElementsByClassName("cmdInput")[0] as HTMLTextAreaElement;
+        cmdInput.style.width = "100%";
+
+        let cmdInputPw = this.divMyCont.getElementsByClassName("cmdInputPw")[0] as HTMLInputElement;
+        cmdInputPw.style.width = "100%";
+
+        this.$cmdInput = $(cmdInput);
+        this.$cmdInputPw = $(cmdInputPw);
+
+        this.$cmdInput.keydown((event: KeyboardEvent) => { return this.keydown(event); });
+        this.$cmdInput.bind("input propertychange", () => { return this.inputChange(); });
+        this.$cmdInputPw.keydown((event: KeyboardEvent) => { return this.pwKeydown(event); });
+
         GlEvent.setEcho.handle(this.handleSetEcho, this);
         GlEvent.telnetConnect.handle(this.handleTelnetConnect, this);
 
         $(document).ready(() => { this.loadHistory(); });
     }
 
-    private prepareReloadLayout(): void {
-        // nada
-    }
-
-    private loadLayout(): void {
-        $("#cmd_input").keydown((event: any) => { return this.keydown(event); });
-        $("#cmd_input").bind("input propertychange", () => { return this.inputChange(); });
-        $("#cmd_input_pw").keydown((event: any) => { return this.pwKeydown(event); });
-    };
-
     private echo: boolean = true;
     private handleSetEcho(value: GlDef.SetEchoData): void {
         this.echo = value;
 
         if (this.echo) {
-            $("#cmd_input_pw").hide();
-            $("#cmd_input").show();
-            $("#cmd_input").val("");
-            $("#cmd_input").focus();
+            this.$cmdInputPw.hide();
+            this.$cmdInput.show();
+            this.$cmdInput.val("");
+            this.$cmdInput.focus();
         } else {
-            $("#cmd_input").hide();
-            $("#cmd_input_pw").show();
-            $("#cmd_input_pw").focus();
+            this.$cmdInput.hide();
+            this.$cmdInputPw.show();
+            this.$cmdInputPw.focus();
 
-            let current = $("#cmd_input").val();
+            let current = this.$cmdInput.val();
             if (this.cmd_history.length > 0
                 && current !== this.cmd_history[this.cmd_history.length - 1]) {
                 /* If they already started typing password before getting echo command*/
-                $("#cmd_input_pw").val(current);
-                (<HTMLInputElement>$("#cmd_input_pw")[0]).setSelectionRange(current.length, current.length);
+                this.$cmdInputPw.val(current);
+                (<HTMLInputElement>this.$cmdInputPw[0]).setSelectionRange(current.length, current.length);
             } else {
-                $("#cmd_input_pw").val("");
+                this.$cmdInputPw.val("");
             }
         }
-    };
+    }
 
     private handleTelnetConnect(): void {
         this.handleSetEcho(true);
-    };
+    }
 
     private sendPw(): void {
-        let pw = $("#cmd_input_pw").val();
+        let pw = this.$cmdInputPw.val();
         GlEvent.sendPw.fire(pw);
     }
 
     private sendCmd(): void {
-        let cmd: string = $("#cmd_input").val();
+        let cmd: string = this.$cmdInput.val();
         let result = this.aliasManager.checkAlias(cmd);
         if (!result) {
             let cmds = cmd.split(";");
@@ -77,7 +89,7 @@ export class CommandInput {
             GlEvent.aliasSendCommands.fire({orig: cmd, commands: cmds});
         } /* else the script ran already */
 
-        $("#cmd_input").select();
+        this.$cmdInput.select();
 
         if (cmd.trim() === "") {
             return;
@@ -93,7 +105,7 @@ export class CommandInput {
             this.saveHistory();
         }
         else {
-            $("#cmd_input").val("");
+            this.$cmdInput.val("");
         }
         this.cmd_index = -1;
     };
@@ -102,7 +114,7 @@ export class CommandInput {
         switch (event.which) {
             case 13: // enter
                 this.sendPw();
-                $("#cmd_input_pw").val("");
+                this.$cmdInputPw.val("");
                 return false;
             default:
                 return true;
@@ -125,8 +137,8 @@ export class CommandInput {
                     this.cmd_index -= 1;
                     this.cmd_index = Math.max(this.cmd_index, 0);
                 }
-                $("#cmd_input").val(this.cmd_history[this.cmd_index]);
-                $("#cmd_input").select();
+                this.$cmdInput.val(this.cmd_history[this.cmd_index]);
+                this.$cmdInput.select();
                 return false;
             case 40: // down
                 if (this.cmd_index === -1) {
@@ -134,8 +146,8 @@ export class CommandInput {
                 }
                 this.cmd_index += 1;
                 this.cmd_index = Math.min(this.cmd_index, this.cmd_history.length - 1);
-                $("#cmd_input").val(this.cmd_history[this.cmd_index]);
-                $("#cmd_input").select();
+                this.$cmdInput.val(this.cmd_history[this.cmd_index]);
+                this.$cmdInput.select();
                 return false;
             default:
                 this.cmd_index = -1;
@@ -145,7 +157,7 @@ export class CommandInput {
     }
 
     private inputChange(): void {
-        let input = $("#cmd_input");
+        let input = this.$cmdInput;
         input.height("1px");
         let scrollHeight = input[0].scrollHeight;
         let new_height = 10 + scrollHeight;

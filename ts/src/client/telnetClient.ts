@@ -1,25 +1,44 @@
-import { Telnet, NegotiationData, Cmd, Opt } from "./telnetlib";
+import { Telnet, NegotiationData, Cmd, CmdName, Opt, OptName } from "./telnetlib";
 import { EventHook } from "./event";
+
+
+const TTYPES: string[] = [
+    "ArcWeb",
+    "ANSI",
+    "-256color"
+];
+
 
 export class TelnetClient extends Telnet {
     public EvtServerEcho = new EventHook<boolean>();
     public EvtMsdpVar = new EventHook<[MsdpVarName, MsdpVal]>();
+
+    public clientIp: string;
     
+    private ttypeIndex: number = 0;
+
     constructor(writeFunc: (data: ArrayBuffer) => void) {
         super(writeFunc);
 
-        this.EvtNegotiation.handle((data) => { return this.onNegotiation(data); });
+        this.EvtNegotiation.handle((data) => { this.onNegotiation(data); });
     }
 
-    private onNegotiation (data: NegotiationData) {
+    private onNegotiation(data: NegotiationData) {
         let {cmd, opt} = data;
+        //console.log(CmdName(cmd), OptName(opt));
 
         if (cmd === Cmd.WILL) {
             if (opt === Opt.ECHO) {
-
                 this.EvtServerEcho.fire(true);
             } else if (opt === ExtOpt.MSDP) {
                 this.writeArr([Cmd.IAC, Cmd.DO, ExtOpt.MSDP]);
+                this.writeMsdpVar("CLIENT_ID", "ArcWeb");
+
+                for (let varName of SupportedMsdpVars) {
+                    this.writeMsdpVar("REPORT", varName);
+                }
+            } else {
+                this.writeArr([Cmd.IAC, Cmd.DONT, opt]);
             }
         } else if (cmd === Cmd.WONT) {
             if (opt === Opt.ECHO) {
@@ -30,6 +49,8 @@ export class TelnetClient extends Telnet {
                 this.writeArr([Cmd.IAC, Cmd.WILL, Opt.TTYPE]);
             } else if (opt === ExtOpt.MXP) {
                 this.writeArr([Cmd.IAC, Cmd.WILL, ExtOpt.MXP]);
+            } else {
+                this.writeArr([Cmd.IAC, Cmd.WONT, opt]);
             }
         } else if (cmd === Cmd.SE) {
             let sb = this.readSbArr();
@@ -39,13 +60,31 @@ export class TelnetClient extends Telnet {
             }
 
             if (sb.length === 2 && sb[0] === Opt.TTYPE && sb[1] === SubNeg.SEND) {
-                // TODO: handle the ttype cycling here
+                let ttype: string;
+                if (this.ttypeIndex >= TTYPES.length) {
+                    ttype = this.clientIp || "UNKNOWNIP";
+                } else {
+                    ttype = TTYPES[this.ttypeIndex];
+                    this.ttypeIndex++;
+                }
+                this.writeArr( ([Cmd.IAC, Cmd.SB, Opt.TTYPE, SubNeg.IS]).concat(
+                    arrayFromString(ttype),
+                    [Cmd.IAC, Cmd.SE]
+                ));
             } else if (sb[0] === ExtOpt.MSDP) {
-                // TODO: parse MSDP
                 let result = ParseMsdp(sb.slice(1));
                 this.EvtMsdpVar.fire(result);
             }
         }
+    }
+
+    private writeMsdpVar(varName: string, value: string) {
+        this.writeArr([Cmd.IAC, Cmd.SB, ExtOpt.MSDP, MsdpDef.VAR].concat(
+            arrayFromString(varName),
+            [MsdpDef.VAL],
+            arrayFromString(value),
+            [Cmd.IAC, Cmd.SE]
+        ));
     }
 }
 
@@ -167,4 +206,36 @@ export namespace MsdpDef {
     export const TABLE_CLOSE = 4;
     export const ARRAY_OPEN = 5;
     export const ARRAY_CLOSE = 6;
+}
+
+const SupportedMsdpVars: string[] = [
+    "CHARACTER_NAME",
+    "HEALTH", "HEALTH_MAX",
+    "MANA", "MANA_MAX",
+    "MOVEMENT", "MOVEMENT_MAX",
+    "EXPERIENCE_TNL", "EXPERIENCE_MAX",
+    "OPPONENT_HEALTH", "OPPONENT_HEALTH_MAX",
+    "OPPONENT_NAME",
+    "STR", "STR_PERM",
+    "CON", "CON_PERM",
+    "VIT", "VIT_PERM",
+    "AGI", "AGI_PERM",
+    "DEX", "DEX_PERM",
+    "INT", "INT_PERM",
+    "WIS", "WIS_PERM",
+    "DIS", "DIS_PERM",
+    "CHA", "CHA_PERM",
+    "LUC", "LUC_PERM",
+    "ROOM_NAME", "ROOM_EXITS", "ROOM_VNUM", "ROOM_SECTOR",
+    "EDIT_MODE", "EDIT_VNUM",
+    "AFFECTS"
+]
+
+function arrayFromString(str: string) {
+    let arr = new Array(str.length);
+    for (let i=0; i < arr.length; i++) {
+        arr[i] = str.charCodeAt(i);
+    }
+
+    return arr;
 }

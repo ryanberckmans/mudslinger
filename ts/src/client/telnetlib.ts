@@ -90,9 +90,11 @@ export class Telnet {
                         this.writeArr([Cmd.IAC, Cmd.WONT, opt]);
                     }
                 } else if ([Cmd.WILL, Cmd.WONT].indexOf(cmd) !== -1) {
+                    let abc = <any>this.EvtNegotiation;
+
                     let handled = this.EvtNegotiation.fire({cmd: cmd, opt: opt});
 
-                    if (handled) {
+                    if (!handled) {
                         this.writeArr([Cmd.IAC, Cmd.DONT, opt]);
                     }
                 }

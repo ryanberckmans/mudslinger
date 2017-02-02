@@ -7,43 +7,68 @@ import { TriggerEditor } from "./triggerEditor";
 import { JsScriptWin } from "./jsScriptWin";
 
 export class MenuBar {
+    private divMyCont: HTMLDivElement;
+    private $menuBar: JQuery;
+    private $chkEnableTrig: JQuery;
+    private $chkEnableAlias: JQuery;
+
     constructor(
+        cont: HTMLDivElement,
         private client: Client,
         private socket: Socket,
         private aliasEditor: AliasEditor,
         private triggerEditor: TriggerEditor,
         private jsScriptWin: JsScriptWin
         ) {
+
+        this.divMyCont = cont;
+        this.divMyCont.innerHTML = `
+        <ul>
+            <li>Connection
+            <ul>
+                <li>Connect</li>
+                <li>Disconnect</li>
+            </ul>
+            </li>
+            <li>Aliases</li>
+            <li>Triggers</li>
+            <li>Script</li>
+            <li>Config
+            <ul>
+                <li>Text Color
+                <ul>
+                    <li>White</li>
+                    <li>Green</li>
+                </ul>
+                </li>
+                <li><label><input class="chkEnableTrig" type="checkbox" checked>Enable Triggers</label></li>
+                <li><label><input class="chkEnableAlias" type="checkbox" checked>Enable Aliases</label></li>
+            </ul>
+            </li>
+        </ul>
+        `;
+
         this.makeClickFuncs();
 
-        GlEvent.prepareReloadLayout.handle(this.prepareReloadLayout, this);
-        GlEvent.loadLayout.handle(this.loadLayout, this);
-    }
+        this.$menuBar = $(cont);
+        this.$chkEnableTrig = $(cont.getElementsByClassName("chkEnableTrig")[0]);
+        this.$chkEnableAlias = $(cont.getElementsByClassName("chkEnableAlias")[0]);
 
-    private prepareReloadLayout() {
-        // nada
-    }
+        (<any>this.$menuBar).jqxMenu({ width: "100%", height: "4%"});
+        this.$menuBar.on("itemclick", (event: any) => { this.handleClick(event); });
 
-    private loadLayout() {
-        (<any>$("#menu_bar")).jqxMenu({ width: "100%", height: "4%"});
-        $("#menu_bar").on("itemclick", this.handleClick.bind(this));
-
-        let o = this;
-        $("#chk_enable_trig").change(function() {
+        this.$chkEnableTrig.change(function() {
             GlEvent.setTriggersEnabled.fire(this.checked);
         });
 
-        $("#chk_enable_alias").change(function() {
+        this.$chkEnableAlias.change(function() {
             GlEvent.setAliasesEnabled.fire(this.checked);
         });
-    };
+    }
+
 
     private clickFuncs: {[k: string]: () => void} = {};
     private makeClickFuncs() {
-        this.clickFuncs["Reload Layout"] = () => {
-            this.client.reloadLayout();
-        };
-
         this.clickFuncs["Connect"] = () => {
             this.socket.openTelnet();
         };

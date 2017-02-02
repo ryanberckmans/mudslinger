@@ -28,7 +28,9 @@ export class OutputManager {
     private defaultAnsiBg: ansiColorTuple = ["black", "low"];
 
     constructor(private outputWin: OutputWin) {
-        GlEvent.loadLayout.handle(this.handleLoadLayout, this);
+        this.targetWindows = [this.outputWin];
+        this.target = this.outputWin;
+
         GlEvent.changeDefaultColor.handle(this.handleChangeDefaultColor, this);
 
         $(document).ready(() => {
@@ -45,11 +47,11 @@ export class OutputManager {
     }
 
     private handleLoadLayout() {
-        // Default output to OutputWin
-        this.targetWindows = [this.outputWin];
-        this.target = this.outputWin;
+        // // Default output to OutputWin
+        // this.targetWindows = [this.outputWin];
+        // this.target = this.outputWin;
 
-        this.initColor();
+        // this.initColor();
     }
 
     public outputDone () {

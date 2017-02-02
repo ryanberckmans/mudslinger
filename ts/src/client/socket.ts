@@ -10,6 +10,7 @@ export class Socket {
     private ioConn: SocketIOClient.Socket;
     private ioEvt: IoEvent;
     private telnetClient: TelnetClient;
+    private clientIp: string;
 
     constructor(private outputManager: OutputManager, private mxp: Mxp) {
         GlEvent.sendCommand.handle(this.handleSendCommand, this);
@@ -49,6 +50,13 @@ export class Socket {
             this.telnetClient.handleData(data);
         });
 
+        this.ioEvt.srvSetClientIp.handle((ipAddr: string) => {
+            this.clientIp = ipAddr;
+            if (this.telnetClient) {
+                this.telnetClient.clientIp = ipAddr;
+            }
+        });
+
         this.ioConn.on("error", (msg: any) => {
             GlEvent.wsError.fire(msg);
         });
@@ -56,12 +64,14 @@ export class Socket {
         this.telnetClient = new TelnetClient((data) => {
             this.ioEvt.clReqTelnetWrite.fire(data);
         });
+        this.telnetClient.clientIp = this.clientIp;
 
         this.telnetClient.EvtData.handle((data) => {
             this.handleTelnetData(data);
         });
 
         this.telnetClient.EvtServerEcho.handle((data) => {
+            // Server echo ON means we should have local echo OFF
             GlEvent.setEcho.fire(!data);
         });
     };

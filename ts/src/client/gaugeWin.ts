@@ -20,15 +20,36 @@ class MsdpVals {
 
 
 export class GaugeWin {
+    private divMyCont: HTMLDivElement;
+    private $hpBar: JQuery;
+    private $manaBar: JQuery;
+    private $moveBar: JQuery;
+    private $tnlBar: JQuery;
+    private $enemyBar: JQuery;
+
     private msdpVals: MsdpVals = new MsdpVals();
     private updateFuncs: {[k: string]: () => void} = {};
 
-    constructor() {
+    constructor(cont: HTMLDivElement) {
+        this.divMyCont = cont;
+
+        this.divMyCont.innerHTML = `
+        <div class='hpBar gaugeBar'></div>
+        <div class='manaBar gaugeBar'></div>
+        <div class='moveBar gaugeBar'></div>
+        <div class='tnlBar gaugeBar'></div>
+        <div class='enemyBar gaugeBar'></div>
+        `;
+        this.$hpBar = $(this.divMyCont.getElementsByClassName("hpBar")[0]);
+        this.$manaBar = $(this.divMyCont.getElementsByClassName("manaBar")[0]);
+        this.$moveBar = $(this.divMyCont.getElementsByClassName("moveBar")[0]);
+        this.$tnlBar = $(this.divMyCont.getElementsByClassName("tnlBar")[0]);
+        this.$enemyBar = $(this.divMyCont.getElementsByClassName("enemyBar")[0]);
+        
         this.createUpdateFuncs();
+        this.loadLayout();
 
         GlEvent.msdpVar.handle(this.handleMsdpVar, this);
-        GlEvent.prepareReloadLayout.handle(this.prepareReloadLayout, this);
-        GlEvent.loadLayout.handle(this.loadLayout, this);
     }
 
     private renderGaugeText(curr: number, max: number, tag: string) {
@@ -42,12 +63,8 @@ export class GaugeWin {
         return rtn;
     }
 
-    private prepareReloadLayout() {
-        // nada
-    };
-
     private loadLayout() {
-        (<any>$("#hp_bar")).jqxProgressBar({
+        (<any>this.$hpBar).jqxProgressBar({
             width: GAUGE_WIDTH,
             height: GAUGE_HEIGHT,
             value: 50,
@@ -58,10 +75,10 @@ export class GaugeWin {
             }
         });
 
-        $("#hp_bar .jqx-progressbar-value").css(
+        this.$hpBar.children(".jqx-progressbar-value").css(
             "background-color", "#DF0101");
 
-        (<any>$("#mana_bar")).jqxProgressBar({
+        (<any>this.$manaBar).jqxProgressBar({
             width: GAUGE_WIDTH,
             height: GAUGE_HEIGHT,
             value: 50,
@@ -71,10 +88,10 @@ export class GaugeWin {
                 return this.renderGaugeText( this.msdpVals["MANA"] || 0, this.msdpVals["MANA_MAX"] || 0, "mn ");
             }
         });
-        $("#mana_bar .jqx-progressbar-value").css(
+        this.$manaBar.children(".jqx-progressbar-value").css(
                 "background-color", "#2E64FE");
 
-        (<any>$("#move_bar")).jqxProgressBar({
+        (<any>this.$moveBar).jqxProgressBar({
             width: GAUGE_WIDTH,
             height: GAUGE_HEIGHT,
             value: 50,
@@ -84,10 +101,10 @@ export class GaugeWin {
                 return this.renderGaugeText( this.msdpVals["MOVEMENT"] || 0, this.msdpVals["MOVEMENT_MAX"] || 0, "mv ");
             }
         });
-        $("#move_bar .jqx-progressbar-value").css(
+        this.$manaBar.children(".jqx-progressbar-value").css(
                 "background-color", "#04B4AE");
 
-        (<any>$("#enemy_bar")).jqxProgressBar({
+        (<any>this.$moveBar).jqxProgressBar({
             width: GAUGE_WIDTH,
             height: GAUGE_HEIGHT,
             value: 0,
@@ -97,10 +114,10 @@ export class GaugeWin {
                 return Util.stripColorTags(this.msdpVals.OPPONENT_NAME || "");
             }
         });
-        $("#enemy_bar .jqx-progressbar-value").css(
+        this.$enemyBar.children(".jqx-progressbar-value").css(
                 "background-color", "purple");
 
-        (<any>$("#tnl_bar")).jqxProgressBar({
+        (<any>this.$tnlBar).jqxProgressBar({
             width: GAUGE_WIDTH,
             height: GAUGE_HEIGHT,
             value: 50,
@@ -112,7 +129,7 @@ export class GaugeWin {
                 return this.renderGaugeText(max - tnl, max, "etl");
             }
         });
-        $("#tnl_bar .jqx-progressbar-value").css(
+        this.$tnlBar.children(".jqx-progressbar-value").css(
                 "background-color", "#04B404");
 
         for (let k in this.updateFuncs) {

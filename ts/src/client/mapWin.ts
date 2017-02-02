@@ -30,20 +30,37 @@ const doors: {[k: string]: string} = {
 };
 
 export class MapWin {
-    constructor() {
-        GlEvent.msdpVar.handle(this.handleMsdpVar, this);
-        GlEvent.prepareReloadLayout.handle(this.prepareReloadLayout, this);
-        GlEvent.loadLayout.handle(this.loadLayout, this);
-    }
+    private divMyCont: HTMLDivElement;
+    private $roomName: JQuery;
+    private $svgCont: JQuery;
+    private $olcStatus: JQuery;
 
-    private prepareReloadLayout() {
-        // nada
-    };
+    constructor(cont: HTMLDivElement) {
+        this.divMyCont = cont;
+
+        this.divMyCont.innerHTML = `
+        <center>
+          <div class="mapWin-roomName"></div>
+          <div class="mapWin-svgCont" style="width:125px;height:100px"></div>
+        </center>
+        <center>
+          <div class="mapWin-olcStatus"></div>
+        </center>
+        `;
+        
+        this.$roomName = $(this.divMyCont.getElementsByClassName("mapWin-roomName")[0]);
+        this.$svgCont = $(this.divMyCont.getElementsByClassName("mapWin-svgCont")[0]);
+        this.$olcStatus = $(this.divMyCont.getElementsByClassName("mapWin-olcStatus")[0]);
+
+        this.loadLayout();
+        
+        GlEvent.msdpVar.handle(this.handleMsdpVar, this);
+    }
 
     private loadLayout() {
         this.updateGrid();
         this.updateRoomName();
-    };
+    }
 
 
     private dirs: {[k: string]: string} = {};
@@ -60,10 +77,6 @@ export class MapWin {
         let room_ex = this.dirs;
 
         for (let key in room_ex) {
-
-//            for (var i=0; i < key.length; i++) {
-//                console.log(key.charCodeAt(i));
-//            }
             output += exits[key];
 
             if (room_ex[key] === "C") {
@@ -72,8 +85,7 @@ export class MapWin {
         }
         output += "<rect x=\"25\" y=\"25\" width=\"50\" height=\"50\" style=\"fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)\">";
 
-//        console.log(output);
-        $("#svg_cont").html("<center><svg height=\"100%\" width=\"100%\">" + output + "<</svg></center>");
+        this.$svgCont.html("<center><svg height=\"100%\" width=\"100%\">" + output + "<</svg></center>");
     };
 
     private updateRoomName() {
@@ -81,14 +93,14 @@ export class MapWin {
         if (this.roomVnum && this.roomSector) {
             room_name += " [Room " + this.roomVnum + " " + this.roomSector + "]";
         }
-        $("#room_name").html(room_name);
+        this.$roomName.html(room_name);
     };
 
     private updateOlcStatus() {
         if (!this.editMode || !this.editVnum) {
             return;
         }
-        $("#olc_status").html(this.editMode + " " + this.editVnum);
+        this.$olcStatus.html(this.editMode + " " + this.editVnum);
     };
 
     private handleMsdpVar(data: GlDef.MsdpVarData) {

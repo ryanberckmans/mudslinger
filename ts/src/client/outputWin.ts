@@ -5,13 +5,37 @@ import { TriggerManager } from "./triggerManager";
 import * as Util from "./util";
 
 export class OutputWin extends OutWinBase {
+    private divMyCont: HTMLPreElement;
+    private $outputWin: JQuery;
     private html: string;
 
-    constructor(private triggerManager: TriggerManager) {
+    constructor(cont: HTMLPreElement, private triggerManager: TriggerManager) {
         super();
 
-        GlEvent.prepareReloadLayout.handle(this.prepareReloadLayout, this);
-        GlEvent.loadLayout.handle(this.loadLayout, this);
+        // this.divMyCont = cont;
+        // this.divMyCont.innerHTML = `
+        // <pre class="output-win"></pre>
+        // `;
+        this.divMyCont = cont;
+        //this.$outputWin = $(this.divMyCont.getElementsByClassName("output-win")[0]);
+        this.$outputWin = $(cont);
+        
+        let elem = this.$outputWin[0] as HTMLPreElement;
+        elem.style.height = "calc(100% - 21px)";
+        elem.style.margin = "0";
+        elem.style.padding = "0";
+
+        elem.style.fontSize = "10";
+        elem.style.backgroundColor = "black";
+        elem.style.fontFamily = "\"Courier\",monospace";
+        elem.style.color = "rgb(0,187,0)";
+        elem.style.whiteSpace = "pre-wrap";
+        elem.style.overflowY = "scroll";
+        elem.style.overflowX = "scroll";
+        elem.style.width = "100%";
+
+        this.setRootElem(this.$outputWin);
+
         GlEvent.telnetConnect.handle(this.handleTelnetConnect, this);
         GlEvent.telnetDisconnect.handle(this.handleTelnetDisconnect, this);
         GlEvent.telnetError.handle(this.handleTelnetError, this);
@@ -33,17 +57,17 @@ export class OutputWin extends OutWinBase {
     }
 
     private prepareReloadLayout() {
-        this.html = $("#win_output").html();
+        // this.html = $("#win_output").html();
     }
 
     private loadLayout() {
-        this.setRootElem($("#win_output"));
-        if (this.html) {
-            // it"s a reload
-            $("#win_output").html(this.html);
-            this.scrollBottom(true);
-            this.html = null;
-        }
+        this.setRootElem(this.$outputWin);
+        // if (this.html) {
+        //     // it"s a reload
+        //     $("#win_output").html(this.html);
+        //     this.scrollBottom(true);
+        //     this.html = null;
+        // }
     }
 
     private handleScriptPrint(data: GlDef.ScriptPrintData) {
@@ -55,7 +79,7 @@ export class OutputWin extends OutWinBase {
             + "<br>"
             + "</span>");
         this.scrollBottom(true);
-    };
+    }
 
     private handleSendPw(data: GlDef.SendPwData) {
         // let stars = ("*".repeat(msg.data.length);
@@ -67,7 +91,7 @@ export class OutputWin extends OutWinBase {
             + "<br>"
             + "</span>");
         this.scrollBottom(true);
-    };
+    }
 
     private handleSendCommand(data: GlDef.SendCommandData) {
         if (data.noPrint) {
@@ -80,7 +104,7 @@ export class OutputWin extends OutWinBase {
             + "<br>"
             + "</span>");
         this.scrollBottom(true);
-    };
+    }
 
     private handleScriptSendCommand(data: GlDef.ScriptSendCommandData) {
         if (data.noPrint) {
@@ -93,7 +117,7 @@ export class OutputWin extends OutWinBase {
             + "<br>"
             + "</span>");
         this.scrollBottom(true);
-    };
+    }
 
     private handleTriggerSendCommands(data: GlDef.TriggerSendCommandsData) {
         let html = "<span style=\"color:cyan\">";
@@ -108,7 +132,7 @@ export class OutputWin extends OutWinBase {
         }
         this.$target.append(html);
         this.scrollBottom(false);
-    };
+    }
 
     private handleAliasSendCommands(data: GlDef.AliasSendCommandsData) {
         let html = "<span style=\"color:yellow\">";
@@ -126,7 +150,7 @@ export class OutputWin extends OutWinBase {
 
         this.$target.append(html);
         this.scrollBottom(true);
-    };
+    }
 
     private handleTelnetConnect(): void {
         this.$target.append(
@@ -135,7 +159,8 @@ export class OutputWin extends OutWinBase {
             + "<br>"
             + "</span>");
         this.scrollBottom(true);
-    };
+    }
+
     private handleTelnetDisconnect() {
         this.$target.append(
             "<span style=\"color:cyan\">"
@@ -143,7 +168,8 @@ export class OutputWin extends OutWinBase {
             + "<br>"
             + "</span>");
         this.scrollBottom(true);
-    };
+    }
+    
     private handleWsConnect() {
         this.$target.append(
             "<span style=\"color:cyan\">"
@@ -151,7 +177,7 @@ export class OutputWin extends OutWinBase {
             + "<br>"
             + "</span>");
         this.scrollBottom(false);
-    };
+    }
 
     private handleWsDisconnect() {
         this.$target.append(
@@ -160,7 +186,7 @@ export class OutputWin extends OutWinBase {
             + "<br>"
             + "</span>");
         this.scrollBottom(false);
-    };
+    }
 
     private handleTelnetError(data: GlDef.TelnetErrorData) {
         this.$target.append(
@@ -171,7 +197,7 @@ export class OutputWin extends OutWinBase {
             + "<br>"
             + "</span>");
         this.scrollBottom(true);
-    };
+    }
 
     private handleWsError() {
         this.$target.append(
@@ -180,7 +206,7 @@ export class OutputWin extends OutWinBase {
             + "<br>"
             + "</span>");
         this.scrollBottom(true);
-    };
+    }
 
     private handleWindowError(message: any, source: any, lineno: any, colno: any, error: any) {
         this.$target.append(
@@ -195,7 +221,7 @@ export class OutputWin extends OutWinBase {
             + "</span>"
         );
         this.scrollBottom(true);
-    };
+    }
 
     private handleScriptEvalError(data: GlDef.ScriptEvalErrorData) {
         let err: any = data;
@@ -210,7 +236,7 @@ export class OutputWin extends OutWinBase {
             + "</span>"
         );
         this.scrollBottom(true);
-    };
+    }
 
     private handleScriptExecError(data: GlDef.ScriptExecErrorData) {
         let err: any = data;
@@ -225,10 +251,9 @@ export class OutputWin extends OutWinBase {
             + "</span>"
         );
         this.scrollBottom(true);
-    };
+    }
 
     protected handleLine(line: string) {
         this.triggerManager.handleLine(line);
-    };
-
+    }
 }

@@ -4,23 +4,25 @@ import { OutWinBase } from "./outWinBase";
 export class ChatWin extends OutWinBase {
     private html: string;
 
-    constructor() {
+    private preMyCont: HTMLPreElement;
+
+    constructor(cont: HTMLPreElement) {
         super();
 
-        GlEvent.prepareReloadLayout.handle(this.prepareReloadLayout, this);
-        GlEvent.loadLayout.handle(this.loadLayout, this);
-    }
+        this.preMyCont = cont;
+        this.setRootElem($(cont));
 
-    private prepareReloadLayout(): void {
-        this.html = $("#win_chat").html();
-    }
+        cont.style.height = "100%";
+        cont.style.flexGrow = "1";
 
-    private loadLayout(): void {
-        this.setRootElem($("#win_chat"));
-        if (this.html) {
-            $("#win_chat").html(this.html);
-            this.html = null;
-        }
+        cont.style.fontSize = "10";
+        cont.style.backgroundColor = "black";
+        cont.style.fontFamily = "\"Courier\",monospace";
+        cont.style.color = "rgb(0,187,0)";
+        cont.style.whiteSpace = "pre-wrap";
+        cont.style.overflowY = "scroll";
+        cont.style.overflowX = "scroll";
+        cont.style.width = "100%";
     }
 }
 

@@ -20,8 +20,6 @@ export class EventHook<TData> {
 
 export namespace GlEvent {
     export const msdpVar = new EventHook<GlDef.MsdpVarData>();
-    export const loadLayout = new EventHook<GlDef.LoadLayoutData>();
-    export const prepareReloadLayout = new EventHook<GlDef.PrepareReloadLayoutData>();
     export const setAliasesEnabled = new EventHook<GlDef.SetAliasesEnabledData>();
     export const setTriggersEnabled = new EventHook<GlDef.SetTriggersEnabledData>();
     export const setEcho = new EventHook<GlDef.SetEchoData>();
@@ -42,6 +40,7 @@ export namespace GlEvent {
     export const wsConnect = new EventHook<GlDef.WsConnectData>();
     export const wsDisconnect = new EventHook<GlDef.WsDisconnectData>();
     export const mxpTag = new EventHook<GlDef.MxpTagData>();
+    export const setClientIp = new EventHook<string>();
 }
 
 export namespace GlDef {
