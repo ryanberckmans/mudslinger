@@ -101,11 +101,11 @@ a:link, a:visited {
     height: 20px;
 }
 
-/*#trig_pattern, #alias_pattern {
+.winEdit-pattern {
     width: 100%;
 }
 
-#trig_list_box, #alias_list_box {
+.winEdit-listBox {
     width: 100%;
     height: 100%;
-}*/
+}

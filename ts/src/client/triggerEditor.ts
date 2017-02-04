@@ -3,7 +3,7 @@ import { TriggerManager } from "./triggerManager";
 
 export class TriggerEditor extends TrigAlEditBase {
     constructor(private triggerManager: TriggerManager) {
-        super();
+        super("TRIGGERS");
     }
 
     protected defaultValue =
@@ -28,21 +28,6 @@ export class TriggerEditor extends TrigAlEditBase {
 
     protected defaultPattern: string = null;
 
-    protected getElements() {
-        this.$win = $("#win_trig_edit");
-        this.$listBox = $("#trig_list_box");
-        this.$pattern = $("#trig_pattern");
-        this.$regexCheckbox = $("#trig_regex_checkbox");
-        this.$scriptCheckbox = $("#trig_script_checkbox");
-        this.$textArea = $("#trig_text_area");
-        this.$scriptArea = $("#trig_script_area");
-        this.$newButton = $("#trig_new_button");
-        this.$deleteButton = $("#trig_delete_button");
-        this.$saveButton = $("#trig_save_button");
-        this.$cancelButton = $("#trig_cancel_button");
-        this.$mainSplit = $("#trig_main_split");
-    };
-
     protected getList() {
         let triggers = this.triggerManager.triggers;
         let lst = [];
@@ -51,7 +36,7 @@ export class TriggerEditor extends TrigAlEditBase {
         }
 
         return lst;
-    };
+    }
 
     protected getItem(ind: number) {
         let triggers = this.triggerManager.triggers;
@@ -60,7 +45,7 @@ export class TriggerEditor extends TrigAlEditBase {
         } else {
             return triggers[ind];
         }
-    };
+    }
 
     protected saveItem(ind: number, pattern: string, value: string, regex: boolean, is_script: boolean) {
         let trig = {
@@ -77,10 +62,10 @@ export class TriggerEditor extends TrigAlEditBase {
             this.triggerManager.triggers[ind] = trig;
         }
         this.triggerManager.saveTriggers();
-    };
+    }
 
     protected deleteItem(ind: number) {
         this.triggerManager.triggers.splice(ind, 1);
         this.triggerManager.saveTriggers();
-    };
+    }
 }

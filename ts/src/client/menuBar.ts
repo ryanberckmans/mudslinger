@@ -52,6 +52,7 @@ export class MenuBar {
         };
 
         this.clickFuncs["Triggers"] = () => {
+            console.log("harpdeerrp");
             this.triggerEditor.show();
         };
 
