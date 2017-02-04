@@ -37,7 +37,6 @@ telnetNs.on('connection', (client: SocketIO.Socket) => {
 
     ioEvt.clReqTelnetOpen.handle(() => {
         telnet = new net.Socket();
-        // telnet.setEncoding(null);
 
         telnet.on('data', (data: Buffer) => {
             ioEvt.srvTelnetData.fire(data.buffer);
@@ -49,7 +48,7 @@ telnetNs.on('connection', (client: SocketIO.Socket) => {
             canWrite = true;
             checkWrite();
         })
-        //telnet.connect(7000, "aarchonmud.com", () => {
+        // telnet.connect(7000, "aarchonmud.com", () => {
         telnet.connect(7101, "rooflez.com", () => {
             ioEvt.srvTelnetOpened.fire(null);
         });

@@ -6,26 +6,12 @@ export class CommandInput {
     private cmd_history: string[] = [];
     private cmd_index: number = -1;
 
-    private divMyCont: HTMLDivElement;
     private $cmdInput: JQuery;
     private $cmdInputPw: JQuery;
 
-    constructor(cont: HTMLDivElement, private aliasManager: AliasManager) {
-        this.divMyCont = cont;
-
-        cont.innerHTML = `
-        <textarea rows="1" class="cmdInput"></textarea>
-        <input class="cmdInputPw" type="password" style="display:none">
-        `;
-
-        let cmdInput = this.divMyCont.getElementsByClassName("cmdInput")[0] as HTMLTextAreaElement;
-        cmdInput.style.width = "100%";
-
-        let cmdInputPw = this.divMyCont.getElementsByClassName("cmdInputPw")[0] as HTMLInputElement;
-        cmdInputPw.style.width = "100%";
-
-        this.$cmdInput = $(cmdInput);
-        this.$cmdInputPw = $(cmdInputPw);
+    constructor(private aliasManager: AliasManager) {
+        this.$cmdInput = $("#cmdInput");
+        this.$cmdInputPw = $("#cmdInputPw");
 
         this.$cmdInput.keydown((event: KeyboardEvent) => { return this.keydown(event); });
         this.$cmdInput.bind("input propertychange", () => { return this.inputChange(); });

@@ -36,6 +36,65 @@
   </script>
 </head>
 <body>
-  <div id="myClient"></div>
+<div id="arcWebClient">
+  <div id="menuBar">
+    <ul>
+      <li>Connection
+        <ul>
+          <li>Connect</li>
+          <li>Disconnect</li>
+        </ul>
+      </li>
+      <li>Reload Layout</li>
+      <li>Aliases</li>
+      <li>Triggers</li>
+      <li>Script</li>
+      <li>Config
+        <ul>
+          <li>Text Color
+            <ul>
+              <li>White</li>
+              <li>Green</li>
+            </ul>
+          </li>
+          <li><label><input id="menuBar-chkEnableTrig" type="checkbox" checked>Enable Triggers</label></li>
+          <li><label><input id="menuBar-chkEnableAlias" type="checkbox" checked>Enable Aliases</label></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+  <div id="mainVertSplit">
+    <div>
+      <div id="leftPanel">
+        <pre id="winOutput" class="outputText"></pre>
+        <!--<br>-->
+        <textarea rows="1" id="cmdInput"></textarea>
+        <input id="cmdInputPw" type="password" style="display:none">
+      </div>
+    </div>
+
+    <div>
+      <div id="rightPanel">
+        <div id="winMap" >
+          <center><div id=winMap-roomName></div>
+            <div id="winMap-svgCont" style="width:125px;height:100px"></div>
+          </center>
+          <center>
+            <div id="winMap-olcStatus"></div>
+          </center>
+        </div>
+        <div id="winGauge" >
+          <div id='winGauge-hpBar' class='gaugeBar'></div>
+          <div id='winGauge-manaBar' class='gaugeBar'></div>
+          <div id='winGauge-moveBar' class='gaugeBar'></div>
+          <div id='winGauge-tnlBar' class='gaugeBar'></div>
+          <div id='winGauge-enemyBar' class='gaugeBar'></div>
+        </div>
+        <center><span>CHAT</span></center>
+        <pre id="winChat" class="outputText"></pre>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>

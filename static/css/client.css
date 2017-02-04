@@ -6,35 +6,34 @@ a:link, a:visited {
     text-decoration: none;
 }
 
-#client {
+.CodeMirror {
+    border: 1px solid black;
+}
+
+#arcWebClient {
     width:95vw;
     height:92vh;
 }
 
-#left_panel {
+#leftPanel {
     height:100%;
     width:100%;
 }
 
-#win_output {
+#winOutput {
     height:calc(100% - 21px);
     margin:0;
     padding:0;
 }
 
-#win_chat_cont {
-    flex-grow: 1;
-}
-#win_chat {
+#winChat {
     height: 100%;
+    margin:0;
+    padding:0;
     flex-grow: 1;
 }
 
-.CodeMirror {
-    border: 1px solid black;
-}
-
-.output_text {
+.outputText {
     font-size: 10;
     background-color:black;
     font-family:"Courier", monospace;
@@ -45,46 +44,34 @@ a:link, a:visited {
     width:100%;
 }
 
-#output_gauge_split {
-    width:100%;
-    height:100%;
-}
-
-#main_vert_split {
-}
-
-#right_panel {
+#rightPanel {
     display: flex;
     flex-direction: column;
     height: 100%;
 }
 
-#win_map {
+#winMap {
     background-color:grey;
 }
 
-#win_gauge {
+#winGauge {
     background-color:black;
     height: 10%;
     width: 100%;
 }
 
-.gauge_bar {
+#winGauge .gaugeBar {
     background-color:grey;
 }
 
-.gauge_bar .jqx-progressbar-text, .gauge_text {
+.gaugeBar .jqx-progressbar-text, .gaugeText {
     color: yellow;
     text-shadow: 0px 0px 2px black;
     font-size: 10px;
     font-family: Courier;
 }
 
-#enemy_bar .jqx-progressbar-text {
-    font-size: 75%;
-}
-
-#room_name {
+#winMap-roomName {
     min-height: 25px;
     border-style: solid;
     border-color: black;
@@ -92,33 +79,33 @@ a:link, a:visited {
     font-weight: bold;
 }
 
-#olc_status {
+#winMap-olcStatus {
     border-style: solid;
     border-color: black;
     font-weight: bold;
 }
 
-#cmd_input, #cmd_input_pw {
+#cmdInput, #cmdInputPw {
     width: 100%;
     margin: 0;
     padding: 0;
 }
 
-#cmd_input {
+#cmdInput {
     resize: none;
     font-family:"Courier", monospace;
     font-size: 10;
 }
 
-#cmd_input_pw {
+#cmdInputPw {
     height: 20px;
 }
 
-#trig_pattern, #alias_pattern {
+/*#trig_pattern, #alias_pattern {
     width: 100%;
 }
 
 #trig_list_box, #alias_list_box {
     width: 100%;
     height: 100%;
-}
+}*/

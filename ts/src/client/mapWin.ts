@@ -30,38 +30,20 @@ const doors: {[k: string]: string} = {
 };
 
 export class MapWin {
-    private divMyCont: HTMLDivElement;
     private $roomName: JQuery;
     private $svgCont: JQuery;
     private $olcStatus: JQuery;
 
-    constructor(cont: HTMLDivElement) {
-        this.divMyCont = cont;
+    constructor() {        
+        this.$roomName = $("#winMap-roomName");
+        this.$svgCont = $("#winMap-svgCont");
+        this.$olcStatus = $("#winMap-olcStatus");
 
-        this.divMyCont.innerHTML = `
-        <center>
-          <div class="mapWin-roomName"></div>
-          <div class="mapWin-svgCont" style="width:125px;height:100px"></div>
-        </center>
-        <center>
-          <div class="mapWin-olcStatus"></div>
-        </center>
-        `;
-        
-        this.$roomName = $(this.divMyCont.getElementsByClassName("mapWin-roomName")[0]);
-        this.$svgCont = $(this.divMyCont.getElementsByClassName("mapWin-svgCont")[0]);
-        this.$olcStatus = $(this.divMyCont.getElementsByClassName("mapWin-olcStatus")[0]);
+        this.updateGrid();
+        this.updateRoomName();        
 
-        this.loadLayout();
-        
         GlEvent.msdpVar.handle(this.handleMsdpVar, this);
     }
-
-    private loadLayout() {
-        this.updateGrid();
-        this.updateRoomName();
-    }
-
 
     private dirs: {[k: string]: string} = {};
     private roomName = "";
@@ -86,7 +68,7 @@ export class MapWin {
         output += "<rect x=\"25\" y=\"25\" width=\"50\" height=\"50\" style=\"fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)\">";
 
         this.$svgCont.html("<center><svg height=\"100%\" width=\"100%\">" + output + "<</svg></center>");
-    };
+    }
 
     private updateRoomName() {
         let room_name = Util.stripColorTags(this.roomName);
@@ -94,14 +76,14 @@ export class MapWin {
             room_name += " [Room " + this.roomVnum + " " + this.roomSector + "]";
         }
         this.$roomName.html(room_name);
-    };
+    }
 
     private updateOlcStatus() {
         if (!this.editMode || !this.editVnum) {
             return;
         }
         this.$olcStatus.html(this.editMode + " " + this.editVnum);
-    };
+    }
 
     private handleMsdpVar(data: GlDef.MsdpVarData) {
         switch (data.varName) {
@@ -138,6 +120,5 @@ export class MapWin {
             default:
                 return;
         }
-
-    };
+    }
 }

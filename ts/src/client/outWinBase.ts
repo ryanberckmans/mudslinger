@@ -3,6 +3,19 @@ import * as Util from "./util";
 export class OutWinBase {
     private lineCount: number = 0;
     private maxLines: number = 5000;
+
+    constructor(rootElem: JQuery) {
+        this.$rootElem = rootElem;
+        this.$targetElems = [rootElem];
+        this.$target = rootElem;
+
+        // direct children of the root will be line containers, let"s push the first one.
+        this.pushElem($("<span>").appendTo(rootElem));
+
+        this.$rootElem.bind("scroll", (e: any) => { this.handleScroll(e); });
+    }
+
+
     public setMaxLines(count: number) {
         this.maxLines = count;
     }
@@ -33,24 +46,8 @@ export class OutWinBase {
         this.scrollLock = !is_at_bottom;
     }
 
-    // must set root elem before actually using it
-    protected setRootElem(elem: JQuery) {
-        // this may be called upon layout reload
-        this.$rootElem = elem;
-        this.$targetElems = [elem];
-        this.$target =  elem;
-
-        // direct children of the root will be line containers, let"s push the first one.
-        this.pushElem($("<span>").appendTo(elem));
-
-        this.$rootElem.bind("scroll", (e: any) => { this.handleScroll(e); });
-    };
-
     // elem is the actual jquery element
     public pushElem(elem: JQuery) {
-//        console.log(o);
-//        console.log("elem pushed");
-//        console.log(elem);
         this.writeBuffer();
 
         this.$target.append(elem);
@@ -62,9 +59,6 @@ export class OutWinBase {
         this.writeBuffer();
 
         let popped = this.$targetElems.pop();
-//        console.log(o);
-//        console.log("elem popped");
-//        console.log(popped);
         this.$target = this.$targetElems[this.$targetElems.length - 1];
         return popped;
     }
@@ -78,7 +72,6 @@ export class OutWinBase {
     public addText(txt: string) {
         this.lineText += txt;
         let html = Util.rawToHtml(txt);
-//        let span = $(document.createElement("span"));
         let span_text = "<span";
         let style = "";
         if (this.fgColor || this.bgColor) {

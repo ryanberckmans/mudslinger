@@ -5,36 +5,8 @@ import { TriggerManager } from "./triggerManager";
 import * as Util from "./util";
 
 export class OutputWin extends OutWinBase {
-    private divMyCont: HTMLPreElement;
-    private $outputWin: JQuery;
-    private html: string;
-
-    constructor(cont: HTMLPreElement, private triggerManager: TriggerManager) {
-        super();
-
-        // this.divMyCont = cont;
-        // this.divMyCont.innerHTML = `
-        // <pre class="output-win"></pre>
-        // `;
-        this.divMyCont = cont;
-        //this.$outputWin = $(this.divMyCont.getElementsByClassName("output-win")[0]);
-        this.$outputWin = $(cont);
-        
-        let elem = this.$outputWin[0] as HTMLPreElement;
-        elem.style.height = "calc(100% - 21px)";
-        elem.style.margin = "0";
-        elem.style.padding = "0";
-
-        elem.style.fontSize = "10";
-        elem.style.backgroundColor = "black";
-        elem.style.fontFamily = "\"Courier\",monospace";
-        elem.style.color = "rgb(0,187,0)";
-        elem.style.whiteSpace = "pre-wrap";
-        elem.style.overflowY = "scroll";
-        elem.style.overflowX = "scroll";
-        elem.style.width = "100%";
-
-        this.setRootElem(this.$outputWin);
+    constructor(private triggerManager: TriggerManager) {
+        super($("#winOutput"));
 
         GlEvent.telnetConnect.handle(this.handleTelnetConnect, this);
         GlEvent.telnetDisconnect.handle(this.handleTelnetDisconnect, this);
@@ -56,20 +28,6 @@ export class OutputWin extends OutWinBase {
         });
     }
 
-    private prepareReloadLayout() {
-        // this.html = $("#win_output").html();
-    }
-
-    private loadLayout() {
-        this.setRootElem(this.$outputWin);
-        // if (this.html) {
-        //     // it"s a reload
-        //     $("#win_output").html(this.html);
-        //     this.scrollBottom(true);
-        //     this.html = null;
-        // }
-    }
-
     private handleScriptPrint(data: GlDef.ScriptPrintData) {
         let message = data;
         let output = JSON.stringify(message);
@@ -82,7 +40,6 @@ export class OutputWin extends OutWinBase {
     }
 
     private handleSendPw(data: GlDef.SendPwData) {
-        // let stars = ("*".repeat(msg.data.length);
         let stars = Array(data.length + 1).join("*");
 
         this.$target.append(

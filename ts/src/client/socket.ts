@@ -74,6 +74,13 @@ export class Socket {
             // Server echo ON means we should have local echo OFF
             GlEvent.setEcho.fire(!data);
         });
+
+        this.telnetClient.EvtMsdpVar.handle((data) => {
+            GlEvent.msdpVar.fire({
+                varName: data[0], 
+                value: data[1]
+            });
+        });
     };
 
     public openTelnet() {
