@@ -125,12 +125,12 @@ export class OutWinBase {
 
     private scrollRequested = false;
     private privScrolBottom() {
-        console.time("_scroll_bottom");
+        // console.time("_scroll_bottom");
         let elem = this.$rootElem;
         elem.scrollTop(elem.prop("scrollHeight"));
         this.scrollLock = false;
         this.scrollRequested = false;
-        console.timeEnd("_scroll_bottom");
+        // console.timeEnd("_scroll_bottom");
     };
 
     protected scrollBottom(force: boolean = false) {
