@@ -188,7 +188,7 @@ export class Socket {
                 output = "";
 
                 i += match[0].length;
-                this.outputManager.handle_xterm_escape(match[0]);
+                this.outputManager.handleXtermEscape(match[0]);
                 continue;
             }
 

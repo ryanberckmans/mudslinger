@@ -24,6 +24,7 @@ export class MenuBar {
         this.makeClickFuncs();
 
         this.$menuBar = $("#menuBar");
+
         this.$chkEnableTrig = $("#menuBar-chkEnableTrig");
         this.$chkEnableAlias = $("#menuBar-chkEnableAlias");
         this.$chkEnableMap = $("#menuBar-chkEnableMap");
@@ -46,6 +47,14 @@ export class MenuBar {
 
         this.$chkEnableGauges.change(function() {
             GlEvent.setGaugesEnabled.fire(this.checked);
+        });
+
+        GlEvent.telnetConnect.handle(() => {
+            $("#menuBar-conn-disconn").text("Disconnect");
+        });
+
+        GlEvent.telnetDisconnect.handle(() => {
+            $("#menuBar-conn-disconn").text("Connect");
         });
     }
 

@@ -52,8 +52,8 @@ telnetNs.on('connection', (client: SocketIO.Socket) => {
             ioEvt.srvTelnetError.fire(err.message);
         });
 
-        // telnet.connect(7000, "aarchonmud.com", () => {
-        telnet.connect(7101, "rooflez.com", () => {
+        telnet.connect(7000, "aarchonmud.com", () => {
+        // telnet.connect(7101, "rooflez.com", () => {
             ioEvt.srvTelnetOpened.fire(null);
         });
     });

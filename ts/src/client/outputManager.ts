@@ -31,32 +31,25 @@ export class OutputManager {
         this.targetWindows = [this.outputWin];
         this.target = this.outputWin;
 
+        this.loadConfig();
+
         GlEvent.changeDefaultColor.handle(this.handleChangeDefaultColor, this);
-
-        $(document).ready(() => {
-            let saved_color_cfg = localStorage.getItem("color_cfg");
-            if (!saved_color_cfg) {
-                return;
-            } else {
-                let cfg = JSON.parse(saved_color_cfg);
-                let default_ansi_fg = cfg.default_ansi_fg;
-                this.setDefaultAnsiFg(this.defaultAnsiFg[0], this.defaultAnsiFg[1]);
-            }
-        });
-
     }
 
-    private handleLoadLayout() {
-        // // Default output to OutputWin
-        // this.targetWindows = [this.outputWin];
-        // this.target = this.outputWin;
-
-        // this.initColor();
+    private loadConfig() {
+        let savedColorCfg = localStorage.getItem("color_cfg");
+        if (!savedColorCfg) {
+            return;
+        } else {
+            let cfg = JSON.parse(savedColorCfg);
+            let defaultAnsiFg = cfg.default_ansi_fg;
+            this.setDefaultAnsiFg(defaultAnsiFg[0], defaultAnsiFg[1]);
+        }
     }
 
     public outputDone () {
         this.target.outputDone();
-    };
+    }
 
     // Redirect output to another OutWinBase until it"s popped
     public pushTarget(tgt: OutWinBase) {
@@ -111,11 +104,7 @@ export class OutputManager {
         return this.bgColor || ansiColors[this.defaultAnsiBg[0]][this.defaultAnsiBg[1]];
     }
 
-    private initColor() {
-//        set_ansi_fg([colors.green, "low"]);
-    }
-
-    public handle_xterm_escape(data: string) {
+    public handleXtermEscape(data: string) {
         let splt = data.split(";");
         let color_code = splt[2].slice(0, -1); // kill the "m"
         color_code = parseInt(color_code).toString();
@@ -217,7 +206,7 @@ export class OutputManager {
         if (new_bg !== undefined) {
             this.setAnsiBg(new_bg);
         }
-    };
+    }
 
     private setDefaultAnsiFg(colorName: ansiName, level: ansiLevel) {
         if ( !(colorName in ansiColors) ) {
@@ -231,7 +220,7 @@ export class OutputManager {
         }
 
         this.defaultAnsiFg = [colorName, level];
-        $(".output_text").css("color", ansiColors[colorName][level]);
+        $(".outputText").css("color", ansiColors[colorName][level]);
     }
 
     private handleChangeDefaultColor(data: GlDef.ChangeDefaultColorData) {
@@ -239,7 +228,7 @@ export class OutputManager {
 
         this.setDefaultAnsiFg(<ansiName>data, level);
         this.saveColorCfg();
-    };
+    }
 
     private saveColorCfg() {
         localStorage.setItem("color_cfg", JSON.stringify({
