@@ -5,6 +5,8 @@ import * as http from 'http';
 
 import { IoEvent } from '../shared/ioevent';
 
+let appConfig = require("../../appConfig.js");
+console.log(appConfig);
 
 let cwd = process.cwd();
 
@@ -52,8 +54,7 @@ telnetNs.on('connection', (client: SocketIO.Socket) => {
             ioEvt.srvTelnetError.fire(err.message);
         });
 
-        telnet.connect(7000, "aarchonmud.com", () => {
-        // telnet.connect(7101, "rooflez.com", () => {
+        telnet.connect(appConfig.gamePort, appConfig.gameHost, () => {
             ioEvt.srvTelnetOpened.fire(null);
         });
     });
@@ -91,6 +92,6 @@ server.on("error", (err: Error) => {
     console.log("Server error: ", err);
 });
 
-server.listen(5000, function() {
-    console.log("Server is running at port 5000");
+server.listen(appConfig.serverPort, function() {
+    console.log("Server is running at port " + appConfig.serverPort);
 });

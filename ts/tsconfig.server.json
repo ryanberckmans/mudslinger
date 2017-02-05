@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "outDir": "./build/build_server",
+        "outDir": "../dist",
         "noImplicitAny": true,
         "noImplicitReturns": true
     },

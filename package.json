@@ -1,9 +1,9 @@
 {
   "name": "aarchon-web-client",
   "scripts": {
-    "start": "node ts/build/build_server/server/app.js",
+    "start": "node dist/server/app.js",
     "postinstall": "node tools/postinstall.js",
-    "clean": "rimraf ts/build && rimraf static/arcWebClient.js",
+    "clean": "rimraf ts/build && rimraf dist && rimraf static/arcWebClient.js",
     "build": "npm run build-client && npm run build-server",
     "build-client": "tsc -p ts/tsconfig.client.json && rollup -c ts/rollup.config.js",
     "build-server": "tsc -p ts/tsconfig.server.json",
