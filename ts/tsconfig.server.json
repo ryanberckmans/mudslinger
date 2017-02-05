@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "outDir": "../dist",
+        "noImplicitAny": true,
+        "noImplicitReturns": true
+    },
+    "include": [
+        "./src/server/*"
+    ]
+}

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Aarchon Web Client V0.8.0</title>
+
+  <link rel="stylesheet" href="jqwidgets/styles/jqx.base.css">
+
+  <script src="//code.jquery.com/jquery-2.1.3.js"></script>
+  <script src="jqwidgets/jqxcore.js"></script>
+  <script src="jqwidgets/jqxcheckbox.js"></script>
+  <script src="jqwidgets/jqxmenu.js"></script>
+  <script src="jqwidgets/jqxwindow.js"></script>
+  <script src="jqwidgets/jqxsplitter.js"></script>
+  <script src="jqwidgets/jqxprogressbar.js"></script>
+  <script src="jqwidgets/jqxribbon.js"></script>
+  <script src="socket.io.min.js"></script>
+
+  <link rel="stylesheet" href="codemirror-5.21.0/lib/codemirror.css">
+  <link rel="stylesheet" href="codemirror-5.21.0/theme/neat.css">
+  <script src="codemirror-5.21.0/lib/codemirror.js"></script>
+  <script src="codemirror-5.21.0/addon/display/autorefresh.js"></script>
+  <script src="codemirror-5.21.0/mode/javascript/javascript.js"></script>
+
+  <link rel="stylesheet" href="css/client.css">
+
+  <script src="polyfill.js"></script>
+  <script src="arcWebClient.js"></script>
+
+  <script>
+    var myClient;
+    $(document).ready(function() {
+      myClient = new ArcWebClient.Client();
+    }); 
+  </script>
+</head>
+<body>
+<div id="arcWebClient">
+  <div id="menuBar">
+    <ul>
+      <li id=menuBar-conn-disconn>Connect</li>
+      <li>Aliases</li>
+      <li>Triggers</li>
+      <li>Script</li>
+      <li>Config
+        <ul>
+          <li>Text Color
+            <ul>
+              <li>White</li>
+              <li>Green</li>
+            </ul>
+          </li>
+          <li><label><input id="menuBar-chkEnableTrig" type="checkbox" checked>Enable Triggers</label></li>
+          <li><label><input id="menuBar-chkEnableAlias" type="checkbox" checked>Enable Aliases</label></li>
+          <li><label><input id="menuBar-chkEnableMap" type="checkbox" checked>Enable Map</label></li>
+          <li><label><input id="menuBar-chkEnableGauges" type="checkbox" checked>Enable Gauges</label></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+  <div id="mainVertSplit">
+    <div>
+      <div id="leftPanel">
+        <pre id="winOutput" class="outputText"></pre>
+        <!--<br>-->
+        <textarea rows="1" id="cmdInput"></textarea>
+        <input id="cmdInputPw" type="password" style="display:none">
+      </div>
+    </div>
+
+    <div>
+      <div id="rightPanel">
+        <div id="winMap" >
+          <center><div id=winMap-roomName></div>
+            <div id="winMap-svgCont" style="width:125px;height:100px"></div>
+          </center>
+          <center>
+            <div id="winMap-olcStatus"></div>
+          </center>
+        </div>
+        <div id="winGauge" >
+          <div id='winGauge-hpBar' class='gaugeBar'></div>
+          <div id='winGauge-manaBar' class='gaugeBar'></div>
+          <div id='winGauge-moveBar' class='gaugeBar'></div>
+          <div id='winGauge-tnlBar' class='gaugeBar'></div>
+          <div id='winGauge-enemyBar' class='gaugeBar'></div>
+        </div>
+        <center><span>CHAT</span></center>
+        <pre id="winChat" class="outputText"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

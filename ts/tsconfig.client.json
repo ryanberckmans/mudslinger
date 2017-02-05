@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "es2015",
+        "outDir": "./build/build_client",
+        "noImplicitAny": true,
+        "noImplicitReturns": true
+    },
+    "exclude": [
+        "node_modules"
+    ],
+    "include": [
+        "./src/client/*"
+    ]
+}
