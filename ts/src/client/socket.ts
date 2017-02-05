@@ -51,6 +51,12 @@ export class Socket {
         });
 
         this.ioEvt.srvSetClientIp.handle((ipAddr: string) => {
+            let re = /::ffff:(\d+\.\d+\.\d+\.\d+)/;
+            let match = re.exec(ipAddr);
+            if (match) {
+                ipAddr = match[1];
+            }
+
             this.clientIp = ipAddr;
             if (this.telnetClient) {
                 this.telnetClient.clientIp = ipAddr;
