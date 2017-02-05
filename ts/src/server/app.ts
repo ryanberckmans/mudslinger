@@ -23,7 +23,6 @@ telnetNs.on('connection', (client: SocketIO.Socket) => {
         if (!canWrite) { return; }
 
         if (writeQueue.length > 0) {
-
             let data = writeQueue.shift();
             canWrite = false;
             canWrite = telnet.write(data as Buffer);

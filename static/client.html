@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Aarchon Web Client V0.7.7</title>
+  <title>Aarchon Web Client V0.8.0</title>
 
   <link rel="stylesheet" href="jqwidgets/styles/jqx.base.css">
 
@@ -30,8 +30,7 @@
   <script>
     var myClient;
     $(document).ready(function() {
-      var myClientDiv = document.getElementById('myClient');
-      myClient = new ArcWebClient.Client(myClientDiv);
+      myClient = new ArcWebClient.Client();
     }); 
   </script>
 </head>
@@ -58,6 +57,8 @@
           </li>
           <li><label><input id="menuBar-chkEnableTrig" type="checkbox" checked>Enable Triggers</label></li>
           <li><label><input id="menuBar-chkEnableAlias" type="checkbox" checked>Enable Aliases</label></li>
+          <li><label><input id="menuBar-chkEnableMap" type="checkbox" checked>Enable Map</label></li>
+          <li><label><input id="menuBar-chkEnableGauges" type="checkbox" checked>Enable Gauges</label></li>
         </ul>
       </li>
     </ul>

@@ -1,5 +1,5 @@
 {
-  "name": "ArcWebClient",
+  "name": "aarchon-web-client",
   "scripts": {
     "start": "node ts/build/build_server/server/app.js",
     "postinstall": "node tools/postinstall.js",

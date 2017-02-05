@@ -22,6 +22,8 @@ export namespace GlEvent {
     export const msdpVar = new EventHook<GlDef.MsdpVarData>();
     export const setAliasesEnabled = new EventHook<GlDef.SetAliasesEnabledData>();
     export const setTriggersEnabled = new EventHook<GlDef.SetTriggersEnabledData>();
+    export const setMapEnabled = new EventHook<boolean>();
+    export const setGaugesEnabled = new EventHook<boolean>();
     export const setEcho = new EventHook<GlDef.SetEchoData>();
     export const telnetConnect = new EventHook<GlDef.TelnetConnectData>();
     export const telnetDisconnect = new EventHook<GlDef.TelnetDisconnectData>();

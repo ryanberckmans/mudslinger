@@ -42,6 +42,15 @@ export class GaugeWin {
         this.loadLayout();
 
         GlEvent.msdpVar.handle(this.handleMsdpVar, this);
+        GlEvent.setGaugesEnabled.handle((value) => {
+            console.log("haeaeae");
+            console.log(value);
+            if (value === true) {
+                $("#winGauge").show();
+            } else if (value === false) {
+                $("#winGauge").hide();
+            }
+        });
     }
 
     private loadLayout() {

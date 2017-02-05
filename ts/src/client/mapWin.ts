@@ -43,6 +43,13 @@ export class MapWin {
         this.updateRoomName();        
 
         GlEvent.msdpVar.handle(this.handleMsdpVar, this);
+        GlEvent.setMapEnabled.handle((data) => {
+            if (data === true) {
+                $("#winMap").show();
+            } else if (data === false) {
+                $("#winMap").hide();
+            }
+        });
     }
 
     private dirs: {[k: string]: string} = {};
