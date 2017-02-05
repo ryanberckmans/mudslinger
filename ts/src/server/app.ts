@@ -12,7 +12,7 @@ let app = express();
 let server = http.createServer(app);
 let io = socketio(server);
 
-var telnetNs = io.of("/telnet");
+var telnetNs: SocketIO.Namespace = io.of("/telnet");
 telnetNs.on('connection', (client: SocketIO.Socket) => {
     let telnet: net.Socket;
     let ioEvt = new IoEvent(client);
@@ -48,6 +48,11 @@ telnetNs.on('connection', (client: SocketIO.Socket) => {
             canWrite = true;
             checkWrite();
         })
+        telnet.on("error", (err: Error) => {
+            console.log("TELNET ERROR: ", err);
+            ioEvt.srvTelnetError.fire(err.message);
+        });
+
         // telnet.connect(7000, "aarchonmud.com", () => {
         telnet.connect(7101, "rooflez.com", () => {
             ioEvt.srvTelnetOpened.fire(null);
@@ -69,6 +74,22 @@ app.use(express.static("static"));
 
 app.get("/", function(req, res) {
     res.sendFile("static/client.html", {root: cwd});
+});
+
+app.use((err: any, req: any, res: any, next: any) => {
+    console.log("App error: " + 
+                "err: " + err + " | " +
+                "req: " + req + " | " +
+                "res: " + res + " | ");
+    next(err);
+});
+
+server.on("error", (err: Error) => {
+    console.log("Server error: ", err);
+});
+
+server.on("error", (err: Error) => {
+    console.log("Server error: ", err);
 });
 
 server.listen(5000, function() {
