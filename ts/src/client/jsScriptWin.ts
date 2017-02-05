@@ -8,26 +8,29 @@ export class JsScriptWin {
     private $runButton: JQuery;
 
     constructor(private jsScript: JsScript) {
-    }
+        let win = document.createElement("div");
+        win.style.display = "none";
+        win.className = "winJsScript";
+        document.body.appendChild(win);
 
-    private handleRunButtonClick() {
-        let code_text = this.codeMirror.getValue();
-        let script = this.jsScript.makeScript(code_text);
-        if (script) { script(); };
-    };
+        win.innerHTML = `
+        <!--header-->
+        <div>JAVASCRIPT SCRIPT</div>
+        <!--content-->
+        <div>
+            <button class="winJsScript-btnRun" style="height:10%">RUN SCRIPT</button>
+            <div style="height:90%">
+                <textarea class="winJsScript-code"></textarea>
+            </div>
+        </div>
+        `;
 
-    private getElements() {
-        this.$win = $("#win_js_script");
-        this.$runButton = $("#win_js_script_run_button");
-    };
-
-    private createWindow() {
-        this.getElements();
+        this.$win = $(win);
+        this.$runButton = $(win.getElementsByClassName("winJsScript-btnRun")[0]); 
 
         (<any>this.$win).jqxWindow({width: 600, height: 400});
         this.codeMirror = CodeMirror.fromTextArea(
-            document.getElementById("win_js_script_code"),
-            {
+            win.getElementsByClassName("winJsScript-code")[0], {
                 mode: "javascript",
                 theme: "neat",
                 autoRefresh: true, // https://github.com/codemirror/CodeMirror/issues/3098
@@ -37,14 +40,15 @@ export class JsScriptWin {
         );
 
         this.$runButton.click(this.handleRunButtonClick.bind(this));
+    }
 
-    };
+    private handleRunButtonClick() {
+        let code_text = this.codeMirror.getValue();
+        let script = this.jsScript.makeScript(code_text);
+        if (script) { script(); };
+    }
 
     public show() {
-        if (!this.$win) {
-            this.createWindow();
-        }
-
         (<any>this.$win).jqxWindow("open");
-    };
+    }
 }
