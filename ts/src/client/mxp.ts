@@ -123,7 +123,7 @@ export class Mxp {
             let match = re.exec(tag);
             if (match) {
                 /* match with explicit href */
-                let tag_re = /^<send (?:href=)?[""](.*)[""]>$/i;
+                let tag_re = /^<send (?:href=)?["'](.*)["']>$/i;
                 let tag_m = tag_re.exec(tag);
                 if (tag_m) {
                     let cmd = tag_m[1];
