@@ -27,7 +27,12 @@ export class Socket {
     public open() {
         let o = this;
 
-        this.ioConn = io.connect("http://" + configClient.socketIoHost + ":" + configClient.socketIoPort + "/telnet");
+        this.ioConn = io.connect(
+            "http://" + 
+            (configClient.socketIoHost || document.domain) + 
+            ":" + 
+            (configClient.socketIoPort || location.port) + 
+            "/telnet");
         this.ioEvt = new IoEvent(this.ioConn);
 
         this.ioConn.on("connect", () => {

@@ -1,6 +1,6 @@
 var configClient = {};
 
-
-configClient.socketIoHost = "aarchonmud.com";
-configClient.socketIoPort = 7024;
+/* set to null if using http server in configServer */
+configClient.socketIoHost = null;
+configClient.socketIoPort = null;
 
