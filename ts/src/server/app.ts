@@ -1,18 +1,27 @@
 import * as express from 'express';
+import * as http from 'http';
 import * as socketio from 'socket.io';
 import * as net from 'net';
-import * as http from 'http';
+
 
 import { IoEvent } from '../shared/ioevent';
 
-let appConfig = require("../../appConfig.js");
-console.log(appConfig);
+let serverConfig = require("../../configServer.js");
+console.log(serverConfig);
 
 let cwd = process.cwd();
 
-let app = express();
-let server = http.createServer(app);
-let io = socketio(server);
+let app: express.Express;
+let server: http.Server;
+let io: SocketIO.Server;
+
+if (serverConfig.useHttpServer === true) {
+    app = express();
+    server = http.createServer(app);
+    io = socketio(server);
+} else {
+    io = socketio(serverConfig.serverPort)
+}
 
 var telnetNs: SocketIO.Namespace = io.of("/telnet");
 telnetNs.on('connection', (client: SocketIO.Socket) => {
@@ -54,7 +63,7 @@ telnetNs.on('connection', (client: SocketIO.Socket) => {
             ioEvt.srvTelnetError.fire(err.message);
         });
 
-        telnet.connect(appConfig.gamePort, appConfig.gameHost, () => {
+        telnet.connect(serverConfig.gamePort, serverConfig.gameHost, () => {
             ioEvt.srvTelnetOpened.fire(null);
         });
     });
@@ -70,28 +79,31 @@ telnetNs.on('connection', (client: SocketIO.Socket) => {
     ioEvt.srvSetClientIp.fire(client.request.connection.remoteAddress);
 });
 
-app.use(express.static("static"));
+if (serverConfig.useHttpServer) {
+    app.use(express.static("static"));
 
-app.get("/", function(req, res) {
-    res.sendFile("static/client.html", {root: cwd});
-});
+    app.get("/", function(req, res) {
+        res.sendFile("static/index.html", {root: cwd});
+    });
 
-app.use((err: any, req: any, res: any, next: any) => {
-    console.log("App error: " + 
-                "err: " + err + " | " +
-                "req: " + req + " | " +
-                "res: " + res + " | ");
-    next(err);
-});
+    app.use((err: any, req: any, res: any, next: any) => {
+        console.log("App error: " + 
+                    "err: " + err + " | " +
+                    "req: " + req + " | " +
+                    "res: " + res + " | ");
+        next(err);
+    });
 
-server.on("error", (err: Error) => {
-    console.log("Server error: ", err);
-});
+    server.on("error", (err: Error) => {
+        console.log("Server error: ", err);
+    });
 
-server.on("error", (err: Error) => {
-    console.log("Server error: ", err);
-});
+    server.on("error", (err: Error) => {
+        console.log("Server error: ", err);
+    });
 
-server.listen(appConfig.serverPort, function() {
-    console.log("Server is running at port " + appConfig.serverPort);
-});
+    server.listen(serverConfig.serverPort, function() {
+        console.log("Server is running at port " + serverConfig.serverPort);
+    });
+}
+

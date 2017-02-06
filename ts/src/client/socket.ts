@@ -6,6 +6,10 @@ import { OutputManager } from "./outputManager";
 import { IoEvent } from "../shared/ioevent";
 import { TelnetClient } from "./telnetClient";
 
+
+declare let configClient: any;
+
+
 export class Socket {
     private ioConn: SocketIOClient.Socket;
     private ioEvt: IoEvent;
@@ -23,7 +27,7 @@ export class Socket {
     public open() {
         let o = this;
 
-        this.ioConn = io.connect("http://" + document.domain + ":" + location.port + "/telnet");
+        this.ioConn = io.connect("http://" + configClient.socketIoHost + ":" + configClient.socketIoPort + "/telnet");
         this.ioEvt = new IoEvent(this.ioConn);
 
         this.ioConn.on("connect", () => {
