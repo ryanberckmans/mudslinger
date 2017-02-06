@@ -3,7 +3,6 @@ import * as http from 'http';
 import * as socketio from 'socket.io';
 import * as net from 'net';
 
-
 import { IoEvent } from '../shared/ioevent';
 
 let serverConfig = require("../../configServer.js");
@@ -45,6 +44,13 @@ telnetNs.on('connection', (client: SocketIO.Socket) => {
         checkWrite();
     };
 
+    client.on("disconnect", () => {
+        if (telnet) {
+            telnet.end();
+            telnet = null;
+        }
+    });
+
     ioEvt.clReqTelnetOpen.handle(() => {
         telnet = new net.Socket();
 
@@ -53,6 +59,7 @@ telnetNs.on('connection', (client: SocketIO.Socket) => {
         });
         telnet.on('close', (had_error: boolean) => {
             ioEvt.srvTelnetClosed.fire(had_error);
+            telnet = null;
         });
         telnet.on("drain", () => {
             canWrite = true;
@@ -70,6 +77,7 @@ telnetNs.on('connection', (client: SocketIO.Socket) => {
 
     ioEvt.clReqTelnetClose.handle(() => {
         telnet.end();
+        telnet = null;
     });
 
     ioEvt.clReqTelnetWrite.handle((data) => {
