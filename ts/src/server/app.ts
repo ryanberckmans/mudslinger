@@ -76,11 +76,13 @@ telnetNs.on('connection', (client: SocketIO.Socket) => {
     });
 
     ioEvt.clReqTelnetClose.handle(() => {
+        if (telnet == null) { return; }
         telnet.end();
         telnet = null;
     });
 
     ioEvt.clReqTelnetWrite.handle((data) => {
+        if (telnet == null) { return; }
         writeData(data);
     });
 
