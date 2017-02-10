@@ -1,4 +1,4 @@
-The Aarchon Web Client is a web based MUD client for Aarchon MUD. It consists of a Node.js/Express web server and a HTML/CSS/Javascript frontend.
+The Aarchon Web Client is a web based MUD client for Aarchon MUD. It consists of a Node.js / Express web server and a HTML/CSS/Javascript frontend.
 
 The Node.js server makes telnet connections to the target host/port and acts as a telnet proxy for the frontend application. 
 
