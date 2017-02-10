@@ -10,7 +10,8 @@
     "build-server": "tsc -p ts/tsconfig.server.json",
     "test-client": "tsc -p ts/tsconfig.client.test.json && mocha --recursive ts/build/build_client_test",
     "test-server": "tsc -p ts/tsconfig.server.test.json && mocha --recursive ts/build/build_server_test",
-    "test": "npm run test-client && npm run test-server"
+    "test": "npm run test-client && npm run test-server",
+    "lint": "tslint -c ts/tslint.json ts/src/client/*.ts && tslint -c ts/tslint.json ts/src/server/*.ts"
   },
   "devDependencies": {
     "@types/chai": "^3.4.34",
@@ -27,7 +28,8 @@
     "rollup": "^0.41.4",
     "socket.io": "^1.7.2",
     "socket.io-client": "^1.7.2",
-    "typescript": "^2.1.5"
+    "tslint": "^4.4.2",
+    "typescript": "^2.1.6"
   },
   "dependencies": {
     "express": "^4.14.0"

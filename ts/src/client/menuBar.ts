@@ -56,7 +56,7 @@ export class MenuBar {
         GlEvent.telnetDisconnect.handle(() => {
             $("#menuBar-conn-disconn").text("Connect");
         });
-        
+
         GlEvent.wsDisconnect.handle(() => {
             $("#menuBar-conn-disconn").text("Connect");
         });

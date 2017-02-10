@@ -26,7 +26,7 @@ export class JsScriptWin {
         `;
 
         this.$win = $(win);
-        this.$runButton = $(win.getElementsByClassName("winJsScript-btnRun")[0]); 
+        this.$runButton = $(win.getElementsByClassName("winJsScript-btnRun")[0]);
 
         (<any>this.$win).jqxWindow({width: 600, height: 400});
         this.codeMirror = CodeMirror.fromTextArea(

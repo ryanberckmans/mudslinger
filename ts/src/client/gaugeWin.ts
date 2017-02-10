@@ -37,7 +37,7 @@ export class GaugeWin {
         this.$moveBar = $("#winGauge-moveBar");
         this.$tnlBar = $("#winGauge-tnlBar");
         this.$enemyBar = $("#winGauge-enemyBar");
-        
+
         this.createUpdateFuncs();
         this.loadLayout();
 

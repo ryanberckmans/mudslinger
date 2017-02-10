@@ -14,7 +14,7 @@ export class TelnetClient extends Telnet {
     public EvtMsdpVar = new EventHook<[MsdpVarName, MsdpVal]>();
 
     public clientIp: string;
-    
+
     private ttypeIndex: number = 0;
 
     constructor(writeFunc: (data: ArrayBuffer) => void) {
@@ -25,7 +25,7 @@ export class TelnetClient extends Telnet {
 
     private onNegotiation(data: NegotiationData) {
         let {cmd, opt} = data;
-        //console.log(CmdName(cmd), OptName(opt));
+        // console.log(CmdName(cmd), OptName(opt));
 
         if (cmd === Cmd.WILL) {
             if (opt === Opt.ECHO) {
@@ -107,7 +107,7 @@ type MsdpVarName = string;
 type MsdpObj = {[k: string]: MsdpVal};
 type MsdpArr = Array<any>;
 
-type MsdpVal = string | MsdpArr | MsdpObj
+type MsdpVal = string | MsdpArr | MsdpObj;
 
 function GetMsdpTable(data: Array<number>): [MsdpObj, number] {
     // skip first char which should be MSDP.TABLE_OPEN
@@ -147,7 +147,7 @@ function GetMsdpVal(data: Array<number>): [MsdpVal, number] {
     let i = 1;
 
     if (i >= data.length) {
-        return ['', i];
+        return ["", i];
     }
 
     if (data[i] === MsdpDef.ARRAY_OPEN) {
@@ -173,7 +173,7 @@ function GetMsdpVal(data: Array<number>): [MsdpVal, number] {
     }
     let val = String.fromCharCode.apply(String, data.slice(startInd, i));
 
-    return [val, i]
+    return [val, i];
 }
 
 function GetMsdpVar(data: Array<number>): [MsdpVarName, MsdpVal, number] {
@@ -229,11 +229,11 @@ const SupportedMsdpVars: string[] = [
     "ROOM_NAME", "ROOM_EXITS", "ROOM_VNUM", "ROOM_SECTOR",
     "EDIT_MODE", "EDIT_VNUM",
     "AFFECTS"
-]
+];
 
 function arrayFromString(str: string) {
     let arr = new Array(str.length);
-    for (let i=0; i < arr.length; i++) {
+    for (let i = 0; i < arr.length; i++) {
         arr[i] = str.charCodeAt(i);
     }
 
