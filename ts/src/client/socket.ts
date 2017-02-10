@@ -96,15 +96,15 @@ export class Socket {
                 value: data[1]
             });
         });
-    };
+    }
 
     public openTelnet() {
         this.ioEvt.clReqTelnetOpen.fire(null);
-    };
+    }
 
     public closeTelnet() {
         this.ioEvt.clReqTelnetClose.fire(null);
-    };
+    }
 
     private sendCmd(cmd: string) {
         cmd += "\n";
