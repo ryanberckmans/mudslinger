@@ -84,7 +84,7 @@ export class Telnet {
                 let opt = c;
 
                 if ([Cmd.DO, Cmd.DONT].indexOf(cmd) !== -1) {
-                    let handled = this.EvtNegotiation.fire({cmd: cmd, opt:opt});
+                    let handled = this.EvtNegotiation.fire({cmd: cmd, opt: opt});
 
                     if (!handled) {
                         this.writeArr([Cmd.IAC, Cmd.WONT, opt]);
@@ -213,5 +213,5 @@ export let OptName = (() => {
 
     return (opt: number): string => {
         return (<any>dict)[opt];
-    }
+    };
 })();

@@ -43,7 +43,7 @@ export class Client {
         this.chatWin = new ChatWin();
         this.gaugeWin = new GaugeWin();
         this.mapWin = new MapWin();
-        
+
         this.jsScriptWin = new JsScriptWin(this.jsScript);
         this.triggerManager = new TriggerManager(this.jsScript);
         this.aliasManager = new AliasManager(this.jsScript);

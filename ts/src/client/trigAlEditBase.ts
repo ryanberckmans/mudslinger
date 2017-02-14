@@ -77,17 +77,17 @@ export abstract class TrigAlEditBase {
         </div>
         `;
 
-        this.$mainSplit = $(myDiv.getElementsByClassName('winEdit-mainSplit')[0]);
-        this.$newButton = $(myDiv.getElementsByClassName('winEdit-btnNew')[0]);
-        this.$deleteButton = $(myDiv.getElementsByClassName('winEdit-btnDelete')[0]);
-        this.$listBox = $(myDiv.getElementsByClassName('winEdit-listBox')[0]);
-        this.$pattern = $(myDiv.getElementsByClassName('winEdit-pattern')[0]);
-        this.$regexCheckbox = $(myDiv.getElementsByClassName('winEdit-chkRegex')[0]);
-        this.$scriptCheckbox = $(myDiv.getElementsByClassName('winEdit-chkScript')[0]);
-        this.$saveButton = $(myDiv.getElementsByClassName('winEdit-btnSave')[0]);
-        this.$cancelButton = $(myDiv.getElementsByClassName('winEdit-btnCancel')[0]);
-        this.$textArea = $(myDiv.getElementsByClassName('winEdit-textArea')[0]);
-        this.$scriptArea = $(myDiv.getElementsByClassName('winEdit-scriptArea')[0]);
+        this.$mainSplit = $(myDiv.getElementsByClassName("winEdit-mainSplit")[0]);
+        this.$newButton = $(myDiv.getElementsByClassName("winEdit-btnNew")[0]);
+        this.$deleteButton = $(myDiv.getElementsByClassName("winEdit-btnDelete")[0]);
+        this.$listBox = $(myDiv.getElementsByClassName("winEdit-listBox")[0]);
+        this.$pattern = $(myDiv.getElementsByClassName("winEdit-pattern")[0]);
+        this.$regexCheckbox = $(myDiv.getElementsByClassName("winEdit-chkRegex")[0]);
+        this.$scriptCheckbox = $(myDiv.getElementsByClassName("winEdit-chkScript")[0]);
+        this.$saveButton = $(myDiv.getElementsByClassName("winEdit-btnSave")[0]);
+        this.$cancelButton = $(myDiv.getElementsByClassName("winEdit-btnCancel")[0]);
+        this.$textArea = $(myDiv.getElementsByClassName("winEdit-textArea")[0]);
+        this.$scriptArea = $(myDiv.getElementsByClassName("winEdit-scriptArea")[0]);
 
 
         (<any>this.$win).jqxWindow({width: 600, height: 400});

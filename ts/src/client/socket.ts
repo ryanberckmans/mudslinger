@@ -28,10 +28,10 @@ export class Socket {
         let o = this;
 
         this.ioConn = io.connect(
-            "http://" + 
-            (configClient.socketIoHost || document.domain) + 
-            ":" + 
-            (configClient.socketIoPort || location.port) + 
+            "http://" +
+            (configClient.socketIoHost || document.domain) +
+            ":" +
+            (configClient.socketIoPort || location.port) +
             "/telnet");
         this.ioEvt = new IoEvent(this.ioConn);
 
@@ -92,7 +92,7 @@ export class Socket {
 
         this.telnetClient.EvtMsdpVar.handle((data) => {
             GlEvent.msdpVar.fire({
-                varName: data[0], 
+                varName: data[0],
                 value: data[1]
             });
         });

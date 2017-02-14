@@ -1,6 +1,6 @@
 export class EventHook<TData> {
     private handlers: Array<[(data: TData) => void, any]> = [];
-    
+
     public handle(callback: (data: TData) => void, context?: any) {
         this.handlers.push([callback, context]);
     }

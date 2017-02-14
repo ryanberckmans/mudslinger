@@ -126,7 +126,7 @@ export class OutputWin extends OutWinBase {
             + "</span>");
         this.scrollBottom(true);
     }
-    
+
     private handleWsConnect() {
         this.$target.append(
             "<span style=\"color:cyan\">"

@@ -34,13 +34,13 @@ export class MapWin {
     private $svgCont: JQuery;
     private $olcStatus: JQuery;
 
-    constructor() {        
+    constructor() {
         this.$roomName = $("#winMap-roomName");
         this.$svgCont = $("#winMap-svgCont");
         this.$olcStatus = $("#winMap-olcStatus");
 
         this.updateGrid();
-        this.updateRoomName();        
+        this.updateRoomName();
 
         GlEvent.msdpVar.handle(this.handleMsdpVar, this);
         GlEvent.setMapEnabled.handle((data) => {
