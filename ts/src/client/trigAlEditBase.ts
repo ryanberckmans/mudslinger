@@ -242,4 +242,11 @@ export abstract class TrigAlEditBase {
 
         (<any>this.$win).jqxWindow("open");
     }
+
+    /* To be called if underlying data changes outside of this class logic (config import, for example) */
+    protected onDataChange() {
+        // if ((<any>this.$win).jqxWindow("isOpen")) {
+            this.updateListBox();
+        // }
+    }
 }

@@ -1,31 +1,48 @@
+import { GlEvent, EventHook } from "./event";
+
+import { UserConfig } from "./userConfig";
+
 import { JsScript } from "./jsScript";
-import { GlEvent } from "./event";
 import { TrigAlItem } from "./trigAlEditBase";
 
+
 export class AliasManager {
+    public evtAliasesChanged = new EventHook<void>();
+
     private enabled: boolean = true;
     public aliases: Array<TrigAlItem> = null;
 
     constructor(private jsScript: JsScript) {
-        GlEvent.setAliasesEnabled.handle(this.handleSetAliasesEnabled, this);
+        /* backward compatibility */
+        let savedAliases: string = localStorage.getItem("aliases");
+        if (savedAliases) {
+            UserConfig.set("aliases", JSON.parse(savedAliases));
+            localStorage.removeItem("aliases");
+        }
 
-        $(document).ready(() => {
-            let saved_aliases: string = localStorage.getItem("aliases");
-            if (!saved_aliases) {
-                this.aliases = [];
-            } else {
-                this.aliases = JSON.parse(saved_aliases);
-            }
-        });
+        this.loadAliases();
+
+        GlEvent.setAliasesEnabled.handle(this.handleSetAliasesEnabled, this);
+        UserConfig.evtConfigImport.handle(this.handleConfigImport, this);
     }
 
     public saveAliases() {
-        localStorage.setItem("aliases", JSON.stringify(this.aliases));
-    };
+        UserConfig.set("aliases", this.aliases);
+    }
+
+    private loadAliases() {
+        this.aliases = UserConfig.get("aliases") || [];
+    }
+
+    private handleConfigImport(imp: {[k: string]: any}) {
+        this.aliases = this.aliases.concat(imp["aliases"] || []);
+        this.saveAliases();
+        this.evtAliasesChanged.fire(null);
+    }
 
     private handleSetAliasesEnabled(value: boolean) {
         this.enabled = value;
-    };
+    }
 
     // return the result of the alias if any (string with embedded lines)
     // return true if matched and script ran

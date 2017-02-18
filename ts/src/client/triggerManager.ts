@@ -1,27 +1,43 @@
-import { GlEvent, GlDef } from "./event";
+import { GlEvent, GlDef, EventHook } from "./event";
+
+import { UserConfig } from "./userConfig";
 
 import { JsScript } from "./jsScript";
 import { TrigAlItem } from "./trigAlEditBase";
 
+
 export class TriggerManager {
+    public evtTriggersChanged = new EventHook<void>();
+
     private enabled: boolean = true;
     public triggers: Array<TrigAlItem> = null;
 
     constructor(private jsScript: JsScript) {
-        $(document).ready(() => {
-            let saved_triggers = localStorage.getItem("triggers");
-            if (!saved_triggers) {
-                this.triggers = [];
-            } else {
-                this.triggers = JSON.parse(saved_triggers);
-            }
-        });
+        /* backward compatibility */
+        let savedTriggers = localStorage.getItem("triggers");
+        if (savedTriggers) {
+            UserConfig.set("triggers", JSON.parse(savedTriggers));
+            localStorage.removeItem("triggers");
+        }
+
+        this.loadTriggers();
 
         GlEvent.setTriggersEnabled.handle(this.handleSetTriggersEnabled, this);
+        UserConfig.evtConfigImport.handle(this.handleConfigImport, this);
     }
 
     public saveTriggers() {
-        localStorage.setItem("triggers", JSON.stringify(this.triggers));
+        UserConfig.set("triggers", this.triggers);
+    }
+
+    private loadTriggers() {
+        this.triggers = UserConfig.get("triggers") || [];
+    }
+
+    private handleConfigImport(imp: {[k: string]: any}) {
+        this.triggers = this.triggers.concat(imp["triggers"] || []);
+        this.saveTriggers();
+        this.evtTriggersChanged.fire(null);
     }
 
     private handleSetTriggersEnabled(data: GlDef.SetTriggersEnabledData) {
@@ -64,6 +80,6 @@ export class TriggerManager {
                 }
             }
         }
-    };
+    }
 }
 

@@ -2,6 +2,8 @@
 
 import { GlEvent } from "./event";
 
+import { UserConfig } from "./userConfig";
+
 import { AliasEditor } from "./aliasEditor";
 import { AliasManager } from "./aliasManager";
 import { ChatWin } from "./chatWin";
@@ -78,4 +80,11 @@ export class Client {
             panels: [{size: "75%"}, {size: "25%"}]
         });
     }
+
+    public dbg = new ClientDebug();
 }
+
+class ClientDebug {
+    public UserConfig = UserConfig;
+}
+

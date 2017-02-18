@@ -1,5 +1,7 @@
 import { GlEvent, GlDef } from "./event";
 
+import { UserConfig } from "./userConfig";
+
 import { Client } from "./client";
 import { Socket } from "./socket";
 import { AliasEditor } from "./aliasEditor";
@@ -90,6 +92,14 @@ export class MenuBar {
 
         this.clickFuncs["Script"] = () => {
             this.jsScriptWin.show();
+        };
+
+        this.clickFuncs["Export"] = () => {
+            UserConfig.exportToFile();
+        };
+
+        this.clickFuncs["Import"] = () => {
+            UserConfig.importFromFile();
         };
     }
 

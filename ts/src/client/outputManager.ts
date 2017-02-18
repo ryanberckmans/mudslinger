@@ -1,5 +1,7 @@
 import { GlEvent, GlDef } from "./event";
 
+import { UserConfig } from "./userConfig";
+
 import {OutputWin} from "./outputWin";
 import {OutWinBase} from "./outWinBase";
 
@@ -34,17 +36,22 @@ export class OutputManager {
         this.loadConfig();
 
         GlEvent.changeDefaultColor.handle(this.handleChangeDefaultColor, this);
+        UserConfig.evtConfigImport.handle(this.handleConfigImport, this);
     }
 
     private loadConfig() {
-        let savedColorCfg = localStorage.getItem("color_cfg");
-        if (!savedColorCfg) {
-            return;
-        } else {
-            let cfg = JSON.parse(savedColorCfg);
-            let defaultAnsiFg = cfg.default_ansi_fg;
+        let defaultAnsiFg = UserConfig.get("defaultAnsiFg");
+        if (defaultAnsiFg) {
             this.setDefaultAnsiFg(defaultAnsiFg[0], defaultAnsiFg[1]);
         }
+    }
+
+    private handleConfigImport(imp: {[k: string]: any}) {
+        let defaultAnsiFg = imp["defaultAnsiFg"];
+        if (defaultAnsiFg) {
+            this.setDefaultAnsiFg(defaultAnsiFg[0], defaultAnsiFg[1]);
+        }
+        this.saveColorCfg();
     }
 
     public outputDone () {
@@ -231,9 +238,7 @@ export class OutputManager {
     }
 
     private saveColorCfg() {
-        localStorage.setItem("color_cfg", JSON.stringify({
-            "default_ansi_fg": this.defaultAnsiFg
-        }));
+        UserConfig.set("defaultAnsiFg", this.defaultAnsiFg);
     }
 }
 

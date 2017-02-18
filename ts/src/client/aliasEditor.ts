@@ -4,6 +4,8 @@ import { TrigAlEditBase } from "./trigAlEditBase";
 export class AliasEditor extends TrigAlEditBase {
     constructor(private aliasManager: AliasManager) {
         super("ALIASES");
+
+        aliasManager.evtAliasesChanged.handle(this.onDataChange, this);
     }
 
     protected defaultPattern: string = null;
