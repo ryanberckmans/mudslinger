@@ -1,8 +1,8 @@
 /// <reference path="../../definitions/polyfill.d.ts" />
 
 import { GlEvent } from "./event";
-
 import { UserConfig } from "./userConfig";
+import { AppInfo } from "./appInfo";
 
 import { AliasEditor } from "./aliasEditor";
 import { AliasManager } from "./aliasManager";
@@ -20,6 +20,7 @@ import { OutputWin } from "./outputWin";
 import { Socket } from "./socket";
 import { TriggerEditor } from "./triggerEditor";
 import { TriggerManager } from "./triggerManager";
+import { AboutWin } from "./aboutWin";
 
 export class Client {
     private aliasEditor: AliasEditor;
@@ -37,10 +38,12 @@ export class Client {
     private socket: Socket;
     private triggerEditor: TriggerEditor;
     private triggerManager: TriggerManager;
+    private aboutWin: AboutWin;
 
     constructor() {
         this.loadLayout();
 
+        this.aboutWin = new AboutWin();
         this.jsScript = new JsScript();
         this.chatWin = new ChatWin();
         this.gaugeWin = new GaugeWin();
@@ -61,7 +64,7 @@ export class Client {
 
         this.mxp = new Mxp(this.outputManager, this.chatWin);
         this.socket = new Socket(this.outputManager, this.mxp);
-        this.menuBar = new MenuBar(this, this.socket, this.aliasEditor, this.triggerEditor, this.jsScriptWin);
+        this.menuBar = new MenuBar(this, this.socket, this.aliasEditor, this.triggerEditor, this.jsScriptWin, this.aboutWin);
 
         // Prevent navigating away accidentally
         window.onbeforeunload = () => {
@@ -81,10 +84,7 @@ export class Client {
         });
     }
 
-    public dbg = new ClientDebug();
-}
-
-class ClientDebug {
-    public UserConfig = UserConfig;
+    public readonly UserConfig = UserConfig;
+    public readonly AppInfo = AppInfo;
 }
 

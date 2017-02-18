@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <!--<title>Aarchon Web Client V0.8.0</title>-->
+  <!--<title>Aarchon Web Client</title>-->
   <link rel="icon" type="image/ico" href="favicon.ico">
   <link rel="stylesheet" href="jqwidgets/styles/jqx.base.css">
 
@@ -32,6 +32,7 @@
     var myClient;
     $(document).ready(function() {
       myClient = new ArcWebClient.Client();
+      document.title = myClient.AppInfo.AppTitle;
     }); 
   </script>
 </head>
@@ -60,6 +61,11 @@
           
           <li>Import</li>
           <li>Export</li>
+        </ul>
+      </li>
+      <li>Help
+        <ul>
+          <li>About</li>
         </ul>
       </li>
     </ul>

@@ -7,6 +7,7 @@ import { Socket } from "./socket";
 import { AliasEditor } from "./aliasEditor";
 import { TriggerEditor } from "./triggerEditor";
 import { JsScriptWin } from "./jsScriptWin";
+import { AboutWin } from "./aboutWin";
 
 export class MenuBar {
     private $menuBar: JQuery;
@@ -20,7 +21,8 @@ export class MenuBar {
         private socket: Socket,
         private aliasEditor: AliasEditor,
         private triggerEditor: TriggerEditor,
-        private jsScriptWin: JsScriptWin
+        private jsScriptWin: JsScriptWin,
+        private aboutWin: AboutWin
         ) {
 
         this.makeClickFuncs();
@@ -100,6 +102,10 @@ export class MenuBar {
 
         this.clickFuncs["Import"] = () => {
             UserConfig.importFromFile();
+        };
+
+        this.clickFuncs["About"] = () => {
+            this.aboutWin.show();
         };
     }
 
