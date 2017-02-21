@@ -20,7 +20,7 @@ export namespace UserConfig {
         return cfgVals[key];
     }
 
-    export function set(key: string, val: any, save: boolean=true) {
+    export function set(key: string, val: any, save: boolean = true) {
         cfgVals[key] = val;
 
         if (save === true) {
@@ -42,7 +42,7 @@ export namespace UserConfig {
 
         document.body.appendChild(link);
         link.click();
-        document.body.removeChild(link)
+        document.body.removeChild(link);
     }
 
     export function importFromFile() {
@@ -61,7 +61,7 @@ export namespace UserConfig {
                 let text = e1.target.result;
                 let vals = JSON.parse(text);
                 // cfgVals = vals;
-                evtConfigImport.fire(vals)
+                evtConfigImport.fire(vals);
                 // saveConfig();
             };
             reader.readAsText(file);

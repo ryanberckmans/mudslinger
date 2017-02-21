@@ -1,9 +1,9 @@
-import * as express from 'express';
-import * as http from 'http';
-import * as socketio from 'socket.io';
-import * as net from 'net';
+import * as express from "express";
+import * as http from "http";
+import * as socketio from "socket.io";
+import * as net from "net";
 
-import { IoEvent } from '../shared/ioevent';
+import { IoEvent } from "../shared/ioevent";
 
 let serverConfig = require("../../configServer.js");
 console.log(serverConfig);
@@ -19,11 +19,11 @@ if (serverConfig.useHttpServer === true) {
     server = http.createServer(app);
     io = socketio(server);
 } else {
-    io = socketio(serverConfig.serverPort)
+    io = socketio(serverConfig.serverPort);
 }
 
-var telnetNs: SocketIO.Namespace = io.of("/telnet");
-telnetNs.on('connection', (client: SocketIO.Socket) => {
+let telnetNs: SocketIO.Namespace = io.of("/telnet");
+telnetNs.on("connection", (client: SocketIO.Socket) => {
     let telnet: net.Socket;
     let ioEvt = new IoEvent(client);
 
@@ -54,17 +54,17 @@ telnetNs.on('connection', (client: SocketIO.Socket) => {
     ioEvt.clReqTelnetOpen.handle(() => {
         telnet = new net.Socket();
 
-        telnet.on('data', (data: Buffer) => {
+        telnet.on("data", (data: Buffer) => {
             ioEvt.srvTelnetData.fire(data.buffer);
         });
-        telnet.on('close', (had_error: boolean) => {
+        telnet.on("close", (had_error: boolean) => {
             ioEvt.srvTelnetClosed.fire(had_error);
             telnet = null;
         });
         telnet.on("drain", () => {
             canWrite = true;
             checkWrite();
-        })
+        });
         telnet.on("error", (err: Error) => {
             console.log("TELNET ERROR: ", err);
             ioEvt.srvTelnetError.fire(err.message);
@@ -97,7 +97,7 @@ if (serverConfig.useHttpServer) {
     });
 
     app.use((err: any, req: any, res: any, next: any) => {
-        console.log("App error: " + 
+        console.log("App error: " +
                     "err: " + err + " | " +
                     "req: " + req + " | " +
                     "res: " + res + " | ");
