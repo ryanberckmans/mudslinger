@@ -25,15 +25,12 @@ export class Socket {
     }
 
     public open() {
-        let o = this;
-
         this.ioConn = io.connect(
             "http://" +
             (configClient.socketIoHost || document.domain) +
             ":" +
             (configClient.socketIoPort || location.port) +
             "/telnet");
-        this.ioEvt = new IoEvent(this.ioConn);
 
         this.ioConn.on("connect", () => {
             GlEvent.wsConnect.fire(null);
@@ -43,11 +40,39 @@ export class Socket {
             GlEvent.wsDisconnect.fire(null);
         });
 
+        this.ioConn.on("error", (msg: any) => {
+            GlEvent.wsError.fire(msg);
+        });
+
+        this.ioEvt = new IoEvent(this.ioConn);
+
         this.ioEvt.srvTelnetOpened.handle(() => {
+            this.telnetClient = new TelnetClient((data) => {
+                this.ioEvt.clReqTelnetWrite.fire(data);
+            });
+            this.telnetClient.clientIp = this.clientIp;
+
+            this.telnetClient.EvtData.handle((data) => {
+                this.handleTelnetData(data);
+            });
+
+            this.telnetClient.EvtServerEcho.handle((data) => {
+                // Server echo ON means we should have local echo OFF
+                GlEvent.setEcho.fire(!data);
+            });
+
+            this.telnetClient.EvtMsdpVar.handle((data) => {
+                GlEvent.msdpVar.fire({
+                    varName: data[0],
+                    value: data[1]
+                });
+            });
+
             GlEvent.telnetConnect.fire(null);
         });
 
         this.ioEvt.srvTelnetClosed.handle(() => {
+            this.telnetClient = null;
             GlEvent.telnetDisconnect.fire(null);
         });
 
@@ -56,7 +81,9 @@ export class Socket {
         });
 
         this.ioEvt.srvTelnetData.handle((data) => {
-            this.telnetClient.handleData(data);
+            if (this.telnetClient) {
+                this.telnetClient.handleData(data);
+            }
         });
 
         this.ioEvt.srvSetClientIp.handle((ipAddr: string) => {
@@ -70,31 +97,6 @@ export class Socket {
             if (this.telnetClient) {
                 this.telnetClient.clientIp = ipAddr;
             }
-        });
-
-        this.ioConn.on("error", (msg: any) => {
-            GlEvent.wsError.fire(msg);
-        });
-
-        this.telnetClient = new TelnetClient((data) => {
-            this.ioEvt.clReqTelnetWrite.fire(data);
-        });
-        this.telnetClient.clientIp = this.clientIp;
-
-        this.telnetClient.EvtData.handle((data) => {
-            this.handleTelnetData(data);
-        });
-
-        this.telnetClient.EvtServerEcho.handle((data) => {
-            // Server echo ON means we should have local echo OFF
-            GlEvent.setEcho.fire(!data);
-        });
-
-        this.telnetClient.EvtMsdpVar.handle((data) => {
-            GlEvent.msdpVar.fire({
-                varName: data[0],
-                value: data[1]
-            });
         });
     }
 
