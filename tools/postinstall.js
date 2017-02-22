@@ -11,10 +11,12 @@ fs.createReadStream("node_modules/socket.io-client/dist/socket.io.min.js").pipe(
 fs.createReadStream("node_modules/jquery/dist/jquery.min.js").pipe(fs.createWriteStream('static/jquery.min.js'));
 
 // Don't want to overwrite existing config file if any
-if (!fs.exists(flnameConfigClient)) {
+if (!fs.existsSync(flnameConfigClient)) {
     fs.createReadStream(flnameConfigClientDefault).pipe(fs.createWriteStream(flnameConfigClient));
+    console.log("Copying " + flnameConfigClientDefault + " to " + flnameConfigClient);
 }
 
-if (!fs.exists(flnameConfigServer)) {
+if (!fs.existsSync(flnameConfigServer)) {
     fs.createReadStream(flnameConfigServerDefault).pipe(fs.createWriteStream(flnameConfigServer));
+    console.log("Copying " + flnameConfigServerDefault + " to " + flnameConfigServer);
 }
