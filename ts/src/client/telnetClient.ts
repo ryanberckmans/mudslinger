@@ -37,6 +37,8 @@ export class TelnetClient extends Telnet {
                 for (let varName of SupportedMsdpVars) {
                     this.writeMsdpVar("REPORT", varName);
                 }
+            } else if (opt === Opt.SGA) {
+                this.writeArr([Cmd.IAC, Cmd.DO, Opt.SGA]);
             } else {
                 this.writeArr([Cmd.IAC, Cmd.DONT, opt]);
             }
