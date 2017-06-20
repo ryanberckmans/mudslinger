@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <!--<title>Aarchon Web Client</title>-->
   <link rel="icon" type="image/ico" href="favicon.ico">
   <link rel="stylesheet" href="jqwidgets/styles/jqx.base.css">
 
@@ -26,18 +25,18 @@
 
   <script src="polyfill.js"></script>
   <script src="configClient.js"></script>
-  <script src="arcWebClient.js"></script>
+  <script src="mudslinger.js"></script>
 
   <script>
     var myClient;
     $(document).ready(function() {
-      myClient = new ArcWebClient.Client();
+      myClient = new Mudslinger.Client();
       document.title = myClient.AppInfo.AppTitle;
     }); 
   </script>
 </head>
 <body>
-<div id="arcWebClient">
+<div id="mudslinger">
   <div id="menuBar">
     <ul>
       <li id=menuBar-conn-disconn>Connect</li>
@@ -70,37 +69,11 @@
       </li>
     </ul>
   </div>
-  <div id="mainVertSplit">
-    <div>
-      <div id="leftPanel">
-        <pre id="winOutput" class="outputText"></pre>
-        <!--<br>-->
-        <textarea rows="1" id="cmdInput"></textarea>
-        <input id="cmdInputPw" type="password" style="display:none">
-      </div>
-    </div>
-
-    <div>
-      <div id="rightPanel">
-        <div id="winMap" >
-          <center><div id=winMap-roomName></div>
-            <div id="winMap-svgCont" style="width:125px;height:100px"></div>
-          </center>
-          <center>
-            <div id="winMap-olcStatus"></div>
-          </center>
-        </div>
-        <div id="winGauge" >
-          <div id='winGauge-hpBar' class='gaugeBar'></div>
-          <div id='winGauge-manaBar' class='gaugeBar'></div>
-          <div id='winGauge-moveBar' class='gaugeBar'></div>
-          <div id='winGauge-tnlBar' class='gaugeBar'></div>
-          <div id='winGauge-enemyBar' class='gaugeBar'></div>
-        </div>
-        <center><span>CHAT</span></center>
-        <pre id="winChat" class="outputText"></pre>
-      </div>
-    </div>
+  <div id="mainWin">
+    <pre id="winOutput" class="outputText"></pre>
+    <!--<br>-->
+    <textarea rows="1" id="cmdInput"></textarea>
+    <input id="cmdInputPw" type="password" style="display:none">
   </div>
 </div>
 </body>

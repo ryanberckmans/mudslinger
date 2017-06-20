@@ -6,12 +6,9 @@ import { AppInfo } from "./appInfo";
 
 import { AliasEditor } from "./aliasEditor";
 import { AliasManager } from "./aliasManager";
-import { ChatWin } from "./chatWin";
 import { CommandInput } from "./commandInput";
-import { GaugeWin } from "./gaugeWin";
 import { JsScript } from "./jsScript";
 import { JsScriptWin } from "./jsScriptWin";
-import { MapWin } from "./mapWin";
 import { MenuBar } from "./menuBar";
 
 import { Mxp } from "./mxp";
@@ -21,16 +18,14 @@ import { Socket } from "./socket";
 import { TriggerEditor } from "./triggerEditor";
 import { TriggerManager } from "./triggerManager";
 import { AboutWin } from "./aboutWin";
+import { ConnectWin } from "./connectWin";
 
 export class Client {
     private aliasEditor: AliasEditor;
     private aliasManager: AliasManager;
-    private chatWin: ChatWin;
     private commandInput: CommandInput;
-    private gaugeWin: GaugeWin;
     private jsScript: JsScript;
     private jsScriptWin: JsScriptWin;
-    private mapWin: MapWin;
     private menuBar: MenuBar;
     private mxp: Mxp;
     private outputManager: OutputManager;
@@ -39,15 +34,13 @@ export class Client {
     private triggerEditor: TriggerEditor;
     private triggerManager: TriggerManager;
     private aboutWin: AboutWin;
+    private connectWin: ConnectWin;
 
     constructor() {
         this.loadLayout();
 
         this.aboutWin = new AboutWin();
         this.jsScript = new JsScript();
-        this.chatWin = new ChatWin();
-        this.gaugeWin = new GaugeWin();
-        this.mapWin = new MapWin();
 
         this.jsScriptWin = new JsScriptWin(this.jsScript);
         this.triggerManager = new TriggerManager(this.jsScript);
@@ -62,9 +55,10 @@ export class Client {
 
         this.outputManager = new OutputManager(this.outputWin);
 
-        this.mxp = new Mxp(this.outputManager, this.chatWin);
+        this.mxp = new Mxp(this.outputManager);
         this.socket = new Socket(this.outputManager, this.mxp);
-        this.menuBar = new MenuBar(this, this.socket, this.aliasEditor, this.triggerEditor, this.jsScriptWin, this.aboutWin);
+        this.connectWin = new ConnectWin(this.socket);
+        this.menuBar = new MenuBar(this, this.socket, this.aliasEditor, this.triggerEditor, this.jsScriptWin, this.aboutWin, this.connectWin);
 
         // Prevent navigating away accidentally
         window.onbeforeunload = () => {
@@ -72,16 +66,16 @@ export class Client {
         };
 
         this.socket.open();
-        this.socket.openTelnet();
+        this.connectWin.show();
     }
 
     private loadLayout() {
-        (<any>$("#mainVertSplit")).jqxSplitter({
-            width: "100%",
-            height: "100%",
-            orientation: "vertical",
-            panels: [{size: "75%"}, {size: "25%"}]
-        });
+        // (<any>$("#mainVertSplit")).jqxSplitter({
+        //     width: "100%",
+        //     height: "100%",
+        //     orientation: "vertical",
+        //     panels: [{size: "75%"}, {size: "25%"}]
+        // });
     }
 
     public readonly UserConfig = UserConfig;

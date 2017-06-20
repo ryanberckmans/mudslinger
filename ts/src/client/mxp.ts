@@ -1,13 +1,12 @@
 import { GlEvent, GlDef } from "./event";
 
-import { ChatWin } from "./chatWin";
 import { OutputManager } from "./outputManager";
 
 export class Mxp {
     private openTags: Array<string> = [];
     private tagHandlers: Array<(tag: string) => void> = [];
 
-    constructor(private outputManager: OutputManager, private chatWin: ChatWin) {
+    constructor(private outputManager: OutputManager) {
         this.makeTagHandlers();
 
         GlEvent.mxpTag.handle(this.handleMxpTag, this);
@@ -19,7 +18,7 @@ export class Mxp {
             let match = re.exec(tag);
             if (match) {
                 GlEvent.sendCommand.fire({
-                    value: "\x1b[1z<VERSION CLIENT=ArcWeb MXP=0.01>", // using closing line tag makes it print twice...
+                    value: "\x1b[1z<VERSION CLIENT=Mudslinger MXP=0.01>", // using closing line tag makes it print twice...
                     noPrint: true});
                 return true;
             }
@@ -41,31 +40,6 @@ export class Mxp {
             return false;
         });
 
-        this.tagHandlers.push((tag) => {
-            /* handle dest tags */
-            let re = /^<dest comm>$/i;
-            let match = re.exec(tag);
-            if (match) {
-                this.openTags.push("dest");
-                this.outputManager.pushTarget(this.chatWin);
-                return true;
-            }
-
-            re = /^<\/dest>$/i;
-            match = re.exec(tag);
-            if (match) {
-                if (this.openTags[this.openTags.length - 1] !== "dest") {
-                    /* We actually expect this to happen because the mud sends newlines inside DEST tags right now... */
-                    // console.log("Got closing dest tag with no opening tag.");
-                } else {
-                    this.openTags.pop();
-                    this.outputManager.popTarget();
-                }
-                return true;
-            }
-
-            return false;
-        });
         this.tagHandlers.push((tag) => {
             let re = /^<a /i;
             let match = re.exec(tag);
@@ -199,11 +173,7 @@ export class Mxp {
         }
 
         for (let i = this.openTags.length - 1; i >= 0; i--) {
-            if (this.openTags[i] === "dest") {
-                this.outputManager.popTarget();
-            } else {
                 this.outputManager.popMxpElem();
-            }
         }
         this.openTags = [];
     };

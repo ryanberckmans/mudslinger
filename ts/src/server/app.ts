@@ -51,8 +51,11 @@ telnetNs.on("connection", (client: SocketIO.Socket) => {
         }
     });
 
-    ioEvt.clReqTelnetOpen.handle(() => {
+    ioEvt.clReqTelnetOpen.handle((args: [string, number]) => {
         telnet = new net.Socket();
+
+        let host: string = args[0];
+        let port: number = args[1];
 
         telnet.on("data", (data: Buffer) => {
             ioEvt.srvTelnetData.fire(data.buffer);
@@ -70,7 +73,7 @@ telnetNs.on("connection", (client: SocketIO.Socket) => {
             ioEvt.srvTelnetError.fire(err.message);
         });
 
-        telnet.connect(serverConfig.gamePort, serverConfig.gameHost, () => {
+        telnet.connect(port, host, () => {
             ioEvt.srvTelnetOpened.fire(null);
         });
     });

@@ -61,13 +61,6 @@ export class Socket {
                 GlEvent.setEcho.fire(!data);
             });
 
-            this.telnetClient.EvtMsdpVar.handle((data) => {
-                GlEvent.msdpVar.fire({
-                    varName: data[0],
-                    value: data[1]
-                });
-            });
-
             GlEvent.telnetConnect.fire(null);
         });
 
@@ -100,8 +93,8 @@ export class Socket {
         });
     }
 
-    public openTelnet() {
-        this.ioEvt.clReqTelnetOpen.fire(null);
+    public openTelnet(host: string, port: number) {
+        this.ioEvt.clReqTelnetOpen.fire([host, port]);
     }
 
     public closeTelnet() {

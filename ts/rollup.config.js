@@ -2,7 +2,7 @@
 export default {
     entry: 'ts/build/build_client/client/client.js',
     format: 'umd',
-    dest: 'static/arcWebClient.js',
-    moduleName: 'ArcWebClient',
+    dest: 'static/mudslinger.js',
+    moduleName: 'Mudslinger',
     sourceMap: 'inline'
 };

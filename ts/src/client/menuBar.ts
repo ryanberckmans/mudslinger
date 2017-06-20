@@ -8,6 +8,7 @@ import { AliasEditor } from "./aliasEditor";
 import { TriggerEditor } from "./triggerEditor";
 import { JsScriptWin } from "./jsScriptWin";
 import { AboutWin } from "./aboutWin";
+import { ConnectWin } from "./connectWin";
 
 export class MenuBar {
     private $menuBar: JQuery;
@@ -22,7 +23,8 @@ export class MenuBar {
         private aliasEditor: AliasEditor,
         private triggerEditor: TriggerEditor,
         private jsScriptWin: JsScriptWin,
-        private aboutWin: AboutWin
+        private aboutWin: AboutWin,
+        private connectWin: ConnectWin
         ) {
 
         this.makeClickFuncs();
@@ -69,7 +71,8 @@ export class MenuBar {
     private clickFuncs: {[k: string]: () => void} = {};
     private makeClickFuncs() {
         this.clickFuncs["Connect"] = () => {
-            this.socket.openTelnet();
+            //this.socket.openTelnet();
+            this.connectWin.show();
         };
 
         this.clickFuncs["Disconnect"] = () => {

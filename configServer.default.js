@@ -1,9 +1,6 @@
 var config = {};
 
 
-config.gameHost = "aarchonmud.com";
-config.gamePort = 7000;
-
 /* If false, only serve socket.io and not http */
 config.useHttpServer = true;
 
