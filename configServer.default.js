@@ -5,7 +5,7 @@ var config = {};
 config.useHttpServer = true;
 
 /* http server port if useHttpServer is true, else the socket.io port */
-config.serverPort = 7000;
+config.serverPort = 80;
 
 
 module.exports = config;
