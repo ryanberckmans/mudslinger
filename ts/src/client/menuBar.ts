@@ -33,8 +33,6 @@ export class MenuBar {
 
         this.$chkEnableTrig = $("#menuBar-chkEnableTrig");
         this.$chkEnableAlias = $("#menuBar-chkEnableAlias");
-        this.$chkEnableMap = $("#menuBar-chkEnableMap");
-        this.$chkEnableGauges = $("#menuBar-chkEnableGauges");
 
         (<any>this.$menuBar).jqxMenu({ width: "100%", height: "4%"});
         this.$menuBar.on("itemclick", (event: any) => { this.handleClick(event); });
@@ -45,14 +43,6 @@ export class MenuBar {
 
         this.$chkEnableAlias.change(function() {
             GlEvent.setAliasesEnabled.fire(this.checked);
-        });
-
-        this.$chkEnableMap.change(function() {
-            GlEvent.setMapEnabled.fire(this.checked);
-        });
-
-        this.$chkEnableGauges.change(function() {
-            GlEvent.setGaugesEnabled.fire(this.checked);
         });
 
         GlEvent.telnetConnect.handle(() => {
