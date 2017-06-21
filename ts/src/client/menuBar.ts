@@ -10,6 +10,8 @@ import { JsScriptWin } from "./jsScriptWin";
 import { AboutWin } from "./aboutWin";
 import { ConnectWin } from "./connectWin";
 
+declare let configClient: any;
+
 export class MenuBar {
     private $menuBar: JQuery;
     private $chkEnableTrig: JQuery;
@@ -61,8 +63,11 @@ export class MenuBar {
     private clickFuncs: {[k: string]: () => void} = {};
     private makeClickFuncs() {
         this.clickFuncs["Connect"] = () => {
-            //this.socket.openTelnet();
-            this.connectWin.show();
+            if (configClient.hardcodedTarget === true) {
+                this.socket.openTelnet(null, null);
+            } else {
+                this.connectWin.show();
+            }
         };
 
         this.clickFuncs["Disconnect"] = () => {

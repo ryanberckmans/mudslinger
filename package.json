@@ -1,12 +1,12 @@
 {
   "name": "mudslinger",
   "scripts": {
+    "prestart": "node tools/prestart.js",
     "start": "node dist/server/app.js",
     "postinstall": "node tools/postinstall.js",
     "clean": "rimraf ts/build && rimraf dist && rimraf static/mudslinger.js",
     "build": "npm run build-client && npm run build-server",
     "build-client": "tsc -p ts/tsconfig.client.json && rollup -c ts/rollup.config.js",
-    "postbuild-client": "node tools/postbuild-client.js",
     "build-server": "tsc -p ts/tsconfig.server.json",
     "test-client": "tsc -p ts/tsconfig.client.test.json && mocha --recursive ts/build/build_client_test",
     "test-server": "tsc -p ts/tsconfig.server.test.json && mocha --recursive ts/build/build_server_test",

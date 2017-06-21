@@ -20,6 +20,10 @@ import { TriggerManager } from "./triggerManager";
 import { AboutWin } from "./aboutWin";
 import { ConnectWin } from "./connectWin";
 
+
+declare let configClient: any;
+
+
 export class Client {
     private aliasEditor: AliasEditor;
     private aliasManager: AliasManager;
@@ -66,7 +70,11 @@ export class Client {
         };
 
         this.socket.open();
-        this.connectWin.show();
+        if (configClient.hardcodedTarget === true) {
+            this.socket.openTelnet(null, null);
+        } else {
+            this.connectWin.show();
+        }
     }
 
     private loadLayout() {

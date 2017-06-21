@@ -54,8 +54,16 @@ telnetNs.on("connection", (client: SocketIO.Socket) => {
     ioEvt.clReqTelnetOpen.handle((args: [string, number]) => {
         telnet = new net.Socket();
 
-        let host: string = args[0];
-        let port: number = args[1];
+        let host: string;
+        let port: number;
+
+        if (serverConfig.targetHost != null) {
+            host = serverConfig.targetHost;
+            port = serverConfig.targetPort;
+        } else {
+            host = args[0];
+            port = args[1];
+        }
 
         telnet.on("data", (data: Buffer) => {
             ioEvt.srvTelnetData.fire(data.buffer);
@@ -73,9 +81,15 @@ telnetNs.on("connection", (client: SocketIO.Socket) => {
             ioEvt.srvTelnetError.fire(err.message);
         });
 
-        telnet.connect(port, host, () => {
-            ioEvt.srvTelnetOpened.fire(null);
-        });
+        try {
+            telnet.connect(port, host, () => {
+                ioEvt.srvTelnetOpened.fire(null);
+            });
+        }
+        catch (err) {
+            console.log("ERROR CONNECTING TELNET: ", err);
+            ioEvt.srvTelnetError.fire(err.message);
+        }
     });
 
     ioEvt.clReqTelnetClose.handle(() => {
