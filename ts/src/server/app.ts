@@ -82,6 +82,10 @@ telnetNs.on("connection", (client: SocketIO.Socket) => {
         });
 
         try {
+            console.log(
+                client.request.connection.remoteAddress
+                + " connecting to "
+                + host + ":" + port);
             telnet.connect(port, host, () => {
                 ioEvt.srvTelnetOpened.fire(null);
             });
