@@ -145,8 +145,8 @@ export class CommandInput {
     private inputChange(): void {
         let input = this.$cmdInput;
         input.height("1px");
-        let scrollHeight = input[0].scrollHeight;
-        let new_height = 1 + scrollHeight;
+        let scrollHeight = Math.max(input[0].scrollHeight, 20);
+        let new_height = scrollHeight;
         input.height(new_height + "px");
     }
 
