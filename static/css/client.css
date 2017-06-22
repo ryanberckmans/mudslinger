@@ -16,6 +16,10 @@ a:link, a:visited {
 }
 
 #mainWin {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;
     height:100%;
     width:100%;
 }
