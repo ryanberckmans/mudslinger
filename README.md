@@ -10,7 +10,7 @@ Live version at: [http://mudslinger.rooflez.com](http://mudslinger.rooflez.com)
 # Features #
 * ANSI color
 * XTERM 256 colors
-* MXP support (\<image>, \<send>, \<a>, \<i>, \<b>, \<u>, and \<s> tags)
+* MXP support (<image>, <send>, <a>, <i>, <b>, <u>, and <s> tags)
 * Triggers (basic and regex)
 * Aliases (basic and regex)
 * Scripting support (Javascript)
