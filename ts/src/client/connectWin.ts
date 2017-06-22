@@ -42,8 +42,8 @@ export class ConnectWin {
     }
 
     private handleConnectButtonClick() {
-        let host: string = this.$hostInput.val();
-        let port: number = this.$portInput.val();
+        let host: string = this.$hostInput.val().trim();
+        let port: number = this.$portInput.val().trim();
 
         this.socket.openTelnet(host, port);
 
