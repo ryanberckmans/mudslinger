@@ -82,12 +82,24 @@ export class MenuBar {
             this.triggerEditor.show();
         };
 
-        this.clickFuncs["Green"] = () => {
-            GlEvent.changeDefaultColor.fire("green");
+        this.clickFuncs["Green on Black"] = () => {
+            GlEvent.changeDefaultColor.fire(["green", "low"]);
+            GlEvent.changeDefaultBgColor.fire(["black", "low"]);
         };
 
-        this.clickFuncs["White"] = () => {
-            GlEvent.changeDefaultColor.fire("white");
+        this.clickFuncs["White on Black"] = () => {
+            GlEvent.changeDefaultColor.fire(["white", "low"]);
+            GlEvent.changeDefaultBgColor.fire(["black", "low"]);
+        };
+
+        this.clickFuncs["Black on Grey"] = () => {
+            GlEvent.changeDefaultColor.fire(["black", "low"]);
+            GlEvent.changeDefaultBgColor.fire(["white", "low"]);
+        };
+
+        this.clickFuncs["Black on White"] = () => {
+            GlEvent.changeDefaultColor.fire(["black", "low"]);
+            GlEvent.changeDefaultBgColor.fire(["white", "high"]);
         };
 
         this.clickFuncs["Script"] = () => {

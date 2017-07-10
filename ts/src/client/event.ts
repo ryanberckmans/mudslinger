@@ -35,6 +35,7 @@ export namespace GlEvent {
     export const scriptEvalError = new EventHook<GlDef.ScriptEvalErrorData>();
     export const scriptExecError = new EventHook<GlDef.ScriptExecErrorData>();
     export const changeDefaultColor = new EventHook<GlDef.ChangeDefaultColorData>();
+    export const changeDefaultBgColor = new EventHook<GlDef.ChangeDefaultBgColorData>();
     export const wsError = new EventHook<GlDef.WsErrorData>();
     export const wsConnect = new EventHook<GlDef.WsConnectData>();
     export const wsDisconnect = new EventHook<GlDef.WsDisconnectData>();
@@ -75,7 +76,8 @@ export namespace GlDef {
     export type ScriptPrintData = string;
     export type ScriptEvalErrorData = {};
     export type ScriptExecErrorData = {};
-    export type ChangeDefaultColorData = string;
+    export type ChangeDefaultColorData = [string, string];
+    export type ChangeDefaultBgColorData = [string, string];
     export type MxpTagData = string;
     export type TelnetErrorData = string;
 }

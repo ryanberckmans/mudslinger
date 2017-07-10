@@ -36,6 +36,7 @@ export class OutputManager {
         this.loadConfig();
 
         GlEvent.changeDefaultColor.handle(this.handleChangeDefaultColor, this);
+        GlEvent.changeDefaultBgColor.handle(this.handleChangeDefaultBgColor, this);
         UserConfig.evtConfigImport.handle(this.handleConfigImport, this);
     }
 
@@ -43,6 +44,10 @@ export class OutputManager {
         let defaultAnsiFg = UserConfig.get("defaultAnsiFg");
         if (defaultAnsiFg) {
             this.setDefaultAnsiFg(defaultAnsiFg[0], defaultAnsiFg[1]);
+        }
+        let defaultAnsiBg = UserConfig.get("defaultAnsiBg");
+        if (defaultAnsiBg) {
+            this.setDefaultAnsiBg(defaultAnsiBg[0], defaultAnsiBg[1]);
         }
     }
 
@@ -217,7 +222,7 @@ export class OutputManager {
 
     private setDefaultAnsiFg(colorName: ansiName, level: ansiLevel) {
         if ( !(colorName in ansiColors) ) {
-            console.log("Invalid color_name: " + colorName);
+            console.log("Invalid colorName: " + colorName);
             return;
         }
 
@@ -230,15 +235,34 @@ export class OutputManager {
         $(".outputText").css("color", ansiColors[colorName][level]);
     }
 
-    private handleChangeDefaultColor(data: GlDef.ChangeDefaultColorData) {
-        let level: ansiLevel = "low";
+    private setDefaultAnsiBg(colorName: ansiName, level: ansiLevel) {
+        if ( !(colorName in ansiColors) ) {
+            console.log("Invalid colorName: " + colorName);
+            return;
+        }
 
-        this.setDefaultAnsiFg(<ansiName>data, level);
+        if ( (["low", "high"]).indexOf(level) === -1) {
+            console.log("Invalid level: " + level);
+            return;
+        }
+
+        this.defaultAnsiBg = [colorName, level];
+        $(".outputText").css("background-color", ansiColors[colorName][level]);
+    }
+
+    private handleChangeDefaultColor(data: GlDef.ChangeDefaultColorData) {
+        this.setDefaultAnsiFg(<ansiName>data[0], <ansiLevel>data[1]);
+        this.saveColorCfg();
+    }
+
+    private handleChangeDefaultBgColor(data: GlDef.ChangeDefaultBgColorData) {
+        this.setDefaultAnsiBg(<ansiName>data[0], <ansiLevel>data[1]);
         this.saveColorCfg();
     }
 
     private saveColorCfg() {
         UserConfig.set("defaultAnsiFg", this.defaultAnsiFg);
+        UserConfig.set("defaultAnsiBg", this.defaultAnsiBg);
     }
 }
 

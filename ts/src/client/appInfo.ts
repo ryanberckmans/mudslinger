@@ -4,6 +4,6 @@ export namespace AppInfo {
     export namespace Version {
         export let Major = 0;
         export let Minor = 1;
-        export let Revision = 0;
+        export let Revision = 1;
     }
 }
