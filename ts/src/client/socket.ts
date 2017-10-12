@@ -102,7 +102,7 @@ export class Socket {
     }
 
     private sendCmd(cmd: string) {
-        cmd += "\n";
+        cmd += "\r\n";
         let arr = new Uint8Array(cmd.length);
         for (let i = 0; i < cmd.length; i++) {
             arr[i] = cmd.charCodeAt(i);
